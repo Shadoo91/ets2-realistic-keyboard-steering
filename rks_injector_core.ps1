@@ -1,211 +1,187 @@
-# ===================================================================================
-#   ATS Realistic-Keyboard-Steering (RKS) (Turbo-Mode) ~ by Shadoo91
-#   [POWERSHELL PROFILE INJECTOR - PURE TEXT MODE - 100% BIT-ACCURATE]
-# ===================================================================================
+# ==============================================================================
+# ETS2 Realistic Keyboard Steering (RKS) - Injector Core
+# Developer: Shadoo91
+# Version: 1.0 (ETS2 Edition)
+# ==============================================================================
 
-if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
-    Exit
-}
+$Global:RKS_VERSION = "1.0"
+$Global:GAME_NAME = "Euro Truck Simulator 2"
+$Global:GAME_SHORT = "ETS2"
+$Global:STEAM_APP_ID = "227300" # Official ETS2 App ID
 
-Clear-Host
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$PresetFile = Join-Path $ScriptDir "rks_preset_controls.sii"
+# Save default console colors
+$oldRaw = $Host.UI.RawUI
+$oldBackground = $oldRaw.BackgroundColor
+$oldForeground = $oldRaw.ForegroundColor
 
-Write-Host "====================================================================================" -ForegroundColor Cyan
-Write-Host "   ATS Realistic-Keyboard-Steering (RKS) ~ Profile Manager" -ForegroundColor Cyan
-Write-Host "====================================================================================" -ForegroundColor Cyan
-Write-Host ""
-
-$AtsDocPath = [System.IO.Path]::Combine([Environment]::GetFolderPath("MyDocuments"), "American Truck Simulator")
-$SearchPaths = @(
-    [System.IO.Path]::Combine($AtsDocPath, "profiles"),
-    [System.IO.Path]::Combine($AtsDocPath, "steam_profiles")
-)
-
-$SteamPath = (Get-ItemProperty -Path "HKLM:\SOFTWARE\WOW6432Node\Valve\Steam" -Name "InstallPath" -ErrorAction SilentlyContinue).InstallPath
-if ($SteamPath -and (Test-Path $SteamPath)) {
-    $UserdataPath = [System.IO.Path]::Combine($SteamPath, "userdata")
-    if (Test-Path $UserdataPath) {
-        foreach ($UserDir in (Get-ChildItem -Path $UserdataPath -Directory)) {
-            $AtsCloudPath = [System.IO.Path]::Combine($UserDir.FullName, "270880", "remote", "profiles")
-            if (Test-Path $AtsCloudPath) { $SearchPaths += $AtsCloudPath }
-        }
-    }
-}
-
-$TargetPaths = $SearchPaths | Select-Object -Unique | Where-Object { Test-Path $_ }
-
-if ($TargetPaths.Count -eq 0) {
-    Write-Host "[ERROR] No American Truck Simulator profile directories found!" -ForegroundColor Red
-    Read-Host "Press Enter to exit..."
-    Exit
-}
-
-$ControlFiles = @()
-foreach ($Dir in $TargetPaths) {
-    foreach ($F in (Get-ChildItem -Path $Dir -Filter "controls.sii" -Recurse -ErrorAction SilentlyContinue)) {
-        $Type = "Local"; if ($F.FullName -match "steam_profiles") { $Type = "Steam Copy" } elseif ($F.FullName -match "userdata") { $Type = "Steam Cloud" }
-        $ControlFiles += [PSCustomObject]@{ Index = 0; Path = $F.FullName; Folder = $F.Directory.Name; Type = $Type; FileInfo = $F; HasBackup = (Test-Path ($F.FullName + ".bak")) }
-    }
-}
-
-if ($ControlFiles.Count -eq 0) {
-    Write-Host "[INFO] No 'controls.sii' files found!" -ForegroundColor Yellow
-    Read-Host "Press Enter to exit..."
-    Exit
-}
-
-for ($i = 0; $i -lt $ControlFiles.Count; $i++) { $ControlFiles[$i].Index = $i + 1 }
-
-Write-Host "Detected ATS Profiles:" -ForegroundColor Yellow
-Write-Host "------------------------------------------------------------------------------------"
-foreach ($CF in $ControlFiles) {
-    $BakStatus = if ($CF.HasBackup) { "[Backup: Yes]" } else { "[Backup: No ]" }
-    Write-Host " [$($CF.Index)] " -NoNewline -ForegroundColor Cyan
-    Write-Host "Folder: $($CF.Folder,-20) | Type: $($CF.Type,-12) | $BakStatus" -ForegroundColor White
-}
-Write-Host "------------------------------------------------------------------------------------"
-Write-Host " [A] Patch ALL profiles  |  [R] Restore backups  |  [E] Exit" -ForegroundColor Yellow
-Write-Host "------------------------------------------------------------------------------------"
-Write-Host ""
-
-$Selection = (Read-Host "Please select an option").Trim().ToUpper()
-if ($Selection -eq "E") { Exit }
-
-# INTERAKTIVES BACKUP-ROLLBACK SYSTEM
-if ($Selection -eq "R") {
+function Show-WelcomeHeader {
+    Clear-Host
+    Write-Host "=====================================================================" -ForegroundColor Cyan
+    Write-Host "    $Global:GAME_SHORT REALISTIC KEYBOARD STEERING (RKS) INJECTOR v$Global:RKS_VERSION    " -ForegroundColor Green -BackgroundColor Black
+    Write-Host "    Created by: Shadoo91                                             " -ForegroundColor DarkGray
+    Write-Host "=====================================================================" -ForegroundColor Cyan
     Write-Host ""
-    $RollbackSel = (Read-Host "Restore ALL backups [A] or select a specific Profile Number? (A/Number)").Trim().ToUpper()
-    
-    $FilesToRollback = @()
-    if ($RollbackSel -eq "A") {
-        $FilesToRollback = $ControlFiles
-    } else {
-        $SelectedRIdx = 0
-        if ([int]::TryParse($RollbackSel, [ref]$SelectedRIdx) -and $SelectedRIdx -le $ControlFiles.Count -and $SelectedRIdx -gt 0) {
-            $FilesToRollback = @($ControlFiles[$SelectedRIdx - 1])
-        } else {
-            Write-Host "[ERROR] Invalid selection!" -ForegroundColor Red
-            Read-Host "Press Enter to exit..."
-            Exit
-        }
-    }
-
-    Write-Host ""
-    Write-Host "Starting Rollback System..." -ForegroundColor Cyan
-    foreach ($CF in $FilesToRollback) {
-        $BackupPath = $CF.Path + ".bak"
-        if (Test-Path $BackupPath) {
-            if ($CF.FileInfo.IsReadOnly) { $CF.FileInfo.IsReadOnly = $false }
-            Copy-Item -Path $BackupPath -Destination $CF.Path -Force
-            Remove-Item -Path $BackupPath -Force
-            Write-Host "  -> Restored: $($CF.Folder)" -ForegroundColor Green
-        } else {
-            Write-Host "  -> No backup found for: $($CF.Folder)" -ForegroundColor DarkYellow
-        }
-    }
-    Read-Host "Rollback completed. Press Enter to exit..."
-    Exit
 }
 
-$FilesToPatch = @()
-if ($Selection -eq "A") { $FilesToPatch = $ControlFiles }
-else {
-    $SelectedIdx = 0
-    if ([int]::TryParse($Selection, [ref]$SelectedIdx) -and $SelectedIdx -le $ControlFiles.Count -and $SelectedIdx -gt 0) {
-        $FilesToPatch = @($ControlFiles[$SelectedIdx - 1])
-    }
-}
-
-if ($FilesToPatch.Count -eq 0) { Write-Host "[ERROR] Invalid selection!" -ForegroundColor Red; Exit }
-
-# REIN-TEXT-MATRIX (NATIVE STRINGS)
-$B = [char]96
-$CustomFormulas = @{
-    'mix dsteerleft'  = "mix dsteerleft ${B}keyboard.a?0${B}"
-    'mix dsteerright' = "mix dsteerright ${B}keyboard.d?0${B}"
-    'mix dsteering'   = "mix dsteering ${B}(keyboard.a?0 - keyboard.d?0) * (0.40 + (keyboard.space?0 * 0.50) + (keyboard.s?0 * keyboard.lalt?0 * 0.20))${B}"
-    'mix steering'    = "mix steering ${B}dsteering * (1.0 - c_steer_func)${B}"
-    'mix msteering'   = "mix msteering ${B}-mouse.rel_position.x?0 * c_msens${B}"
-    'mix mpedals'     = "mix mpedals ${B}-mouse.rel_position.y?0 * c_msens${B}"
-    'mix dforward'    = "mix dforward ${B}0${B}"
-    'mix dbackward'   = "mix dbackward ${B}0${B}"
-    'mix aforward'    = "mix aforward ${B}((keyboard.w?0 * 0.35) + (keyboard.lalt?0 * 0.55)) * (! keyboard.s?0)${B}"
-    'mix abackward'   = "mix abackward ${B}keyboard.s?0 * (0.10 + (keyboard.lalt?0 * 0.50) + (keyboard.space?0 * 0.90))${B}"
-    'mix forward'     = "mix forward ${B}aforward${B}"
-    'mix backward'    = "mix backward ${B}abackward${B}"
-}
-
-foreach ($CF in $FilesToPatch) {
-    $File = $CF.FileInfo
-    Write-Host "Processing: $($CF.Folder) [$($CF.Type)]" -ForegroundColor Yellow
-    if ($File.IsReadOnly) { $File.IsReadOnly = $false }
+function Get-Ets2Paths {
+    $Paths = @()
     
-    $BackupPath = $File.FullName + ".bak"
-    if (-not (Test-Path $BackupPath)) { 
-        Copy-Item -Path $File.FullName -Destination $BackupPath -Force 
-        Write-Host "  -> Backup created: controls.sii.bak" -ForegroundColor Green
+    # 1. Check default Documents path
+    $DocPath = [System.IO.Path]::Combine([Environment]::GetFolderPath("MyDocuments"), $Global:GAME_NAME)
+    if (Test-Path -Path $DocPath) {
+        $Paths += ,[pscustomobject]@{ Type = "Local"; Path = [System.IO.Path]::Combine($DocPath, "profiles") }
     }
     
-    # Datei zeilenweise einlesen
-    $Lines = [System.IO.File]::ReadAllLines($File.FullName, [System.Text.Encoding]::UTF8)
-    $NewLines = @()
-    $ModifiedCount = 0
-    
-    foreach ($Line in $Lines) {
-        $Matched = $false
-        foreach ($Key in $CustomFormulas.Keys) {
-            # FLEXIBLE SUCHE: Ignoriert Anstriche und Leerzeichen vor dem mix-Befehl
-            if ($Line -match "\b$Key\b") {
-                if ($Line -match '^(\s*config_lines\[\d+\]:\s*)') {
-                    $Prefix = $Matches[1]
-                    $NewLines += "${Prefix}`"$($CustomFormulas[$Key])`""
-                    $ModifiedCount++
-                    $Matched = $true
-                    break
+    # 2. Locate Steam Cloud path via Registry
+    $SteamReg = Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -ErrorAction SilentlyContinue
+    if ($SteamReg -and $SteamReg.SteamPath) {
+        $SteamPath = $SteamReg.SteamPath
+        $UserdataDir = [System.IO.Path]::Combine($SteamPath, "userdata")
+        
+        if (Test-Path -Path $UserdataDir) {
+            Get-ChildItem -Path $UserdataDir -Directory | ForEach-Object {
+                $Ets2CloudPath = [System.IO.Path]::Combine($_.FullName, $Global:STEAM_APP_ID, "remote", "profiles")
+                if (Test-Path -Path $Ets2CloudPath) {
+                    $Paths += ,[pscustomobject]@{ Type = "SteamCloud"; Path = $Ets2CloudPath }
                 }
             }
         }
-        if (-not $Matched) {
-            $NewLines += $Line
-        }
     }
     
-    # Pruefen, ob die Zeilen erfolgreich injiziert wurden
-    if ($ModifiedCount -ge 6) {
-        [System.IO.File]::WriteAllLines($File.FullName, $NewLines, [System.Text.Encoding]::UTF8)
-        Write-Host "  -> Success: RKS formulas injected!" -ForegroundColor Green
-    } else {
-        # WARNBLOCK & PRESET-FALLBACK WENN INJEKTION FEHLSCHLÄGT
-        Write-Host "  -> [WARNING] Target lines not found. File might be corrupted." -ForegroundColor DarkYellow
-        if (Test-Path $PresetFile) {
-            Write-Host ""
-            Write-Host "     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" -ForegroundColor Red
-            Write-Host "     WARNING: Installing the preset will reset your custom in-game keybinds " -ForegroundColor Yellow
-            Write-Host "              and sensitivity settings to default RKS values!" -ForegroundColor Yellow
-            Write-Host "              Your original settings are SAFELY backed up in 'controls.sii.bak'." -ForegroundColor Green
-            Write-Host "              You will need to manually reconfigure your basic controls in-game." -ForegroundColor Yellow
-            Write-Host "     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" -ForegroundColor Red
-            Write-Host ""
-            $Choice = Read-Host "     Do you still want to overwrite with the clean RKS Default Preset? (Y/N)"
-            if ($Choice.Trim().ToUpper() -eq "Y") {
-                Copy-Item -Path $PresetFile -Destination $File.FullName -Force
-                Write-Host "     -> Success: Overwritten with clean RKS Preset!" -ForegroundColor Green
-                Write-Host ""
-                Write-Host "     ------------------------------------------------------------------------" -ForegroundColor Cyan
-                Write-Host "     HOW TO RESTORE YOUR ORIGINAL SETTINGS LATER:" -ForegroundColor Yellow
-                Write-Host "     Option 1 (Automatic): Restart this tool and press [R] in the main menu." -ForegroundColor White
-                Write-Host "     Option 2 (Manual): Go to your profile folder:" -ForegroundColor White
-                Write-Host "                        $($File.DirectoryName)" -ForegroundColor Gray
-                Write-Host "                        Delete 'controls.sii' and rename 'controls.sii.bak'" -ForegroundColor White
-                Write-Host "                        back to 'controls.sii'." -ForegroundColor White
-                Write-Host "     ------------------------------------------------------------------------" -ForegroundColor Cyan
-                Write-Host ""
-            } else { Write-Host "     -> Skipped preset installation." -ForegroundColor Gray }
-        } else { Write-Host "     -> Fallback preset file 'rks_preset_controls.sii' not found in script folder!" -ForegroundColor Red }
-    }
-    Write-Host "------------------------------------------------------------------------------------"
+    return $Paths
 }
 
-Read-Host "Process finished. Press Enter to exit..."
+function Get-ProfileName ($HexFolder) {
+    try {
+        $Bytes = @()
+        for ($i = 0; $i -lt $HexFolder.Length; $i += 2) {
+            $Bytes += [Convert]::ToByte($HexFolder.Substring($i, 2), 16)
+        }
+        return [System.Text.Encoding]::UTF8.GetString($Bytes)
+    } catch {
+        return $HexFolder
+    }
+}
+
+function Invoke-PatchProfiles {
+    $TargetPaths = Get-Ets2Paths
+    if ($TargetPaths.Count -eq 0) {
+        Write-Host "[-] No $Global:GAME_NAME profile directories found!" -ForegroundColor Red
+        Write-Host "    Please ensure the game has been launched at least once." -ForegroundColor Yellow
+        Read-Host "`nPress Enter to return to the main menu..."
+        return
+    }
+
+    $PresetFile = [System.IO.Path]::Combine($PSScriptRoot, "rks_preset_controls.sii")
+    if (-not (Test-Path -Path $PresetFile)) {
+        Write-Host "[-] Critical Error: 'rks_preset_controls.sii' not found in the same directory!" -ForegroundColor Red
+        Read-Host "`nPress Enter to return to the main menu..."
+        return
+    }
+    $PresetLines = Get-Content -Path $PresetFile
+
+    Write-Host "[+] Scanning for profiles..." -ForegroundColor Cyan
+    $PatchedCount = 0
+
+    foreach ($Target in $TargetPaths) {
+        $Profiles = Get-ChildItem -Path $Target.Path -Directory
+        foreach ($Prof in $Profiles) {
+            $ControlFile = [System.IO.Path]::Combine($Prof.FullName, "controls.sii")
+            if (Test-Path -Path $ControlFile) {
+                $ReadableName = Get-ProfileName -HexFolder $Prof.Name
+                Write-Host "-> Processing profile: $ReadableName ($($Target.Type))" -ForegroundColor Gray
+                
+                # Create a safety backup if it doesn't exist yet
+                $BackupFile = $ControlFile + ".bak"
+                if (-not (Test-Path -Path $BackupFile)) {
+                    Copy-Item -Path $ControlFile -Destination $BackupFile -Force
+                    Write-Host "   [+] Backup created: controls.sii.bak" -ForegroundColor DarkGreen
+                }
+
+                # Patching process for the 12 RKS matrix lines
+                $FileLines = Get-Content -Path $ControlFile
+                $NewLines = @()
+                $SkipMode = $false
+
+                # Clean existing RKS blocks or replace default lines
+                foreach ($Line in $FileLines) {
+                    if ($Line -match "mix dsteerleft") { $SkipMode = $true; continue }
+                    if ($SkipMode -and $Line -match "mix backward") { $SkipMode = $false; continue }
+                    if ($SkipMode) { continue }
+                    $NewLines += $Line
+                }
+
+                # Inject RKS configuration (usually before the 'mix forward' line)
+                $FinalLines = @()
+                $Injected = $false
+                foreach ($Line in $NewLines) {
+                    if ($Line -match "mix forward" -and -not $Injected) {
+                        foreach ($PLine in $PresetLines) { $FinalLines += $PLine }
+                        $Injected = $true
+                    }
+                    $FinalLines += $Line
+                }
+
+                Set-Content -Path $ControlFile -Value $FinalLines -Force
+                $PatchedCount++
+                Write-Host "   [+] RKS control matrix successfully injected!" -ForegroundColor Green
+            }
+        }
+    }
+
+    Write-Host "`n[+] Done! $PatchedCount profiles have been successfully updated to RKS." -ForegroundColor Green
+    Read-Host "`nPress Enter to return to the main menu..."
+}
+
+function Invoke-RestoreProfiles {
+    $TargetPaths = Get-Ets2Paths
+    if ($TargetPaths.Count -eq 0) {
+        Write-Host "[-] No directories found to restore." -ForegroundColor Red
+        Read-Host "`nPress Enter..."
+        return
+    }
+
+    $RestoredCount = 0
+    foreach ($Target in $TargetPaths) {
+        $Profiles = Get-ChildItem -Path $Target.Path -Directory
+        foreach ($Prof in $Profiles) {
+            $ControlFile = [System.IO.Path]::Combine($Prof.FullName, "controls.sii")
+            $BackupFile = $ControlFile + ".bak"
+            
+            if (Test-Path -Path $BackupFile) {
+                $ReadableName = Get-ProfileName -HexFolder $Prof.Name
+                Write-Host "-> Restoring profile: $ReadableName" -ForegroundColor Gray
+                Copy-Item -Path $BackupFile -Destination $ControlFile -Force
+                Remove-Item -Path $BackupFile -Force
+                $RestoredCount++
+                Write-Host "   [+] Backup successfully restored." -ForegroundColor Green
+            }
+        }
+    }
+
+    Write-Host "`n[+] Done! $RestoredCount profiles have been reverted to their original state." -ForegroundColor Green
+    Read-Host "`nPress Enter to return to the main menu..."
+}
+
+# --- MAIN MENU LOOP ---
+do {
+    Show-WelcomeHeader
+    Write-Host "Please select an option:" -ForegroundColor Yellow
+    Write-Host " [A] Inject RKS steering into ALL ETS2 profiles (Patch)" -ForegroundColor White
+    Write-Host " [R] Restore backups (Uninstall RKS / Rollback)" -ForegroundColor White
+    Write-Host " [E] Exit" -ForegroundColor White
+    Write-Host ""
+    $Choice = (Read-Host "Selection").ToUpper()
+
+    switch ($Choice) {
+        "A" { Invoke-PatchProfiles }
+        "R" { Invoke-RestoreProfiles }
+        "E" { Write-Host "`nGoodbye! Have a safe journey." -ForegroundColor Cyan }
+    }
+} while ($Choice -ne "E")
+
+# Reset console colors
+$raw = $Host.UI.RawUI
+$raw.BackgroundColor = $oldBackground
+$raw.ForegroundColor = $oldForeground
+Clear-Host
