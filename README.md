@@ -1,2 +1,92 @@
-# ets2-realistic-keyboard-steering
-ETS2 Realistic Keyboard Steering (with Turbo-Mode) &amp; Realistic Physics Logic. A multi-stage input matrix for high-fidelity analog keyboard driving.
+# ETS2 - Realistic Keyboard Steering & Authentic Physics Logic (v1.10)
+
+![Game Version](https://shields.io)
+![Platform](https://shields.io)
+![License](https://shields.io)
+
+This mod fundamentally transforms driving in Euro Truck Simulator 2 (ETS2) by introducing a smart, multi-stage control matrix directly into the game's input engine. Experience razor-sharp steering, multi-tier braking, and realistic weight dynamics – completely independent of global physics files!
+
+---
+
+## 🇺🇸 ENGLISH VERSION
+
+## 🎮 Features & Control Layout
+
+### 🔹 Steering (A / D)
+- **Cruise & Maneuver Logic (A / D):** Smooth, precise 40% baseline sensitivity.
+- **Maneuvering-Boost (A/D + Spacebar):** Adds 50% extra, totaling 90% max angle.
+- **Anti-Snapping:** Dynamically locked spacebar boost when stopped.
+- **100% Emergency Steering Bypass (S + LAlt):** Instant max steering.
+
+### 🔹 Throttle
+- **Smooth Throttle (W Key):** 35% power for city driving.
+- **Partial Throttle (LAlt):** Independent 55% mid-stage.
+- **Kickdown / Turbo Gas (W + LAlt):** 90% total throttle.
+
+### 🔹 Braking & Reversing
+- **Stage 1 - Soft (S Key):** 10% deceleration.
+- **Stage 2 - Mid (S + Spacebar):** 50% controlled deceleration.
+- **Stage 3 - Emergency (S + LAlt):** 100% maximum force.
+
+---
+
+## 🚀 Installation Guide
+
+1. **Subscribe** to the official companion core mod on the Steam Workshop.
+2. Go to Steam -> Right-click **ETS2** -> Properties -> Controller -> Select **"Disable Steam Input"**.
+3. Download the automated profile patcher from this repository (`.ps1` for Windows / `.sh` for Linux).
+4. Run the script to safely apply the high-fidelity input matrix to your profiles.
+
+---
+
+## ⚙️ Recommended In-Game Settings
+
+- **Steering Sensitivity / Animation Range:** Full Right (1440° for ETS2)
+- **Steering Non-Linearity:** 50% - 80% (Highway damping)
+- **Braking Intensity / Truck Stability:** 80%
+- **Trailer Stability / Suspension Stiffness:** 40%
+
+---
+
+## 🇩🇪 DEUTSCHE VERSION
+
+## 🎮 Features & Tastenbelegung
+
+### 🔹 Lenkung (A / D)
+- **Cruising-Logik (A / D):** Sanfter, präziser 40% Einschlag.
+- **Intelligenter Rangier-Boost (A/D + Leertaste):** 50% Zusatz, insgesamt 90% Winkel.
+- **Anti-Ausrast-Schutz:** Dynamisch gesperrter Boost im Stand.
+- **100% Notfall-Lenk-Bypass (S + LAlt):** Sofortiger Max-Einschlag.
+
+### 🔹 Gas geben
+- **Sanftes Gas (W-Taste):** 35% Leistung für die Stadt.
+- **Teil-Beschleunigung (Links-Alt):** Unabhängige 55% Stufe.
+- **Kickdown (W + LAlt):** 90% Gesamtleistung.
+
+### 🔹 Bremsen & Rückwärtsfahren
+- **Stufe 1 - Sanft (S-Taste):** 10% Verzögerung.
+- **Stufe 2 - Mittel (S + Leertaste):** 50% kontrollierte Bremskraft.
+- **Stufe 3 - Gefahrenbremsung (S + LAlt):** 100% maximale Kraft.
+
+---
+
+## 🚀 Rankings & Installations-Anleitung
+
+1. Klicke im Steam Workshop bei der Core-Mod auf **Abonnieren**.
+2. Gehe in Steam zu -> Rechtsklick auf **ETS2** -> Eigenschaften -> Controller -> Wähle **"Steam Input deaktivieren"**.
+3. Lade den automatischen Profil-Patcher aus diesem Repository herunter (`.ps1` für Windows / `.sh` for Linux).
+4. Starte das Launcher-Skript, um die High-Fidelity-Eingabematrix sicher auf deine Profile anzuwenden.
+
+---
+
+## ⚙️ Empfohlene Ingame-Einstellungen
+
+- **Lenkempfindlichkeit / Animationsbereich:** Ganz nach rechts (1440° für ETS2)
+- **Lenkungs-Nichtlinearität:** 50% - 80% (Autobahn-Dämpfung)
+- **Bremsintensität / Lkw-Stabilität:** 80%
+- **Aufliegerstabilität / Federungshärte:** 40%
+
+---
+
+## 🔒 License & Copyright
+© 2026 Shadoo91. All rights reserved. Re-uploading or unauthorized modification of these configuration files is strictly prohibited.
