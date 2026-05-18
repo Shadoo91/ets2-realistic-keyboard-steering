@@ -4,7 +4,7 @@
 ![Platform](https://shields.io)
 ![License](https://shields.io)
 
-This mod fundamentally transforms driving in Euro Truck Simulator 2 (ETS2) by introducing a smart, multi-stage control matrix directly into the game's input engine. Experience razor-sharp steering, multi-tier braking, and realistic weight dynamics – completely independent of global physics files!
+This mod fundamentally transforms driving in Euro Truck Simulator 2 (ETS2) by introducing a smart, multi-stage control system directly into the game's input engine. Experience razor-sharp steering, multi-tier braking, and realistic weight dynamics – completely independent of global physics files!
 
 ---
 
@@ -49,11 +49,12 @@ Linux security requires you to explicitly grant execution permissions to the scr
 ```bash
 chmod +x Launcher_Linux_RKS.sh && ./Launcher_Linux_RKS.sh
 ```
+
 ---
 
 ## ⚙️ Recommended In-Game Settings
 
-- **Steering Sensitivity / Animation Range:** Full Right (1800° for ATS / 1440° for ETS2)
+- **Steering Sensitivity / Animation Range:** Full Right (1440° for ETS2)
 - **Steering Non-Linearity:** 50% - 80% (Highway damping)
 - **Auto-Centering (Gameplay Settings):** **DISABLED / OFF** *(Crucial for the RKS physics engine to take full control!)*
 - **Braking Intensity:** **50%** *(Perfectly balanced for the multi-stage brake matrix)*
@@ -93,7 +94,7 @@ chmod +x Launcher_Linux_RKS.sh && ./Launcher_Linux_RKS.sh
 3. **Steam-Einstellungen optimieren:** 
    - Gehe in Steam zu -> Rechtsklick auf **ETS2** -> Eigenschaften -> Controller -> Wähle **"Steam Input deaktivieren"**.
 4. **Patcher herunterladen & starten:** 
-   - Lade den automatischen Profil-Patcher aus diesem Repository herunter (`rks_injector_core.ps1` für Windows / `Launcher_Linux_RKS.sh` für Linux).
+   - Lade den automatischen Profil-Patcher aus diesem Repository herunter (`rks_injector_core.ps1` für Windows / `Launcher_Linux_RKS.sh` for Linux).
 
 ### 🖥️ Windows-Ausführung:
 - Öffne die PowerShell im Skript-Ordner und führe folgenden Befehl aus: `.\rks_injector_core.ps1`
@@ -103,12 +104,12 @@ Die Linux-Sicherheit erfordert es, dass du dem Skript vor dem Start explizit Aus
 ```bash
 chmod +x Launcher_Linux_RKS.sh && ./Launcher_Linux_RKS.sh
 ```
----
 
+---
 
 ## ⚙️ Empfohlene Ingame-Einstellungen
 
-- **Lenkempfindlichkeit / Animationsbereich:** Ganz nach rechts (1800° für ATS / 1440° für ETS2)
+- **Lenkempfindlichkeit / Animationsbereich:** Ganz nach rechts (1440° für ETS2)
 - **Lenkungs-Nichtlinearität:** 50% - 80% (Autobahn-Dämpfung)
 - **Automatisches Zentrieren (Gameplay-Optionen):** **DEAKTIVIERT / AUS** *(Zwingend notwendig, damit die RKS-Physikmatrix die volle Kontrolle übernimmt!)*
 - **Bremsintensität:** **50%** *(Perfekt ausbalanciert für die mehrstufige Bremsmatrix)*
@@ -117,5 +118,10 @@ chmod +x Launcher_Linux_RKS.sh && ./Launcher_Linux_RKS.sh
 
 ---
 
-## 🔒 License & Copyright
-© 2026 Shadoo91. All rights reserved. Re-uploading or unauthorized modification of these configuration files is strictly prohibited.
+## ⚠️ Terms of Use & Copyright
+
+© 2026 Shadoo91. All rights reserved.
+
+- **No Redistribution:** You are strictly prohibited from re-uploading, redistributing, or mirroring these scripts or the repository files on any other platform, forum, or modding site.
+- **No Unauthorized Modifications:** Modifying, editing, or copying code from these installers or configuration files for public release or sharing is not allowed.
+- **Credits & Attribution:** If you showcase, review, or feature this project (e.g., on YouTube, blogs, or community forums), you MUST explicitly credit me as the author and provide direct links to this GitHub repository and the official Steam Workshop page.
