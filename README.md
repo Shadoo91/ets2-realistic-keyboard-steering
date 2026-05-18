@@ -34,8 +34,16 @@ This mod fundamentally transforms driving in Euro Truck Simulator 2 (ETS2) by in
 
 1. **Subscribe** to the official companion core mod on the Steam Workshop.
 2. Go to Steam -> Right-click **ETS2** -> Properties -> Controller -> Select **"Disable Steam Input"**.
-3. Download the automated profile patcher from this repository (`.ps1` for Windows / `.sh` for Linux).
-4. Run the script to safely apply the high-fidelity input matrix to your profiles.
+3. Download the automated profile patcher from this repository (`rks_injector_core.ps1` for Windows / `Launcher_Linux_RKS.sh` for Linux).
+
+### 🖥️ Windows Execution:
+- Open PowerShell in the script folder and execute: `.\rks_injector_core.ps1`
+
+### 🐧 Linux & Steam Deck Permissions (Pop!_OS, Ubuntu, etc.):
+Linux security requires you to explicitly grant execution permissions to the script before running it. Open your terminal in the script directory and run:
+```bash
+chmod +x Launcher_Linux_RKS.sh && ./Launcher_Linux_RKS.sh
+```
 
 ---
 
@@ -70,14 +78,22 @@ This mod fundamentally transforms driving in Euro Truck Simulator 2 (ETS2) by in
 
 ---
 
-## 🚀 Rankings & Installations-Anleitung
+## 🚀 Installations-Anleitung
 
 1. Klicke im Steam Workshop bei der Core-Mod auf **Abonnieren**.
 2. Gehe in Steam zu -> Rechtsklick auf **ETS2** -> Eigenschaften -> Controller -> Wähle **"Steam Input deaktivieren"**.
-3. Lade den automatischen Profil-Patcher aus diesem Repository herunter (`.ps1` für Windows / `.sh` for Linux).
-4. Starte das Launcher-Skript, um die High-Fidelity-Eingabematrix sicher auf deine Profile anzuwenden.
+3. Lade den automatischen Profil-Patcher aus diesem Repository herunter (`rks_injector_core.ps1` für Windows / `Launcher_Linux_RKS.sh` für Linux).
 
+### 🖥️ Windows-Ausführung:
+- Öffne die PowerShell im Skript-Ordner und führe folgenden Befehl aus: `.\rks_injector_core.ps1`
+
+### 🐧 Linux & Steam Deck Rechte-Vergabe (Pop!_OS, Ubuntu, etc.):
+Die Linux-Sicherheit erfordert es, dass du dem Skript vor dem Start explizit Ausführungsrechte (Execution Permissions) gibst. Öffne dein Terminal im Skript-Ordner und führe diesen Befehl aus:
+```bash
+chmod +x Launcher_Linux_RKS.sh && ./Launcher_Linux_RKS.sh
+```
 ---
+
 
 ## ⚙️ Empfohlene Ingame-Einstellungen
 
