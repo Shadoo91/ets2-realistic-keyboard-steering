@@ -165,7 +165,7 @@ for FILE in "${FilesToPatch[@]}"; do
         s/(config_lines\[\d+\]:\s+)"mix dforward .*"/$1"mix dforward \`0\`"/i;
         s/(config_lines\[\d+\]:\s+)"mix dbackward .*"/$1"mix dbackward \`0\`"/i;
         s/(config_lines\[\d+\]:\s+)"mix aforward .*"/$1"mix aforward \`((keyboard.w?0 * 0.35) + (keyboard.lalt?0 * 0.55)) * (! keyboard.s?0)\`"/i;
-        s/(config_lines\[\d+\]:\s+)"mix abackward .*"/$1"mix abackward \`keyboard.s?0 * (0.10 + (keyboard.space?0 * 0.50) + (keyboard.lalt?0 * 0.90))\`"/i;
+        s/(config_lines\[\d+\]:\s+)"mix abackward .*"/$1"mix abackward \`keyboard.s?0 * (0.10 + (keyboard.space?0 * 0.35) + (keyboard.lalt?0 * 0.90))\`"/i;
         s/(config_lines\[\d+\]:\s+)"mix forward .*"/$1"mix forward \`aforward\`"/i;
         s/(config_lines\[\d+\]:\s+)"mix backward .*"/$1"mix backward \`abackward\`"/i;
     ' "$FILE" > "$TEMP_FILE"
