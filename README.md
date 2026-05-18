@@ -33,8 +33,13 @@ This mod fundamentally transforms driving in Euro Truck Simulator 2 (ETS2) by in
 ## 🚀 Installation Guide
 
 1. **Subscribe** to the official companion core mod on the Steam Workshop.
-2. Go to Steam -> Right-click **ETS2** -> Properties -> Controller -> Select **"Disable Steam Input"**.
-3. Download the automated profile patcher from this repository (`rks_injector_core.ps1` for Windows / `Launcher_Linux_RKS.sh` for Linux).
+2. **Disable Steam Cloud (Highly Recommended):** 
+   - Start the game once, click **Edit Profile** on your main profile, and **uncheck "Use Steam Cloud"**. 
+   - *Note: This forces the game to save files locally so the script can find them. You can safely turn it back on after the installation is complete!*
+3. **Optimize Steam Settings:** 
+   - Go to Steam -> Right-click **ATS / ETS2** -> Properties -> Controller -> Select **"Disable Steam Input"**.
+4. **Download & Run Patcher:** 
+   - Download the automated profile patcher from this repository (`rks_injector_core.ps1` for Windows / `Launcher_Linux_RKS.sh` for Linux).
 
 ### 🖥️ Windows Execution:
 - Open PowerShell in the script folder and execute: `.\rks_injector_core.ps1`
@@ -44,7 +49,6 @@ Linux security requires you to explicitly grant execution permissions to the scr
 ```bash
 chmod +x Launcher_Linux_RKS.sh && ./Launcher_Linux_RKS.sh
 ```
-
 ---
 
 ## ⚙️ Recommended In-Game Settings
@@ -81,8 +85,13 @@ chmod +x Launcher_Linux_RKS.sh && ./Launcher_Linux_RKS.sh
 ## 🚀 Installations-Anleitung
 
 1. Klicke im Steam Workshop bei der Core-Mod auf **Abonnieren**.
-2. Gehe in Steam zu -> Rechtsklick auf **ETS2** -> Eigenschaften -> Controller -> Wähle **"Steam Input deaktivieren"**.
-3. Lade den automatischen Profil-Patcher aus diesem Repository herunter (`rks_injector_core.ps1` für Windows / `Launcher_Linux_RKS.sh` für Linux).
+2. **Steam Cloud deaktivieren (Dringend empfohlen):** 
+   - Starte das Spiel einmal, klicke bei deinem Hauptprofil auf **Profil bearbeiten** und **entferne den Haken bei "Steam Cloud nutzen"**. 
+   - *Hinweis: Dies zwingt das Spiel, die Dateien lokal zu speichern, damit das Skript sie finden kann. Du kannst die Cloud nach der Installation beruhigt wieder einschalten!*
+3. **Steam-Einstellungen optimieren:** 
+   - Gehe in Steam zu -> Rechtsklick auf **ATS / ETS2** -> Eigenschaften -> Controller -> Wähle **"Steam Input deaktivieren"**.
+4. **Patcher herunterladen & starten:** 
+   - Lade den automatischen Profil-Patcher aus diesem Repository herunter (`rks_injector_core.ps1` für Windows / `Launcher_Linux_RKS.sh` für Linux).
 
 ### 🖥️ Windows-Ausführung:
 - Öffne die PowerShell im Skript-Ordner und führe folgenden Befehl aus: `.\rks_injector_core.ps1`
