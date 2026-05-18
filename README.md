@@ -53,10 +53,12 @@ chmod +x Launcher_Linux_RKS.sh && ./Launcher_Linux_RKS.sh
 
 ## ⚙️ Recommended In-Game Settings
 
-- **Steering Sensitivity / Animation Range:** Full Right (1440° for ETS2)
+- **Steering Sensitivity / Animation Range:** Full Right (1800° for ATS / 1440° for ETS2)
 - **Steering Non-Linearity:** 50% - 80% (Highway damping)
-- **Braking Intensity / Truck Stability:** 80%
-- **Trailer Stability / Suspension Stiffness:** 40%
+- **Auto-Centering (Gameplay Settings):** **DISABLED / OFF** *(Crucial for the RKS physics engine to take full control!)*
+- **Braking Intensity:** **50%** *(Perfectly balanced for the multi-stage brake matrix)*
+- **Truck / Trailer Stability:** 80%
+- **Suspension / Cabin Stiffness:** 40%
 
 ---
 
@@ -106,10 +108,12 @@ chmod +x Launcher_Linux_RKS.sh && ./Launcher_Linux_RKS.sh
 
 ## ⚙️ Empfohlene Ingame-Einstellungen
 
-- **Lenkempfindlichkeit / Animationsbereich:** Ganz nach rechts (1440° für ETS2)
+- **Lenkempfindlichkeit / Animationsbereich:** Ganz nach rechts (1800° für ATS / 1440° für ETS2)
 - **Lenkungs-Nichtlinearität:** 50% - 80% (Autobahn-Dämpfung)
-- **Bremsintensität / Lkw-Stabilität:** 80%
-- **Aufliegerstabilität / Federungshärte:** 40%
+- **Automatisches Zentrieren (Gameplay-Optionen):** **DEAKTIVIERT / AUS** *(Zwingend notwendig, damit die RKS-Physikmatrix die volle Kontrolle übernimmt!)*
+- **Bremsintensität:** **50%** *(Perfekt ausbalanciert für die mehrstufige Bremsmatrix)*
+- **Lkw- / Aufliegerstabilität:** 80%
+- **Federungs- / Kabinenhärte:** 40%
 
 ---
 
