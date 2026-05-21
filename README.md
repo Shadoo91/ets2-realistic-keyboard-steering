@@ -41,7 +41,7 @@ Do not copy the raw script. Download the pre-compiled, secure standalone Windows
 
 ## 📜 License & Copyright
 **Copyright (c) 2026 by Shadoo91. All rights reserved.**
-Re-uploading, distribution on third-party platforms, or copying the mathematical formulas into other modifications without express written permission from Shadoo91 is strictly prohibited and illegal [ex-4].
+Re-uploading, distribution on third-party platforms, or copying the mathematical formulas into other modifications without express written permission from Shadoo91 is strictly prohibited and illegal.
 
 ----------------------------------------------------------------------------------
 Enjoy the realistic truck handling! Safe travels! ~ Shadoo91 😉
