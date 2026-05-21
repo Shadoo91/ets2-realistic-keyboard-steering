@@ -23,7 +23,7 @@
 ## 📥 DOWNLOAD THE GRAPHICAL INSTALLER (.EXE)
 Do not copy the raw script. Download the pre-compiled, secure standalone Windows application directly from our official releases page:
 
-👉 **[CLICK HERE TO DOWNLOAD THE LATEST RKS-INSTALLER](https://github.com)**
+👉 **[CLICK HERE TO DOWNLOAD THE LATEST RKS-INSTALLER](https://github.com/Shadoo91/ets2-realistic-keyboard-steering/releases/download/v1.10.1/RKS-Installer-v1.10.1.zip)**
 
 *(Simply download the ZIP, extract it, and double-click the `RKS-Installer.exe`. No Python required!)*
 
@@ -36,8 +36,8 @@ Do not copy the raw script. Download the pre-compiled, secure standalone Windows
 ## 🔗 Required Steam Workshop Subscriptions:
 *This installer scans your hard drive. Installation will be blocked if you are not subscribed to the corresponding Steam Workshop mod!*
 
-* 🚚 **Euro Truck Simulator 2 Mod:** https://steamcommunity.com
-* 🦅 **American Truck Simulator Mod:** https://steamcommunity.com
+* 🚚 **Euro Truck Simulator 2 Mod:** https://steamcommunity.com/sharedfiles/filedetails/?id=3727705125
+* 🦅 **American Truck Simulator Mod:** https://steamcommunity.com/sharedfiles/filedetails/?id=3725174940
 
 ## 📜 License & Copyright
 **Copyright (c) 2026 by Shadoo91. All rights reserved.**
@@ -53,7 +53,7 @@ Enjoy the realistic truck handling! Safe travels! ~ Shadoo91 😉
 ## 📥 GRAPHISCHEN INSTALLER HERUNTERLADEN (.EXE)
 Kopiere nicht das rohe Skript. Lade dir die fertig kompilierte, sichere Windows-Anwendung direkt von unserer offiziellen Release-Seite herunter:
 
-👉 **[KLICKE HIER, UM DEN NEUEN RKS-INSTALLER HERUNTERZULADEN](https://github.com)**
+👉 **[KLICKE HIER, UM DEN NEUEN RKS-INSTALLER HERUNTERZULADEN](https://github.com/Shadoo91/ets2-realistic-keyboard-steering/releases/download/v1.10.1/RKS-Installer-v1.10.1.zip)**
 
 *(Einfach die ZIP herunterladen, entpacken und die `RKS-Installer.exe` per Doppelklick starten. Kein Python nötig!)*
 
@@ -66,8 +66,8 @@ Kopiere nicht das rohe Skript. Lade dir die fertig kompilierte, sichere Windows-
 ## 🔗 Benötigte Steam Workshop Abonnements:
 *Dieser Installer prüft deine Festplatte. Die Installation wird blockiert, wenn du die Mod nicht im Workshop abonniert hast!*
 
-* 🚚 **Euro Truck Simulator 2 Mod:** https://steamcommunity.com
-* 🦅 **American Truck Simulator Mod:** https://steamcommunity.com
+* 🚚 **Euro Truck Simulator 2 Mod:** https://steamcommunity.com/sharedfiles/filedetails/?id=3727705125
+* 🦅 **American Truck Simulator Mod:** https://steamcommunity.com/sharedfiles/filedetails/?id=3725174940
 
 ## 📜 Lizenz & Urheberrecht
 **Urheberrecht (c) 2026 von Shadoo91. Alle Rechte vorbehalten.**
