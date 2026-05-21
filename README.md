@@ -1,3 +1,6 @@
+# 🚀 RKS-Mod — Realistic Keyboard Steering (Universal Version)
+
+```text
 ==================================================================================
 🚨 CRITICAL UPDATE INFO / WICHTIGER HINWEIS FÜR RE-INSTALLATIONEN 🚨
 ==================================================================================
@@ -11,8 +14,8 @@
 ⚠️ JEDER SPIELER MUSS diesen neuen grafischen Installer (.exe) herunterladen!
 ⚠️ Die Mod funktioniert im Spiel NUR, wenn du die Workshop-Mods aktiv abonniert hast!
 ==================================================================================
+```
 
----
 ---
 
 # 🇺🇸 ENGLISH VERSION
@@ -43,7 +46,6 @@ Re-uploading, distribution on third-party platforms, or copying the mathematical
 ----------------------------------------------------------------------------------
 Enjoy the realistic truck handling! Safe travels! ~ Shadoo91 😉
 
----
 ---
 
 # 🇩🇪 DEUTSCHE VERSION
