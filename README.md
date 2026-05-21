@@ -1,5 +1,3 @@
-# 🚀 RKS-Mod — Realistic Keyboard Steering (Universal Version)
-
 ==================================================================================
 🚨 CRITICAL UPDATE INFO / WICHTIGER HINWEIS FÜR RE-INSTALLATIONEN 🚨
 ==================================================================================
