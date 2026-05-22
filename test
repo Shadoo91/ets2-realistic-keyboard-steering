@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
+from tkinter import messagebox, ttk, filedialog
 import os
 import platform
 import sys
@@ -146,8 +147,20 @@ class RksInstaller:
         prof_frame = tk.Frame(card_profile, bg=self.card_bg)
         prof_frame.pack(fill="x", pady=(8, 0))
         tk.Label(prof_frame, text=self.txt["profile_select"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=15, anchor="w").pack(side="left")
-        self.prof_combo = ttk.Combobox(prof_frame, state="readonly", width=30, font=("Arial", 11))
-        self.prof_combo.pack(side="left")
+                # Das originale Profil-Dropdown-Menü
+        self.prof_combo = ttk.Combobox(prof_frame, textvariable=self.selected_profile, state="readonly", width=40)
+        self.prof_combo.pack(side="left", padx=5)
+        
+        # DER NEUE ALTERNATIV-BUTTON (Direkt daneben platziert)
+        self.btn_browse = tk.Button(
+            prof_frame, 
+            text="Ordner manuell suchen 📂", 
+            command=self.manuellen_ordner_auswaehlen,
+            bg="#f0f0f0",
+            fg="black"
+        )
+        self.btn_browse.pack(side="left", padx=5)
+
         
         self.btn_uninstall = tk.Button(prof_frame, text="Mod deinstallieren ❌", bg=self.accent_red, fg="white", font=("Arial", 10, "bold"), relief="flat", padx=10)
         self.btn_uninstall.pack(side="right", padx=5)
@@ -489,62 +502,55 @@ class RksInstaller:
 
     # --- FIXED: FINDET JETZT AUCH STEAM-CLOUD-PROFILE IM USERDATA-ORDNER ---
     # --- FIXED V3: PERFEKTER STEAM-CLOUD-TIEFENSCAN FÜR USERDATA ---
-    def suche_profile(self):
+    def suche_profile(self, alternativer_pfad=None):
         game_name = self.game_combo.get()
         app_id = "227300" if game_name == "Euro Truck Simulator 2" else "270880"
-        home = os.path.expanduser("~")
         
-        moegliche_basis_pfade = []
-        
-        if platform.system() == "Windows":
-            try:
-                import ctypes
-                from ctypes import wintypes
-                CSIDL_PERSONAL = 5       
-                SHGFP_TYPE_CURRENT = 0
-                buf = ctypes.create_unicode_buffer(wintypes.MAX_PATH)
-                ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
-                local_documents = buf.value
-            except:
-                local_documents = os.path.join(home, "Documents") 
-                
-            moegliche_basis_pfade.append(os.path.join(local_documents, game_name))
-            moegliche_basis_pfade.append(os.path.join(os.environ.get("USERPROFILE", ""), "OneDrive", "Documents", game_name))
-            
-            # FIXED: Der Tiefenscan sucht jetzt exakt nach dem verborgenen "remote/profiles" Ordner von Steam!
-            steam_base = os.path.join(os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)"), "Steam", "userdata")
-            if not os.path.exists(steam_base):
-                steam_base = os.path.join(os.environ.get("ProgramFiles", "C:\\Program Files"), "Steam", "userdata")
-                
-            if os.path.exists(steam_base):
-                for user_folder in os.listdir(steam_base):
-                    # Pfad zu den Steam-Cloud-Profilen exakt spiegeln
-                    cloud_profile_path = os.path.join(steam_base, user_folder, app_id, "remote", "profiles")
-                    if os.path.exists(cloud_profile_path):
-                        moegliche_basis_pfade.append(cloud_profile_path)
+        # WICHTIG: Wenn ein manueller Pfad gewählt wurde, nutzen wir NUR diesen.
+        # Ansonsten greift deine automatische Standard-Suche.
+        if alternativer_pfad:
+            moegliche_basis_pfade = [alternativer_pfad]
         else:
-            moegliche_basis_pfade.append(os.path.join(home, ".steam", "steam", "steamapps", "compatdata", app_id, "pfx", "drive_c", "users", "steamuser", "Documents", game_name))
+            moegliche_basis_pfade = [
+                os.path.expanduser(f"~/Documents/{game_name}"),
+                os.path.expanduser(f"~/OneDrive/Documents/{game_name}"),
+                os.path.expanduser(f"~/OneDrive/Dokumente/{game_name}"),
+                f"C:/Program Files (x86)/Steam/userdata",
+                f"D:/Steam/userdata",
+            ]
 
         self.profile_dict.clear()
         
-        for b_path in moegliche_basis_pfade:
-            if not os.path.exists(b_path): continue
-            
-            # Wenn der Pfad direkt auf den Steam-Cloud-Zweig zeigt, nutzen wir ihn direkt als profiles_dir
-            if b_path.endswith("profiles"):
-                profiles_dir = b_path
-            else:
-                profiles_dir = os.path.join(b_path, "profiles")
+        # Dein originaler Scan-Algorithmus sucht nun in den definierten Pfaden nach Profilen
+        for basis_pfad in moegliche_basis_pfade:
+            if not os.path.exists(basis_pfad):
+                continue
                 
-            if os.path.exists(profiles_dir):
-                for folder in os.listdir(profiles_dir):
-                    if os.path.isdir(os.path.join(profiles_dir, folder)):
-                        try:
-                            readable_name = bytes.fromhex(folder).decode('utf-8')
-                            display_str = f"{readable_name} ({folder[:6]}...)"
-                            if display_str not in self.profile_dict:
-                                self.profile_dict[display_str] = os.path.join(profiles_dir, folder, "controls.sii")
-                        except: pass
+            # Schleife scannt nach Ordnern ("profiles" oder Steam AppID)
+            for root, dirs, files in os.walk(basis_pfad):
+                if "controls.sii" in files:
+                    profil_name = os.path.basename(root)
+                    # Falls der Ordnername eine lange Hex-ID ist, kürzen oder so belassen
+                    self.profile_dict[profil_name] = os.path.join(root, "controls.sii")
+
+        # Dropdown-Menü mit den gefundenen Profilnamen füllen
+        if self.profile_dict:
+            self.prof_combo['values'] = list(self.profile_dict.keys())
+            self.prof_combo.current(0)
+        else:
+            self.prof_combo['values'] = []
+            self.selected_profile.set("")
+
+    def manuellen_ordner_auswaehlen(self):
+        # Öffnet das Windows-Fenster zur Ordnerauswahl
+        gewaehlter_ordner = filedialog.askdirectory(
+            title="Wähle deinen ETS2- oder profiles-Ordner aus (Fallback)"
+        )
+        
+        # Falls ein Ordner ausgewählt wurde, starte die Profilsuche gezielt darin
+        if gewaehlter_ordner:
+            self.suche_profile(alternativer_pfad=gewaehlter_ordner)
+
                         
         if self.profile_dict:
             self.prof_combo.config(values=list(self.profile_dict.keys()))
@@ -552,6 +558,17 @@ class RksInstaller:
         else:
             self.prof_combo.config(values=[self.txt["no_profiles"]])
             self.prof_combo.current(0)
+
+    def manuellen_ordner_auswaehlen(self):
+        # Öffnet einen Dialog, bei dem der Nutzer den ETS2- oder profile-Ordner wählt
+        gewaehlter_ordner = filedialog.askdirectory(
+            title="Wähle deinen ETS2- oder profiles-Ordner (z.B. bei OneDrive/Cloud-Problemen)"
+        )
+        
+        # Wenn der Nutzer nicht abgebrochen hat, starte die Suche mit diesem Pfad
+        if gewaehlter_ordner:
+            self.suche_profile(alternativer_pfad=gewaehlter_ordner)
+
 
     # --- UNZERSTÖRBAR: ENTPFERNT JEDEN WINDOWS-SCHREIBSCHUTZ VOR DEM SPEICHERN ---
     def ausfuehren_installation(self):
