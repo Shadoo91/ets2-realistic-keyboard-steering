@@ -207,7 +207,7 @@ class ETS2SteeringInstaller:
                 for key, value in mod_daten.items():
                     if zeile.strip().startswith(key):
                         neue_zeilen.append(value + "\n")
-                        ersetbt = True
+                        ersetzt = True
                         break
                 if not ersetzt:
                     neue_zeilen.append(zeile)
