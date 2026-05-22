@@ -383,44 +383,58 @@ class RksInstaller:
             else:
                 tk.Label(f, text=f"    {normal_part}", font=("Arial", 9), fg="#444444", bg=self.card_bg).pack(side="left")
 
-    def suche_profile(self):
+    def suche_profile(self, alternativer_pfad=None):
         game_name = self.game_combo.get()
         home = os.path.expanduser("~")
         base_path = None
         
-        if platform.system() == "Windows":
-            try:
-                import ctypes
-                from ctypes import wintypes
-                CSIDL_PERSONAL = 5       
-                SHGFP_TYPE_CURRENT = 0
-                buf = ctypes.create_unicode_buffer(wintypes.MAX_PATH)
-                ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
-                local_documents = buf.value
-            except:
-                local_documents = os.path.join(home, "Documents") 
-                
-            local_path = os.path.join(local_documents, game_name)
-            onedrive_path = os.path.join(os.environ.get("USERPROFILE", ""), "OneDrive", "Documents", game_name)
-            
-            if os.path.exists(local_path): base_path = local_path
-            elif os.path.exists(onedrive_path): base_path = onedrive_path
+        # WICHTIG: Wenn ein manueller Ordner gewählt wurde, nutzen wir direkt diesen als base_path
+        if alternativer_pfad:
+            base_path = alternativer_pfad
         else:
-            app_id = "227300" if game_name == "Euro Truck Simulator 2" else "270880"
-            linux_steam_path = os.path.join(home, ".steam", "steam", "steamapps", "compatdata", app_id, "pfx", "drive_c", "users", "steamuser", "Documents", game_name)
-            if os.path.exists(linux_steam_path): base_path = linux_steam_path
+            # Hier läuft deine originale automatische Erkennung komplett unverändert weiter:
+            if platform.system() == "Windows":
+                try:
+                    import ctypes
+                    from ctypes import wintypes
+                    CSIDL_PERSONAL = 5       
+                    SHGFP_TYPE_CURRENT = 0
+                    buf = ctypes.create_unicode_buffer(wintypes.MAX_PATH)
+                    ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
+                    local_documents = buf.value
+                except:
+                    local_documents = os.path.join(home, "Documents") 
+                    
+                local_path = os.path.join(local_documents, game_name)
+                onedrive_path = os.path.join(os.environ.get("USERPROFILE", ""), "OneDrive", "Documents", game_name)
+                
+                if os.path.exists(local_path): base_path = local_path
+                elif os.path.exists(onedrive_path): base_path = onedrive_path
+            else:
+                app_id = "227300" if game_name == "Euro Truck Simulator 2" else "270880"
+                linux_steam_path = os.path.join(home, ".steam", "steam", "steamapps", "compatdata", app_id, "pfx", "drive_c", "users", "steamuser", "Documents", game_name)
+                if os.path.exists(linux_steam_path): base_path = linux_steam_path
 
         self.profile_dict.clear()
-        if base_path and os.path.exists(os.path.join(base_path, "profiles")):
-            profiles_dir = os.path.join(base_path, "profiles")
-            for folder in os.listdir(profiles_dir):
-                if os.path.isdir(os.path.join(profiles_dir, folder)):
-                    try:
-                        readable_name = bytes.fromhex(folder).decode('utf-8')
-                        display_str = f"{readable_name} ({folder[:6]}...)"
-                        self.profile_dict[display_str] = os.path.join(profiles_dir, folder, "controls.sii")
-                    except: pass
-                        
+        
+        if base_path:
+            # Fall 1: Der Pfad ist direkt der "profiles"-Ordner oder enthält ihn
+            if os.path.basename(base_path.rstrip(r"\/")) == "profiles":
+                profiles_dir = base_path
+            elif os.path.exists(os.path.join(base_path, "profiles")):
+                profiles_dir = os.path.join(base_path, "profiles")
+            else:
+                profiles_dir = base_path # Fallback: Nutze den Ordner direkt, falls der User schon im "profiles"-Ordner war
+
+            if os.path.exists(profiles_dir):
+                for folder in os.listdir(profiles_dir):
+                    if os.path.isdir(os.path.join(profiles_dir, folder)):
+                        try:
+                            readable_name = bytes.fromhex(folder).decode('utf-8')
+                            display_str = f"{readable_name} ({folder[:6]}...)"
+                            self.profile_dict[display_str] = os.path.join(profiles_dir, folder, "controls.sii")
+                        except: pass
+                            
         if self.profile_dict:
             self.prof_combo.config(values=list(self.profile_dict.keys()))
             self.prof_combo.current(0)
