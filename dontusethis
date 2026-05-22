@@ -11,7 +11,7 @@ class ETS2SteeringInstaller:
         self.root.geometry("850x650")
         self.root.resizable(False, False)
         
-        # Design & Farben (Dracula/Catppuccin Style)
+        # Design & Farben
         self.bg_main = "#1e1e2e"
         self.card_bg = "#252538"
         self.fg_text = "#cdd6f4"
@@ -91,10 +91,7 @@ class ETS2SteeringInstaller:
         self.suche_profile()
 
     def lese_profile_aus_ordner(self, profiles_dir):
-        """
-        Scannt den Zielordner und filtert OneDrive-Geisterpfade aus.
-        Gibt NUR Profile zurück, bei denen die controls.sii physisch existiert.
-        """
+        """Scannt den Zielordner und filtert OneDrive-Geisterpfade aus."""
         gueltige_profile = []
         if not os.path.isdir(profiles_dir):
             return gueltige_profile
@@ -103,7 +100,7 @@ class ETS2SteeringInstaller:
             vollstaendiger_pfad = os.path.join(profiles_dir, folder)
             controls_datei = os.path.join(vollstaendiger_pfad, "controls.sii")
             
-            # OS.PATH.ISFILE FILTER: Verhindert leere OneDrive "Ghost"-Profile
+            # WICHTIGER FIX: os.path.isfile stellt sicher, dass die Datei real existiert
             if os.path.isdir(vollstaendiger_pfad) and os.path.isfile(controls_datei):
                 try:
                     lesbarer_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
@@ -120,7 +117,6 @@ class ETS2SteeringInstaller:
         spiel = self.game_combo.get()
         user_docs = os.path.expanduser("~/Documents")
         
-        # Standard-Pfade zusammenbauen
         self.aktueller_spiel_pfad = os.path.join(user_docs, spiel)
         profiles_path = os.path.join(self.aktueller_spiel_pfad, "profiles")
         
@@ -137,7 +133,7 @@ class ETS2SteeringInstaller:
             self.status_label.config(text="Keine Profile automatisch gefunden. Bitte Pfad manuell wählen!", fg=self.accent_red)
 
     def manueller_pfad_waehlen(self):
-        """Erlaubt dem User, den Pfad selbst auszuwählen falls OneDrive blockiert."""
+        """Erlaubt dem User, den Pfad selbst auszuwählen."""
         initial_dir = os.path.expanduser("~/Documents")
         gewaehlter_pfad = filedialog.askdirectory(title="Wähle den ETS2/ATS Hauptordner aus", initialdir=initial_dir)
         
@@ -170,7 +166,7 @@ class ETS2SteeringInstaller:
             messagebox.showwarning("Keine Profile", "Ordner existiert, enthält aber keine echten Profile mit controls.sii.")
 
     def hole_ausgewaehlten_profil_ordner(self):
-        """Gibt den exakten Ordnernamen (Hex) des aktuell ausgewählten Profils zurück."""
+        """Gibt den exakten Ordnernamen (Hex) des Profils zurück."""
         ausgewaehlter_index = self.prof_combo.current()
         if ausgewaehlter_index == -1:
             return None
@@ -191,15 +187,14 @@ class ETS2SteeringInstaller:
             return
 
         try:
-            # Backup erstellen falls noch keines existiert
             if not os.path.exists(backup_datei):
                 shutil.copy2(ziel_datei, backup_datei)
                 
-            # --- MOD INJEKTIONSLOGIK ---
             with open(ziel_datei, "r", encoding="utf-8", errors="ignore") as f:
                 zeilen = f.readlines()
                 
             neue_zeilen = []
+            # Hier stecken deine 4 Modifikations-Zeilen
             mod_daten = {
                 'config_lines = "device keyboard': 'config_lines = "device keyboard `di8.keyboard`"',
                 'config_lines = "mix steering': 'config_lines = "mix steering `dsteering - deadzone(-sel(c_jisteer, -sys.steering, j_steering), c_jisteer_dz) * c_jisteer_sens`"',
@@ -212,7 +207,7 @@ class ETS2SteeringInstaller:
                 for key, value in mod_daten.items():
                     if zeile.strip().startswith(key):
                         neue_zeilen.append(value + "\n")
-                        ersetzt = True
+                        ersetbt = True
                         break
                 if not ersetzt:
                     neue_zeilen.append(zeile)
@@ -227,7 +222,7 @@ class ETS2SteeringInstaller:
             messagebox.showerror("Fehler", f"Fehler bei der Installation:\n{str(e)}")
 
     def deinstalliere_mod(self):
-        """Stellt das automatische Backup wieder her."""
+        """Stelt das automatische Backup wieder her."""
         profil_folder = self.hole_ausgewaehlten_profil_ordner()
         if not profil_folder or not self.aktueller_spiel_pfad:
             messagebox.showerror("Fehler", "Bitte wähle zuerst ein gültiges Profil aus!")
@@ -244,7 +239,7 @@ class ETS2SteeringInstaller:
             except Exception as e:
                 messagebox.showerror("Fehler", f"Fehler beim Wiederherstellen:\n{str(e)}")
         else:
-            messagebox.showwarning("Kein Backup", "Es wurde kein Backup (controls.sii.bak) für dieses Profil gefunden.")
+            messagebox.showwarning("Kein Backup", "Es wurde kein Backup für dieses Profil gefunden.")
 
 if __name__ == "__main__":
     root = tk.Tk()
