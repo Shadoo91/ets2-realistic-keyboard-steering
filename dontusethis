@@ -94,6 +94,57 @@ class RksInstaller:
                 "Vielen Dank, dass du dieses Projekt nutzt und unterstützt. Ich würde mich sehr über "
                 "eine positive Bewertung oder konstruktive Kritik im Steam Workshop freuen. Viel Spaß! ;)"
             )
+            
+            def manueller_pfad_waehlen(self):
+        """
+        Öffnet einen Dialog zur manuellen Auswahl des ETS2- oder ATS-Hauptordners,
+        falls die Automatik fehlschlägt oder durch OneDrive getäuscht wurde.
+        """
+        from tkinter import filedialog, messagebox
+        import os
+
+        # Standardmäßig im Dokumentenordner des Windows-Benutzers starten
+        initial_dir = os.path.expanduser("~/Documents")
+        
+        gewaehlter_pfad = filedialog.askdirectory(
+            title="Wähle den ETS2/ATS Hauptordner aus (wo der 'profiles' Ordner liegt)",
+            initialdir=initial_dir
+        )
+        
+        if not gewaehlter_pfad:
+            return  # Abgebrochen durch Nutzer
+
+        # Falls der Nutzer versehentlich direkt IM "profiles"-Ordner gelandet ist, korrigieren:
+        if os.path.basename(gewaehlter_pfad).lower() == "profiles":
+            base_dir = os.path.dirname(gewaehlter_pfad)
+        else:
+            base_dir = gewaehlter_pfad
+
+        profiles_path = os.path.join(base_dir, "profiles")
+
+        # Absicherung: Existiert der physische profiles-Ordner an diesem gewählten Ort?
+        if not os.path.isdir(profiles_path):
+            messagebox.showerror(
+                "Ordner ungültig", 
+                f"Unter dem Pfad:\n{base_dir}\nwurde kein 'profiles'-Ordner gefunden!\n\nBitte wählen Sie den echten Hauptordner des Spiels."
+            )
+            return
+
+        # Profile über die neue, sichere Filter-Funktion einlesen
+        gefundene_profile = self.lese_profile_aus_ordner(profiles_path)
+
+        if gefundene_profile:
+            self.prof_combo["values"] = gefundene_profile
+            self.prof_combo.current(0)
+            messagebox.showinfo("Erfolg", f"Es wurden {len(gefundene_profile)} echte Profile im manuellen Pfad gefunden!")
+        else:
+            self.prof_combo["values"] = []
+            self.prof_combo.set("")
+            messagebox.showwarning(
+                "Keine Profile", 
+                "Der Ordner existiert zwar, aber es wurden keine Profile mit einer physisch vorhandenen 'controls.sii' darin gefunden."
+            )
+        
         }
 
         # --- SEITE 1: WELCOME FRAME ---
