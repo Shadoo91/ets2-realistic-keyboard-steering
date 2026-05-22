@@ -95,7 +95,7 @@ class RksInstaller:
                 "eine positive Bewertung oder konstruktive Kritik im Steam Workshop freuen. Viel Spaß! ;)"
             )
             
-            def manueller_pfad_waehlen(self):
+    def manueller_pfad_waehlen(self):
         """
         Öffnet einen Dialog zur manuellen Auswahl des ETS2- oder ATS-Hauptordners,
         falls die Automatik fehlschlägt oder durch OneDrive getäuscht wurde.
@@ -103,7 +103,6 @@ class RksInstaller:
         from tkinter import filedialog, messagebox
         import os
 
-        # Standardmäßig im Dokumentenordner des Windows-Benutzers starten
         initial_dir = os.path.expanduser("~/Documents")
         
         gewaehlter_pfad = filedialog.askdirectory(
@@ -112,17 +111,17 @@ class RksInstaller:
         )
         
         if not gewaehlter_pfad:
-            return  # Abgebrochen durch Nutzer
+            return
 
-        # Falls der Nutzer versehentlich direkt IM "profiles"-Ordner gelandet ist, korrigieren:
         if os.path.basename(gewaehlter_pfad).lower() == "profiles":
             base_dir = os.path.dirname(gewaehlter_pfad)
         else:
             base_dir = gewaehlter_pfad
 
+        # Wir speichern den manuellen Pfad in der Klasse, damit die Installation ihn später findet
+        self.aktueller_spiel_pfad = base_dir
         profiles_path = os.path.join(base_dir, "profiles")
 
-        # Absicherung: Existiert der physische profiles-Ordner an diesem gewählten Ort?
         if not os.path.isdir(profiles_path):
             messagebox.showerror(
                 "Ordner ungültig", 
@@ -130,22 +129,54 @@ class RksInstaller:
             )
             return
 
-        # Profile über die neue, sichere Filter-Funktion einlesen
         gefundene_profile = self.lese_profile_aus_ordner(profiles_path)
 
         if gefundene_profile:
-            self.prof_combo["values"] = gefundene_profile
+            # Zeigt die lesbaren Profilnamen im Dropdown an
+            anzuzeigende_namen = [p["name"] for p in gefundene_profile]
+            self.prof_combo["values"] = anzuzeigende_namen
             self.prof_combo.current(0)
+            
+            # Wir merken uns die echten Ordnernamen für die Installation
+            self.aktuelle_profil_liste = gefundene_profile 
             messagebox.showinfo("Erfolg", f"Es wurden {len(gefundene_profile)} echte Profile im manuellen Pfad gefunden!")
         else:
             self.prof_combo["values"] = []
             self.prof_combo.set("")
+            self.aktuelle_profil_liste = []
             messagebox.showwarning(
                 "Keine Profile", 
-                "Der Ordner existiert zwar, aber es wurden keine Profile mit einer physisch vorhandenen 'controls.sii' darin gefunden."
+                "Der Ordner existiert zwar, aber es wurden keine Profile mit einer echten 'controls.sii' darin gefunden."
             )
+
+    def lese_profile_aus_ordner(self, profiles_dir):
+        """
+        Scannt den Ordner und filtert OneDrive-Geisterpfade aus.
+        Wandelt Hex-Ordnernamen in lesbaren Text um, genau wie deine alte Suche.
+        """
+        import os
+        gueltige_profile = []
         
-        }
+        if not os.path.isdir(profiles_dir):
+            return gueltige_profile
+
+        for folder in os.listdir(profiles_dir):
+            vollstaendiger_pfad = os.path.join(profiles_dir, folder)
+            controls_datei = os.path.join(vollstaendiger_pfad, "controls.sii")
+            
+            # Filtert OneDrive-Geisterordner aus
+            if os.path.isdir(vollstaendiger_pfad) and os.path.isfile(controls_datei):
+                try:
+                    # Versucht den Hex-Ordnernamen in lesbaren Text zu wandeln (wie in deinem Originalskript)
+                    lesbarer_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
+                    display_name = f"{lesbarer_name} ({folder})" if lesbarer_name.strip() else folder
+                except Exception:
+                    display_name = folder
+                
+                # Speichert den Ordnernamen und den Anzeigenamen
+                gueltige_profile.append({"folder": folder, "name": display_name})
+                
+        return gueltige_profile
 
         # --- SEITE 1: WELCOME FRAME ---
         self.welcome_frame = tk.Frame(self.root, padx=40, pady=30, bg=self.bg_main)
