@@ -1,0 +1,760 @@
+import tkinter as tk
+from tkinter import messagebox, ttk
+import os
+import platform
+import sys
+import locale
+import shutil
+import urllib.request
+import json
+import subprocess
+
+class RksInstaller:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("RKS-MOD INSTALLER ~ by Shadoo91")
+        self.root.geometry("850x800") 
+        self.root.resizable(False, False)
+        
+        # GITHUB-EINSTELLUNGEN FÜR DEN AUTO-UPDATER
+        self.aktuelle_version = "v1.10.1"
+        self.github_user = "Shadoo91"       
+        self.github_repo = "ets2-realistic-keyboard-steering"   
+        
+        # Moderne Farb-Palette (Flat-Design)
+        self.bg_main = "#f8f9fa"       
+        self.fg_text = "#212529"       
+        self.accent_blue = "#007acc"   
+        self.accent_green = "#28a745"  
+        self.accent_orange = "#d35400" 
+        self.accent_red = "#dc3545"    
+        self.card_bg = "#ffffff"       
+        
+        self.root.configure(bg=self.bg_main)
+        self.is_de = True
+        
+        # Standard-Belegungen (Daumentaste 1 als Standard)
+        self.taste_turbo_code = "keyboard.space?0"
+        self.taste_rangier_code = "mouse.button_4?0" 
+        self.taste_notbremse_code = "keyboard.lalt?0"
+        
+        self.taste_turbo_display = "SPACE"
+        self.taste_rangier_display = "MAUS DAUMEN 1"
+        self.taste_notbremse_display = "LEFT ALT"
+        
+        self.aktueller_listener = None
+        self.profile_dict = {}
+
+        self.txt = {
+            "titel": f"RKS-MOD INSTALLER ~ by Shadoo91 ({self.aktuelle_version})",
+            "welcome_head": "Willkommen beim RKS-Mod Setup! 🚚💨",
+            "btn_start": "Weiter zur Konfiguration >",
+            "info": "Klicke auf einen Button und tippe danach die gewünschte Taste auf deiner Tastatur oder Maus, um sie dummysicher zuzuweisen:",
+            "btn_turbo": "Stadt- / Turbo-Taste:",
+            "btn_rangier": "Rangier-Taste (100%):",
+            "btn_not": "Notbrems-Zusatz (LAlt):",
+            "weiter": "Weiter zur Übersicht >",
+            "status_wait": "👉 Drücke eine Taste oder Maustaste...",
+            "status_done": "Erfolgreich zugewiesen: ",
+            "game_select": "Spiel wählen:",
+            "profile_select": "Profil wählen:",
+            "no_profiles": "Keine Profile gefunden!",
+            "readme_head": "DEINE INSTALLATIONS-ÜBERSICHT",
+            "readme_sub": "Bitte überprüfe deine Konfiguration und die Gameplay-Empfehlungen:",
+            "btn_install": "Jetzt installieren ✔",
+            "btn_zurueck": "< Zurück",
+            "status_success": "✅ INSTALLATION ERFOLGREICH ABGESCHLOSSEN!",
+            "status_failed": "❌ INSTALLATION FEHLGESCHLAGEN!",
+            "btn_close": "Schließen",
+            "terms_head": "ENDNUTZER-LIZENZVEREINBARUNG (EULA)",
+            "terms_sub": "Bitte lies und scrolle die Bedingungen vollständig durch, um die Installation freizuschalten:",
+            "terms_accept": "Ich habe die Lizenzvereinbarung gelesen und akzeptiere alle Bedingungen bedingungslos.",
+            "terms_text": (
+                "SOFTWARE-LIZENZ & NUTZUNGSBEDINGUNGEN (RKS-Mod v1.10.1)\n"
+                "Urheberrecht (c) 2026 von Shadoo91. Alle Rechte vorbehalten.\n"
+                "----------------------------------------------------------------------------------\n\n"
+                "1. GEWÄHRUNG DER LIZENZ\n"
+                "Der Entwickler (Shadoo91) gewährt dir hiermit eine nicht-exklusive, kostenlose "
+                "Lizenz zur Nutzung dieser Modifikation für den privaten Gebrauch. Ein Verkauf "
+                "oder eine kommerzielle Nutzung der Software/Code-Struktur ist strengstens untersagt.\n\n"
+                "2. SCHUTZ DES GEISTIGEN EIGENTUMS (URHEBERRECHT)\n"
+                "Der gesamte mathematische Code, die Formeln, die Struktur dieses Installers sowie "
+                "die Modifikation selbst sind das geistige Eigentum des Entwicklers. Ein Re-Upload, "
+                "die Verbreitung auf Drittanbieter-Plattformen oder die Einbindung in andere Mods "
+                "OHNE die ausdrückliche, schriftliche Genehmigung von Shadoo91 ist illegal.\n\n"
+                "3. MODIFIKATIONS-VERBOT\n"
+                "Es ist nicht gestattet, den Installer zu dekompilieren, zu verändern oder die "
+                "Urheberrechtshinweise des Entwicklers zu entfernen.\n\n"
+                "4. HAFTUNGSAUSSCHLUSS\n"
+                "Diese Software wird 'wie besehen' (as-is) zur Verfügung gestellt. Der Entwickler "
+                "übernimmt keinerlei Haftung für eventuelle Schäden an Spieldateien, Spielständen "
+                "oder Systemen, die durch die Nutzung oder Fehlbedienung des Installers entstehen. "
+                "Die Nutzung erfolgt auf eigene Gefahr. Das Erstellen von Backups wird automatisch durchgeführt.\n\n"
+                "----------------------------------------------------------------------------------\n"
+                "Vielen Dank, dass du dieses Projekt nutzt und unterstützt. Ich würde mich sehr über "
+                "eine positive Bewertung oder konstruktive Kritik im Steam Workshop freuen. Viel Spaß! ;)"
+            )
+        }
+
+        # --- SEITE 1: WELCOME FRAME ---
+        self.welcome_frame = tk.Frame(self.root, padx=40, pady=30, bg=self.bg_main)
+        self.welcome_frame.pack(fill="both", expand=True)
+        tk.Label(self.welcome_frame, text=self.txt["welcome_head"], font=("Arial", 16, "bold"), fg=self.accent_blue, bg=self.bg_main).pack(anchor="w", pady=(0, 15))
+        self.welcome_box = tk.Text(self.welcome_frame, height=18, width=90, font=("Arial", 12), fg=self.fg_text, bg=self.card_bg, bd=1, relief="solid", padx=20, pady=20, wrap="word")
+        self.welcome_box.pack(fill="both", expand=True, pady=(0, 20))
+        self.welcome_box.insert(tk.END, "Wahnsinn! Ein riesiges ")
+        self.welcome_box.insert(tk.END, "DANKESCHÖN für über 300 Abonnenten", "bold_blue")
+        self.welcome_box.insert(tk.END, " auf Steam!\n\n")
+        self.welcome_box.insert(tk.END, "Das hier ist meine ")
+        self.welcome_box.insert(tk.END, "allererste Mod", "bold")
+        self.welcome_box.insert(tk.END, " für ")
+        self.welcome_box.insert(tk.END, "ETS2 & ATS", "bold_blue")
+        self.welcome_box.insert(tk.END, ", und euer genialer Support und euer ")
+        self.welcome_box.insert(tk.END, "Vertrauen", "bold")
+        self.welcome_box.insert(tk.END, " hauen mich einfach um. Danke!\n\n")
+        self.welcome_box.insert(tk.END, "Dieses Tool installiert oder entfernt dein erweitertes RKS-Tastatur-Lenksystem ab jetzt absolut dummysicher und vollautomatisch auf deinem PC.\n\n\n")
+        self.welcome_box.insert(tk.END, "📢 KLEINER WUNSCH VOM MODDER:\n", "bold_orange")
+        self.welcome_box.insert(tk.END, "Wenn dir die neue, feine Physik gefällt und der Lkw damit so richtig Bock macht, lass dem Projekt doch bitte eine kurze positive Bewertung da!\n\n")
+        self.welcome_box.insert(tk.END, "Ein Klick auf den ")
+        self.welcome_box.insert(tk.END, "Daumen hoch (👍)", "bold_green")
+        self.welcome_box.insert(tk.END, " im Steam Workshop hilft mir riesig dabei, das Projekt aktiv weiterzuentwickeln!\n\n\n")
+        self.welcome_box.insert(tk.END, "Klicke unten auf 'Weiter', um deine Tasten im Handumdrehen einzustellen.", "italic")
+        self.welcome_box.tag_config("bold", font=("Arial", 12, "bold"))
+        self.welcome_box.tag_config("bold_blue", font=("Arial", 12, "bold"), foreground=self.accent_blue)
+        self.welcome_box.tag_config("bold_green", font=("Arial", 12, "bold"), foreground=self.accent_green)
+        self.welcome_box.tag_config("bold_orange", font=("Arial", 12, "bold"), foreground=self.accent_orange)
+        self.welcome_box.tag_config("italic", font=("Arial", 12, "italic"), foreground="#555555")
+        self.welcome_box.config(state="disabled")
+        
+        self.btn_start = tk.Button(self.welcome_frame, text=self.txt["btn_start"], width=25, height=2, bg=self.accent_blue, fg="white", font=("Arial", 11, "bold"), relief="flat")
+        self.btn_start.pack(side="bottom", anchor="e")
+
+        # --- SEITE 2: CONFIG FRAME ---
+        self.config_frame = tk.Frame(self.root, padx=30, pady=20, bg=self.bg_main)
+        tk.Label(self.config_frame, text=self.txt["titel"], font=("Arial", 15, "bold"), fg=self.accent_blue, bg=self.bg_main).pack(anchor="w", pady=(0, 10))
+        tk.Label(self.config_frame, text=self.txt["info"], font=("Arial", 12), fg=self.fg_text, bg=self.bg_main, wraplength=760, justify="left").pack(anchor="w", pady=(0, 15))
+        
+        card_profile = tk.Frame(self.config_frame, bg=self.card_bg, bd=1, relief="solid", padx=15, pady=15)
+        card_profile.pack(fill="x", pady=(0, 15))
+        game_frame = tk.Frame(card_profile, bg=self.card_bg)
+        game_frame.pack(fill="x", pady=2)
+        tk.Label(game_frame, text=self.txt["game_select"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=15, anchor="w").pack(side="left")
+        self.game_combo = ttk.Combobox(game_frame, values=["Euro Truck Simulator 2", "American Truck Simulator"], state="readonly", width=30, font=("Arial", 11))
+        self.game_combo.current(0)
+        self.game_combo.pack(side="left")
+        
+        prof_frame = tk.Frame(card_profile, bg=self.card_bg)
+        prof_frame.pack(fill="x", pady=(8, 0))
+        tk.Label(prof_frame, text=self.txt["profile_select"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=15, anchor="w").pack(side="left")
+        self.prof_combo = ttk.Combobox(prof_frame, state="readonly", width=30, font=("Arial", 11))
+        self.prof_combo.pack(side="left")
+        
+        self.btn_uninstall = tk.Button(prof_frame, text="Mod deinstallieren ❌", bg=self.accent_red, fg="white", font=("Arial", 10, "bold"), relief="flat", padx=10)
+        self.btn_uninstall.pack(side="right", padx=5)
+        
+        card_keys = tk.Frame(self.config_frame, bg=self.card_bg, bd=1, relief="solid", padx=15, pady=15)
+        card_keys.pack(fill="both", expand=True, pady=(0, 15))
+        f_turbo = tk.Frame(card_keys, bg=self.card_bg)
+        f_turbo.pack(fill="x", pady=5)
+        tk.Label(f_turbo, text=self.txt["btn_turbo"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=22, anchor="w").pack(side="left")
+        self.btn_turbo = tk.Button(f_turbo, text=self.taste_turbo_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1)
+        self.btn_turbo.pack(side="left")
+        
+        f_rangier = tk.Frame(card_keys, bg=self.card_bg)
+        f_rangier.pack(fill="x", pady=5)
+        tk.Label(f_rangier, text=self.txt["btn_rangier"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=22, anchor="w").pack(side="left")
+        self.btn_rangier = tk.Button(f_rangier, text=self.taste_rangier_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1)
+        self.btn_rangier.pack(side="left")
+        
+        f_not = tk.Frame(card_keys, bg=self.card_bg)
+        f_not.pack(fill="x", pady=5)
+        tk.Label(f_not, text=self.txt["btn_not"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=22, anchor="w").pack(side="left")
+        self.btn_not = tk.Button(f_not, text=self.taste_notbremse_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1)
+        self.btn_not.pack(side="left")
+        
+        self.status_label = tk.Label(card_keys, text="", font=("Arial", 12, "italic"), fg="green", bg=self.card_bg)
+        self.status_label.pack(pady=(10, 0))
+        self.btn_weiter = tk.Button(self.config_frame, text=self.txt["weiter"], width=20, height=2, bg=self.accent_blue, fg="white", font=("Arial", 11, "bold"), relief="flat")
+        self.btn_weiter.pack(side="bottom", anchor="e")
+
+        # --- SEITE 3: README / ÜBERSICHT FRAME ---
+        self.readme_frame = tk.Frame(self.root, padx=30, pady=15, bg=self.bg_main)
+        tk.Label(self.readme_frame, text=self.txt["readme_head"], font=("Arial", 15, "bold"), fg=self.accent_blue, bg=self.bg_main).pack(anchor="w", pady=(0, 2))
+        tk.Label(self.readme_frame, text=self.txt["readme_sub"], font=("Arial", 10, "italic"), fg=self.fg_text, bg=self.bg_main).pack(anchor="w", pady=(0, 10))
+        self.readme_card = tk.Frame(self.readme_frame, bg=self.card_bg, bd=1, relief="solid", padx=20, pady=15)
+        self.readme_card.pack(fill="both", expand=True, pady=(0, 15))
+        self.readme_content_frame = tk.Frame(self.readme_card, bg=self.card_bg)
+        self.readme_content_frame.pack(fill="both", expand=True)
+        btn_box3 = tk.Frame(self.readme_frame, bg=self.bg_main)
+        btn_box3.pack(fill="x", side="bottom")
+        self.btn_back3 = tk.Button(btn_box3, text=self.txt["btn_zurueck"], width=15, height=2, font=("Arial", 11, "bold"), bg="#e1e1e1", relief="flat")
+        self.btn_back3.pack(side="left")
+        self.btn_to_eula = tk.Button(btn_box3, text="Weiter zur Lizenz >", width=18, height=2, bg=self.accent_blue, fg="white", font=("Arial", 11, "bold"), relief="flat")
+        self.btn_to_eula.pack(side="right")
+
+        # --- SEITE 4: EULA FRAME ---
+        self.eula_frame = tk.Frame(self.root, padx=30, pady=20, bg=self.bg_main)
+        tk.Label(self.eula_frame, text=self.txt["terms_head"], font=("Arial", 15, "bold"), fg=self.accent_blue, bg=self.bg_main).pack(anchor="w", pady=(0, 2))
+        tk.Label(self.eula_frame, text=self.txt["terms_sub"], font=("Arial", 10, "italic"), fg=self.fg_text, bg=self.bg_main).pack(anchor="w", pady=(0, 15))
+        scroll_container = tk.Frame(self.eula_frame, bd=1, relief="solid", bg=self.card_bg)
+        scroll_container.pack(fill="x", pady=(0, 15))
+        scrollbar = tk.Scrollbar(scroll_container)
+        scrollbar.pack(side="right", fill="y")
+        self.terms_box = tk.Text(scroll_container, height=18, width=80, font=("Arial", 10), fg="#444444", bg="#f8f9fa", relief="flat", padx=10, pady=10, yscrollcommand=scrollbar.set)
+        self.terms_box.insert(tk.END, self.txt["terms_text"])
+        self.terms_box.config(state="disabled")
+        self.terms_box.pack(side="left", fill="x", expand=True)
+        scrollbar.config(command=self.terms_box.yview)
+        
+        self.chk_state = tk.BooleanVar()
+        self.chk_terms = tk.Checkbutton(self.eula_frame, text=self.txt["terms_accept"], variable=self.chk_state, font=("Arial", 11, "bold"), fg=self.fg_text, bg=self.bg_main, activebackground=self.bg_main)
+        self.chk_terms.pack(anchor="w", pady=(0, 20))
+        
+        btn_box4 = tk.Frame(self.eula_frame, bg=self.bg_main)
+        btn_box4.pack(fill="x", side="bottom")
+        self.btn_back4 = tk.Button(btn_box4, text=self.txt["btn_zurueck"], width=15, height=2, font=("Arial", 11, "bold"), bg="#e1e1e1", relief="flat")
+        self.btn_back4.pack(side="left")
+        self.btn_install = tk.Button(btn_box4, text=self.txt["btn_install"], width=18, height=2, bg="#e1e1e1", fg="#888888", font=("Arial", 11, "bold"), state="disabled", relief="flat")
+        self.btn_install.pack(side="right")
+
+        # --- SEITE 5: STATUS END-ANZEIGE ---
+        self.end_frame = tk.Frame(self.root, padx=30, pady=25, bg=self.bg_main)
+
+    # --- AUTOMATISCHER GITHUB-UPDATER MECHANISMUS ---
+    def pruefe_auf_updates(self):
+        if platform.system() != "Windows":
+            return 
+
+        try:
+            url = f"https://github.com{self.github_user}/{self.github_repo}/releases/latest"
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            
+            with urllib.request.urlopen(req, timeout=3) as response:
+                data = json.loads(response.read().decode())
+                latest_tag = data.get("tag_name", self.aktuelle_version)
+                
+                if latest_tag != self.aktuelle_version:
+                    assets = data.get("assets", [])
+                    if assets and len(assets) > 0:
+                        download_url = assets[0].get("browser_download_url")
+                        
+                        if download_url and messagebox.askyesno("Update verfügbar! 🚀", 
+                            f"Eine neue Version ({latest_tag}) des RKS-Installers wurde gefunden!\n\n"
+                            f"Deine Version: {self.aktuelle_version}\n"
+                            f"Neueste Version: {latest_tag}\n\n"
+                            "Möchtest du das Update jetzt vollautomatisch herunterladen und installieren?"):
+                            
+                            self.starte_selbst_update(download_url)
+        except:
+            pass 
+
+    def starte_selbst_update(self, download_url):
+        try:
+            current_exe = sys.executable
+            backup_exe = current_exe + ".old"
+            
+            if os.path.exists(backup_exe):
+                os.remove(backup_exe)
+            os.rename(current_exe, backup_exe)
+            
+            urllib.request.urlretrieve(download_url, current_exe)
+            
+            batch_cmd = f'ping 127.0.0.1 -n 2 > nul & del "{backup_exe}"'
+            subprocess.Popen(f'cmd.exe /c {batch_cmd}', shell=True)
+            subprocess.Popen([current_exe])
+            
+            self.root.destroy()
+            sys.exit()
+        except Exception as e:
+            messagebox.showerror("Update-Fehler", f"Das automatische Update ist fehlgeschlagen: {str(e)}")
+
+    # --- NAVIGATIONS-LOGIK & REGISTRIERUNG ---
+    def oeffne_url(self, url):
+        import webbrowser
+        webbrowser.open_new_tab(url)
+
+    def seite_config(self):
+        self.welcome_frame.pack_forget()
+        self.readme_frame.pack_forget()
+        self.eula_frame.pack_forget()
+        self.end_frame.pack_forget()
+        self.config_frame.pack(fill="both", expand=True)
+
+    def zurueck_zu_config(self):
+        self.readme_frame.pack_forget()
+        self.config_frame.pack(fill="both", expand=True)
+
+    def seite_readme(self):
+        selected_prof = self.prof_combo.get()
+        if selected_prof == self.txt["no_profiles"] or not selected_prof:
+            messagebox.showerror("Error", "Kein gültiges Profil ausgewählt!")
+            return
+        self.config_frame.pack_forget()
+        self.eula_frame.pack_forget()
+        self.readme_frame.pack(fill="both", expand=True)
+        self.generiere_readme_text(selected_prof)
+
+    def seite_eula(self):
+        self.readme_frame.pack_forget()
+        self.eula_frame.pack(fill="both", expand=True)
+        self.chk_state.set(False) 
+        self.btn_install.config(text=self.txt["btn_install"], bg="#e1e1e1", fg="#888888", state="disabled")
+
+    def zurueck_zu_readme(self):
+        self.eula_frame.pack_forget()
+        self.readme_frame.pack(fill="both", expand=True)
+
+    def toggle_install_button(self):
+        if self.chk_state.get():
+            self.btn_install.config(text="Bitte warten (2s)...", bg="#e1e1e1", fg="#888888", state="disabled")
+            self.root.after(2000, self.freischalten_install_jetzt)
+        else:
+            self.btn_install.config(text=self.txt["btn_install"], bg="#e1e1e1", fg="#888888", state="disabled")
+
+    def freischalten_install_jetzt(self):
+        if self.chk_state.get():
+            self.btn_install.config(text=self.txt["btn_install"], bg=self.accent_green, fg="white", state="normal")
+
+    def generiere_readme_text(self, selected_prof):
+        for widget in self.readme_content_frame.winfo_children():
+            widget.destroy()
+            
+        tk.Label(self.readme_content_frame, text=f"👤 Ausgewähltes Profil: {selected_prof}", font=("Arial", 11, "bold"), fg="#333333", bg=self.card_bg).pack(anchor="w", pady=(0,6))
+        
+        T = self.taste_turbo_display
+        R = self.taste_rangier_display
+        N = self.taste_notbremse_display
+        
+        self.add_readme_line("📥 BLOCK 1: DEINE GEWÄHLTEN TASTEN-REITER", [
+            (f"● Stadt- / Turbo-Taste:", f"  ➔  [{T}]  (Erhöht Kurvenkraft auf 90%)"),
+            (f"● Rangier-Taste:", f"  ➔  [{R}]  (Hebt Trägheit im Stand sofort auf)"),
+            (f"● Notbrems-Zusatz:", f"  ➔  [{N}]  (Bypass für Gefahrenbremsung)")
+        ], color=self.accent_blue)
+        
+        self.add_readme_line("🎮 BLOCK 2: DAS KOMPLETTE RKS-FAHR-REGISTER (W, A, S, D, LAlt, Space, RAlt)", [
+            (f"➔ [A] oder [D]", f"  = Normale Lenkung (Auf Autobahnen stabilisiert über 50 km/h)."),
+            (f"➔ [A] oder [D] + [{T}]", f"  = Adaptives Lenken mit agilem, schnellem Ansprechverhalten in der Stadt."),
+            (f"➔ Halten von [{R}]", f"  = Rangier-Modus: Schaltet ungedämpfte, maximale Präzisionslenkung frei."),
+            ("", ""), 
+            ("➔ [W]", "  = Leichtes Gas (Sanfte Beschleunigung & Mitschwimmen)."),
+            (f"➔ [{N}]", "  = Mittleres Gas (Erhöhter Vorwärtsschub)."),
+            (f"➔ [W] + [{N}]", "  = Vollgas / Turbo (Maximale Triebkraft des LKWs)."),
+            ("", ""), 
+            ("➔ [S]", "  = Leichtes Bremsen (Die reguläre, sanfte Betriebsbremse)."),
+            (f"➔ [S] + [{T}]", "  = Mittlere Bremse (Beschleunigte, kraftvolle Bremswirkung)."),
+            (f"➔ [S] + [{N}]", "  = Starke Bremse / Notbremsung (Volle Bremskraft + Fluchtlenkung).")
+        ], color=self.accent_green)
+        
+        self.add_readme_line("⚙️ BLOCK 3: EMPFOHLENE IN-GAME EINSTELLUNGEN (Im Spielmenü einstellen)", [
+            ("** Automatische Zentrierung:", " AUSGESTELLT"),
+            ("** Lenkintensität:", " Auf 40% einstellen"),
+            ("** Nichtlineare Lenkung:", " Auf 60% einstellen"),
+            ("** Lkw- & Auflieger-Stabilität:", " Auf etwa 80% einstellen"),
+            ("** Steifigkeit:", " Auf etwa 40% einstellen"),
+            ("", "(Diese Richtwerte können nach der Installation nach eigenem Geschmack angepasst werden!)")
+        ], color=self.accent_orange)
+
+    def add_readme_line(self, header_text, sub_tuples, color="#0088cc"):
+        lbl_head = tk.Label(self.readme_content_frame, text=header_text, font=("Arial", 10, "bold"), fg=color, bg=self.card_bg)
+        lbl_head.pack(anchor="w", pady=(3, 1))
+        
+        line_strip = tk.Frame(self.readme_content_frame, height=1, bg="#e9ecef")
+        line_strip.pack(fill="x", pady=(0, 2))
+        
+        for bold_part, normal_part in sub_tuples:
+            f = tk.Frame(self.readme_content_frame, bg=self.card_bg)
+            f.pack(anchor="w", pady=0)
+            if bold_part:
+                tk.Label(f, text=f"    {bold_part}", font=("Arial", 9, "bold"), fg="#333333" if color in [self.accent_orange, self.accent_green] else "#005588", bg=self.card_bg).pack(side="left")
+                tk.Label(f, text=normal_part, font=("Arial", 9), fg="#444444", bg=self.card_bg).pack(side="left")
+            else:
+                tk.Label(f, text=f"    {normal_part}", font=("Arial", 9), fg="#444444", bg=self.card_bg).pack(side="left")
+
+    def suche_profile(self):
+        game_name = self.game_combo.get()
+        home = os.path.expanduser("~")
+        base_path = None
+        
+        if platform.system() == "Windows":
+            try:
+                import ctypes
+                from ctypes import wintypes
+                CSIDL_PERSONAL = 5       
+                SHGFP_TYPE_CURRENT = 0
+                buf = ctypes.create_unicode_buffer(wintypes.MAX_PATH)
+                ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
+                local_documents = buf.value
+            except:
+                local_documents = os.path.join(home, "Documents") 
+                
+            local_path = os.path.join(local_documents, game_name)
+            onedrive_path = os.path.join(os.environ.get("USERPROFILE", ""), "OneDrive", "Documents", game_name)
+            
+            if os.path.exists(local_path): base_path = local_path
+            elif os.path.exists(onedrive_path): base_path = onedrive_path
+        else:
+            app_id = "227300" if game_name == "Euro Truck Simulator 2" else "270880"
+            linux_steam_path = os.path.join(home, ".steam", "steam", "steamapps", "compatdata", app_id, "pfx", "drive_c", "users", "steamuser", "Documents", game_name)
+            if os.path.exists(linux_steam_path): base_path = linux_steam_path
+
+        self.profile_dict.clear()
+        if base_path and os.path.exists(os.path.join(base_path, "profiles")):
+            profiles_dir = os.path.join(base_path, "profiles")
+            for folder in os.listdir(profiles_dir):
+                if os.path.isdir(os.path.join(profiles_dir, folder)):
+                    try:
+                        readable_name = bytes.fromhex(folder).decode('utf-8')
+                        display_str = f"{readable_name} ({folder[:6]}...)"
+                        self.profile_dict[display_str] = os.path.join(profiles_dir, folder, "controls.sii")
+                    except: pass
+                        
+        if self.profile_dict:
+            self.prof_combo.config(values=list(self.profile_dict.keys()))
+            self.prof_combo.current(0)
+        else:
+            self.prof_combo.config(values=[self.txt["no_profiles"]])
+            self.prof_combo.current(0)
+
+    def starte_listener(self, ziel):
+        self.aktueller_listener = ziel
+        if ziel == "turbo": self.btn_turbo.config(text="❓ ...", bg="#ffcc00")
+        elif ziel == "rangier": self.btn_rangier.config(text="❓ ...", bg="#ffcc00")
+        elif ziel == "notbremse": self.btn_not.config(text="❓ ...", bg="#ffcc00")
+        self.status_label.config(text=self.txt["status_wait"], fg="#d35400")
+
+    def taste_abfangen(self, event):
+        if not self.aktueller_listener: return
+        t_name = event.keysym.upper()
+        scs_code = f"keyboard.{event.keysym.lower()}?0"
+        
+        if t_name == "SPACE": scs_code = "keyboard.space?0"
+        elif "ALT" in t_name:
+            if event.keycode == 108: t_name = "ALT GR"; scs_code = "keyboard.ralt?0"
+            else: t_name = "LEFT ALT"; scs_code = "keyboard.lalt?0"
+            
+        self.zuweisen_an_ziel(t_name, scs_code)
+
+    def universelle_maus_abfangen(self, event):
+        if not self.aktueller_listener: return
+        button_num = event.num
+        scs_button = button_num
+        display_name = f"MOUSE BTN {button_num}"
+        
+        if button_num == 1: display_name = "LINKS-KLICK"
+        elif button_num == 2: display_name = "MAUSRAD-KLICK"
+        elif button_num == 3: display_name = "RECHTS-KLICK"
+        elif button_num == 4 or button_num == 8: 
+            display_name = "MAUS DAUMEN 1"
+            scs_button = 4  
+        elif button_num == 5 or button_num == 9: 
+            display_name = "MAUS DAUMEN 2"
+            scs_button = 5  
+            
+        scs_code = f"mouse.button_{scs_button}?0"
+        self.zuweisen_an_ziel(display_name, scs_code)
+
+    def zuweisen_an_ziel(self, display_name, scs_code):
+        if self.aktueller_listener == "turbo":
+            self.taste_turbo_display, self.taste_turbo_code = display_name, scs_code
+            self.btn_turbo.config(text=self.taste_turbo_display, bg="#e1e1e1")
+        elif self.aktueller_listener == "rangier":
+            self.taste_rangier_display, self.taste_rangier_code = display_name, scs_code
+            self.btn_rangier.config(text=self.taste_rangier_display, bg="#e1e1e1")
+        elif self.aktueller_listener == "notbremse":
+            self.taste_notbremse_display, self.taste_notbremse_code = display_name, scs_code
+            self.btn_not.config(text=self.taste_notbremse_display, bg="#e1e1e1")
+            
+        self.status_label.config(text=f"{self.txt['status_done']}{display_name}", fg="green")
+        self.aktueller_listener = None
+
+    def ausfuehren_deinstallation(self):
+        selected_prof = self.prof_combo.get()
+        if not selected_prof or selected_prof == self.txt["no_profiles"]:
+            messagebox.showerror("Fehler", "Bitte wähle zuerst ein gültiges Profil aus!")
+            return
+            
+        target_file = self.profile_dict[selected_prof]
+        backup_file = target_file + ".bak"
+        
+        if os.path.exists(backup_file):
+            if messagebox.askyesno("Deinstallieren", f"Möchtest du die RKS-Mod für das Profil '{selected_prof}' wirklich deinstallieren und das originale Backup wiederherstellen?"):
+                try:
+                    os.remove(target_file)
+                    shutil.copyfile(backup_file, target_file)
+                    messagebox.showinfo("Erfolg", f"Die RKS-Mod wurde erfolgreich für das Profil '{selected_prof}' deinstalliert!")
+                except Exception as e:
+                    messagebox.showerror("Fehler", f"Deinstallation fehlgeschlagen: {str(e)}")
+        else:
+            messagebox.showinfo("Info", f"Für das Profil '{selected_prof}' ist die RKS-Mod noch gar nicht installiert!")
+
+    # --- FIXED: FINDET JETZT AUCH STEAM-CLOUD-PROFILE IM USERDATA-ORDNER ---
+    # --- FIXED V3: PERFEKTER STEAM-CLOUD-TIEFENSCAN FÜR USERDATA ---
+    def suche_profile(self):
+        game_name = self.game_combo.get()
+        app_id = "227300" if game_name == "Euro Truck Simulator 2" else "270880"
+        home = os.path.expanduser("~")
+        
+        moegliche_basis_pfade = []
+        
+        if platform.system() == "Windows":
+            try:
+                import ctypes
+                from ctypes import wintypes
+                CSIDL_PERSONAL = 5       
+                SHGFP_TYPE_CURRENT = 0
+                buf = ctypes.create_unicode_buffer(wintypes.MAX_PATH)
+                ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
+                local_documents = buf.value
+            except:
+                local_documents = os.path.join(home, "Documents") 
+                
+            moegliche_basis_pfade.append(os.path.join(local_documents, game_name))
+            moegliche_basis_pfade.append(os.path.join(os.environ.get("USERPROFILE", ""), "OneDrive", "Documents", game_name))
+            
+            # FIXED: Der Tiefenscan sucht jetzt exakt nach dem verborgenen "remote/profiles" Ordner von Steam!
+            steam_base = os.path.join(os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)"), "Steam", "userdata")
+            if not os.path.exists(steam_base):
+                steam_base = os.path.join(os.environ.get("ProgramFiles", "C:\\Program Files"), "Steam", "userdata")
+                
+            if os.path.exists(steam_base):
+                for user_folder in os.listdir(steam_base):
+                    # Pfad zu den Steam-Cloud-Profilen exakt spiegeln
+                    cloud_profile_path = os.path.join(steam_base, user_folder, app_id, "remote", "profiles")
+                    if os.path.exists(cloud_profile_path):
+                        moegliche_basis_pfade.append(cloud_profile_path)
+        else:
+            moegliche_basis_pfade.append(os.path.join(home, ".steam", "steam", "steamapps", "compatdata", app_id, "pfx", "drive_c", "users", "steamuser", "Documents", game_name))
+
+        self.profile_dict.clear()
+        
+        for b_path in moegliche_basis_pfade:
+            if not os.path.exists(b_path): continue
+            
+            # Wenn der Pfad direkt auf den Steam-Cloud-Zweig zeigt, nutzen wir ihn direkt als profiles_dir
+            if b_path.endswith("profiles"):
+                profiles_dir = b_path
+            else:
+                profiles_dir = os.path.join(b_path, "profiles")
+                
+            if os.path.exists(profiles_dir):
+                for folder in os.listdir(profiles_dir):
+                    if os.path.isdir(os.path.join(profiles_dir, folder)):
+                        try:
+                            readable_name = bytes.fromhex(folder).decode('utf-8')
+                            display_str = f"{readable_name} ({folder[:6]}...)"
+                            if display_str not in self.profile_dict:
+                                self.profile_dict[display_str] = os.path.join(profiles_dir, folder, "controls.sii")
+                        except: pass
+                        
+        if self.profile_dict:
+            self.prof_combo.config(values=list(self.profile_dict.keys()))
+            self.prof_combo.current(0)
+        else:
+            self.prof_combo.config(values=[self.txt["no_profiles"]])
+            self.prof_combo.current(0)
+
+    # --- UNZERSTÖRBAR: ENTPFERNT JEDEN WINDOWS-SCHREIBSCHUTZ VOR DEM SPEICHERN ---
+    def ausfuehren_installation(self):
+        game_name = self.game_combo.get()
+        
+        if game_name == "Euro Truck Simulator 2":
+            workshop_mod_id = "3727705125"
+            app_id = "227300"
+            link_url = "https://steamcommunity.com"
+        else:
+            workshop_mod_id = "3725174940"
+            app_id = "270880"
+            link_url = "https://steamcommunity.com"
+        
+        selected_prof = self.prof_combo.get()
+        if not selected_prof or selected_prof == self.txt["no_profiles"]: return
+            
+        home = os.path.expanduser("~")
+        workshop_path = None
+
+        if platform.system() == "Windows":
+            moegliche_pfade = [
+                os.path.join(os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)"), "Steam", "steamapps", "workshop", "content", app_id, workshop_mod_id),
+                os.path.join(os.environ.get("ProgramFiles", "C:\\Program Files"), "Steam", "steamapps", "workshop", "content", app_id, workshop_mod_id),
+                f"D:\\SteamLibrary\\steamapps\\workshop\\content\\{app_id}\\{workshop_mod_id}",
+                f"E:\\SteamLibrary\\steamapps\\workshop\\content\\{app_id}\\{workshop_mod_id}",
+                f"C:\\SteamLibrary\\steamapps\\workshop\\content\\{app_id}\\{workshop_mod_id}"
+            ]
+            for p in moegliche_pfade:
+                if os.path.exists(p): workshop_path = p; break
+        else:
+            moegliche_linux_pfade = [
+                os.path.join(home, ".steam", "steam", "steamapps", "workshop", "content", app_id, workshop_mod_id),
+                os.path.join(home, ".local", "share", "Steam", "steamapps", "workshop", "content", app_id, workshop_mod_id),
+                os.path.join(home, ".var", "app", "com.valvesoftware.Steam", ".steam", "steam", "steamapps", "workshop", "content", app_id, workshop_mod_id)
+            ]
+            for lp in moegliche_linux_pfade:
+                if os.path.exists(lp): workshop_path = lp; break
+
+        self.eula_frame.pack_forget()
+        self.end_frame.pack(fill="both", expand=True)
+        
+        for widget in self.end_frame.winfo_children():
+            widget.destroy()
+
+        if not workshop_path:
+            tk.Label(self.end_frame, text="⚠️ ABONNEMENT ERFORDERLICH!", font=("Arial", 14, "bold"), fg="#d35400", bg=self.bg_main).pack(anchor="w", pady=(30, 10))
+            error_card = tk.Frame(self.end_frame, bg="#fff3cd", bd=1, relief="solid", padx=15, pady=15)
+            error_card.pack(fill="x", pady=(0, 20))
+            msg = f"Moin! Ich habe kurz nachgesehen: Du hast die benötigte RKS-Fahrphysik-Mod für {game_name} noch nicht abonniert.\n\nBitte klicke unten auf den offiziellen Link, um die Mod direkt im Workshop zu abonnieren. Starte danach Steam kurz neu und führe dieses Tool erneut aus!"
+            tk.Label(error_card, text=msg, font=("Arial", 11), fg="#333333", bg="#fff3cd", justify="left", wraplength=700).pack(anchor="w")
+            btn_link = tk.Button(self.end_frame, text=f"➔ Öffne Steam Workshop für {game_name} 🌐", font=("Arial", 11, "bold", "underline"), fg="#0056b3", bg=self.bg_main, activebackground=self.bg_main, relief="flat", cursor="hand2", command=lambda: self.oeffne_url(link_url))
+            btn_link.pack(anchor="w", pady=10)
+            line_end = tk.Frame(self.end_frame, height=2, bg="#dddddd")
+            line_end.pack(fill="x", pady=20)
+            btn_zurueck_s5 = tk.Button(self.end_frame, text="< Zurück zur Config", width=18, height=2, bg="#e1e1e1", font=("Arial", 10, "bold"), relief="flat", command=self.seite_config)
+            btn_zurueck_s5.pack(side="bottom", anchor="e", pady=20)
+            return
+
+        target_file = self.profile_dict[selected_prof]
+        backup_file = target_file + ".bak"
+        ist_erfolgreich = False
+
+        try:
+            import stat
+            import time
+            zeit_vor_schreiben = time.time()
+
+            # CRITICAL FIX: Zwingt Windows, den Schreibschutz aufzuheben! [1]
+            if os.path.exists(target_file):
+                os.chmod(target_file, stat.S_IWRITE)
+
+            if not os.path.exists(backup_file):
+                shutil.copyfile(target_file, backup_file)
+                if os.path.exists(backup_file):
+                    os.chmod(backup_file, stat.S_IWRITE)
+                
+            with open(target_file, "r", encoding="utf-8", errors="ignore") as f:
+                lines = f.readlines()
+                
+            T = self.taste_turbo_code
+            R = self.taste_rangier_code
+            N = self.taste_notbremse_code
+            
+            # DEINE UNVERÄNDERTEN v1.59 FORMELN [ex-1.5.9]
+            rks_formeln = [
+                f'mix dsteerleft `keyboard.a?0`',
+                f'mix dsteerright `keyboard.d?0`',
+                f'mix dsteering `(keyboard.a?0 - keyboard.d?0) * (0.30 + ({T} * (0.60 - (keyboard.s?0 * 0.25)))) * (1.00 + (keyboard.s?0 * {N} * 1.20)) * (c_steer_func * (4.2 - steering_speed_coef))`',
+                f'mix steering `(dsteering * (1.00 - c_steer_func)) + (({R}) * (keyboard.a?0 - keyboard.d?0) * 0.35)`',
+                f'mix msteering `-mouse.rel_position.x?0 * c_msens`',
+                f'mix mpedals `mouse.rel_position.y?0 * c_msens`',
+                f'mix dforward `0`',
+                f'mix dbackward `0`',
+                f'mix aforward `((keyboard.w?0 * 0.35) + ({N} * 0.55)) * (! keyboard.s?0)`',
+                f'mix abackward `keyboard.s?0 * (0.10 + ({T} * 0.35) + ({N} * 1.00))`',
+                f'mix forward `aforward`',
+                f'mix backward `abackward`'
+            ]
+            
+            bereinigte_lines = []
+            max_index = 320
+            
+            for line in lines:
+                if "config_lines[" in line:
+                    try:
+                        parts = line.split("[")
+                        if len(parts) > 1:
+                            idx_str = parts[1].split("]")
+                            max_index = max(max_index, int(idx_str[0]))
+                    except: pass
+                
+                if any(x in line for x in ['mix dsteerleft', 'mix dsteerright', 'mix dsteering', 'mix steering', 'mix msteering', 'mix mpedals', 'mix dforward', 'mix dbackward', 'mix aforward', 'mix abackward', 'mix forward', 'mix backward']):
+                    continue
+                bereinigte_lines.append(line)
+            
+            klammer_index = -1
+            for idx in range(len(bereinigte_lines) - 1, -1, -1):
+                if "}" in bereinigte_lines[idx]:
+                    klammer_index = idx
+                    break
+            
+            neue_zeilen_block = []
+            current_idx = max_index + 1
+            for formel in rks_formeln:
+                neue_zeilen_block.append(f' config_lines[{current_idx}]: "{formel}"\n')
+                current_idx += 1
+            
+            if klammer_index != -1:
+                bereinigte_lines[klammer_index:klammer_index] = neue_zeilen_block
+            else:
+                bereinigte_lines.extend(neue_zeilen_block)
+                bereinigte_lines.append("}\n")
+                        
+            # Schreiben über nativen OS-Deskriptor erzwingen [1]
+            fd = os.open(target_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC)
+            with os.fdopen(fd, 'w', encoding='utf-8') as f:
+                f.writelines(bereinigte_lines)
+                f.flush()
+                os.fsync(fd)
+
+            # Unbestechliche Verifikation direkt auf der Hardware [1]
+            if os.path.getmtime(target_file) >= (zeit_vor_schreiben - 1.0):
+                with open(target_file, "rb") as f_check:
+                    if b"mix dsteering" in f_check.read():
+                        ist_erfolgreich = True
+            
+        except Exception as e:
+            ist_erfolgreich = False
+
+        # OUTPUT ANZEIGE
+        if ist_erfolgreich:
+            tk.Label(self.end_frame, text=self.txt["status_success"], font=("Arial", 14, "bold"), fg="green", bg=self.bg_main).pack(anchor="w", pady=(40, 10))
+            tk.Label(self.end_frame, text="Die Dateien deines gewählten Profils wurden erfolgreich modifiziert. Viel Spaß beim Fahren!", font=("Arial", 12), fg=self.fg_text, bg=self.bg_main).pack(anchor="w", pady=(0, 20))
+        else:
+            tk.Label(self.end_frame, text=self.txt["status_failed"], font=("Arial", 14, "bold"), fg="red", bg=self.bg_main).pack(anchor="w", pady=(40, 5))
+            tk.Label(self.end_frame, text="Fehler: Das Schreiben wurde blockiert. Bitte stelle sicher, dass ETS2/ATS geschlossen sind und versuche es erneut!", font=("Arial", 11), fg=self.fg_text, bg=self.bg_main, justify="left", wraplength=700).pack(anchor="w", pady=(0, 20))
+
+        line_end = tk.Frame(self.end_frame, height=2, bg="#dddddd")
+        line_end.pack(fill="x", pady=10)
+
+        lbl_danke = tk.Label(self.end_frame, text=(
+            "Vielen Dank, dass du dieses Projekt nutzt und unterstützt!\n"
+            "Ich würde mich sehr über eine positive Bewertung oder konstruktive Kritik im Steam Workshop freuen.\n\n"
+            "Viel Spaß und gute Fahrt wünscht dir Shadoo91! 🚚💨 ;)"
+        ), font=("Arial", 12, "italic"), fg="#333333", bg=self.bg_main, justify="center", wraplength=700)
+        lbl_danke.pack(anchor="center", pady=20)
+
+        self.btn_close = tk.Button(self.end_frame, text=f"{self.txt['btn_close']} (2s)", width=15, height=2, bg="#e1e1e1", fg="#888888", font=("Arial", 11, "bold"), state="disabled", relief="flat", command=self.root.destroy)
+        self.btn_close.pack(side="bottom", anchor="e", pady=20)
+
+        self.root.after(2000, self.aktiviere_schliessen_button)
+
+    def aktiviere_schliessen_button(self):
+        self.btn_close.config(text=self.txt["btn_close"], bg=self.accent_blue, fg="white", state="normal")
+
+if __name__ == "__main__":
+    import ctypes
+    
+    def ist_admin():
+        try: return ctypes.windll.shell32.IsUserAnAdmin()
+        except: return False
+
+    if platform.system() == "Windows" and not ist_admin():
+        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+        sys.exit()
+    else:
+        root = tk.Tk()
+        app = RksInstaller(root)
+        
+        # SCHARFE BEFEHLS-WEICHE [ex-1.3.4]
+        app.btn_start.config(command=app.seite_config)
+        app.btn_weiter.config(command=app.seite_readme)
+        app.btn_back3.config(command=app.zurueck_zu_config)
+        app.btn_to_eula.config(command=app.seite_eula)
+        app.btn_back4.config(command=app.zurueck_zu_readme)
+        app.btn_install.config(command=app.ausfuehren_installation)
+        app.btn_uninstall.config(command=app.ausfuehren_deinstallation)
+        app.chk_terms.config(command=app.toggle_install_button)
+        app.game_combo.bind("<<ComboboxSelected>>", lambda e: app.suche_profile())
+        
+        app.btn_turbo.config(command=lambda: app.starte_listener("turbo"))
+        app.btn_rangier.config(command=lambda: app.starte_listener("rangier"))
+        app.btn_not.config(command=lambda: app.starte_listener("notbremse"))
+
+        root.mainloop()
