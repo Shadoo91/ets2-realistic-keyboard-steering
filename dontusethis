@@ -92,48 +92,74 @@ class ETS2SteeringInstaller:
         self.check_for_updates()
         
     def check_for_updates(self):
-        """Prüft via GitHub-API auf Updates (1.10.2)."""
-        import urllib.request, json, subprocess
+        """Prüft über die offizielle GitHub-API nach der neuesten Release-Version."""
+        import urllib.request
+        import json
+        import subprocess
         
         CURRENT_VERSION = "1.10.2"
-        VERSION_URL = "https://github.com/Shadoo91/ets2-realistic-keyboard-steering/releases/tag/v1.10.1"
-        EXE_URL = "https://github.com/Shadoo91/ets2-realistic-keyboard-steering/releases/tag/v1.10.1"
+        # Die API-Adresse zu deinen GitHub-Releases (holt immer das neueste Release)
+        API_URL = "https://github.com"
         
         try:
-            with urllib.request.urlopen(VERSION_URL, timeout=4) as response:
+            # Wir fügen einen User-Agent hinzu, damit GitHub die Anfrage nicht blockiert
+            req = urllib.request.Request(API_URL, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req, timeout=4) as response:
                 data = json.loads(response.read().decode())
-                latest_version = data.get("version", CURRENT_VERSION)
                 
+                # Holt den Namen des GitHub Tags (z.B. "v1.10.2") und entfernt das "v"
+                latest_tag = data.get("tag_name", CURRENT_VERSION)
+                latest_version = latest_tag.replace("v", "").strip()
+                
+                # Wenn eine neuere Version online ist, starte den Auto-Updater
                 if latest_version != CURRENT_VERSION:
                     antwort = messagebox.askyesno(
                         "Update verfügbar! 🚀", 
-                        f"Eine neue Version ({latest_version}) ist verfügbar!\n\nMöchtest du den Hotfix jetzt automatisch installieren und neu starten?"
+                        f"Eine neue Version ({latest_version}) ist verfügbar!\n\nMöchtest du den Hotfix jetzt automatisch installieren und das Programm neu starten?"
                     )
                     if not antwort:
+                        return
+
+                    # Wir suchen den direkten Download-Link zur dontusethis.exe in deinen Release-Assets
+                    exe_url = None
+                    for asset in data.get("assets", []):
+                        if asset.get("name") == "dontusethis.exe":
+                            exe_url = asset.get("browser_download_url")
+                            break
+                    
+                    # Falls du vergessen hast die .exe im Release hochzuladen, brechen wir sicherheitshalber ab
+                    if not exe_url:
                         return
 
                     self.status_label.config(text="Lade Update herunter...", fg=self.accent_blue)
                     self.root.update()
 
+                    # Pfade ermitteln (Wo läuft die aktuelle .exe?)
                     current_exe = sys.argv[0]
                     exe_dir = os.path.dirname(os.path.abspath(current_exe))
                     new_exe_tmp = os.path.join(exe_dir, "update_tmp.exe")
 
-                    urllib.request.urlretrieve(EXE_URL, new_exe_tmp)
+                    # 1. Die neue .exe aus den Assets herunterladen
+                    urllib.request.urlretrieve(exe_url, new_exe_tmp)
 
+                    # 2. Ein temporäres Windows-Batch-Skript erstellen, um die alte Datei zu ersetzen
                     batch_path = os.path.join(exe_dir, "updater.bat")
                     with open(batch_path, "w") as b:
                         b.write("@echo off\n")
-                        b.write("timeout /t 1 /nobreak > nul\n")
-                        b.write(f'move /y "{new_exe_tmp}" "{current_exe}"\n')
-                        b.write(f'start "" "{current_exe}"\n')
-                        b.write(f'del "{batch_path}"\n')
+                        b.write("timeout /t 1 /nobreak > nul\n")  # Wartet, bis dieses Hauptprogramm geschlossen ist
+                        b.write(f'move /y "{new_exe_tmp}" "{current_exe}"\n')  # Ersetzt die alte .exe
+                        b.write(f'start "" "{current_exe}"\n')  # Startet den runderneuerten Installer neu
+                        b.write(f'del "{batch_path}"\n')  # Löscht die Batch-Datei selbstständig
 
+                    # 3. Das Batch-Skript im Hintergrund starten und den Installer sofort beenden
                     subprocess.Popen([batch_path], shell=True)
                     self.root.destroy()
                     sys.exit()
+
         except Exception:
+            # Falls der User offline ist oder GitHub blockiert, läuft das Programm einfach normal weiter
             pass
+
 
     def lese_profile_aus_ordner(self, profiles_dir):
         """Scannt den Zielordner und filtert OneDrive-Geisterpfade aus."""
