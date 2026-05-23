@@ -99,7 +99,7 @@ class ETS2SteeringInstaller:
         
         CURRENT_VERSION = "1.10.2"
         # Die API-Adresse zu deinen GitHub-Releases (holt immer das neueste Release)
-        API_URL = "https://github.com"
+        API_URL = "https://github.com/Shadoo91/ets2-realistic-keyboard-steering/releases/tag/v1.10.1"
         
         try:
             # Wir fügen einen User-Agent hinzu, damit GitHub die Anfrage nicht blockiert
