@@ -618,13 +618,17 @@ class RksInstaller:
             self.prof_combo.set("")
             self.status_label.config(text="Keine Profile automatisch gefunden. Bitte Pfad manuell wählen!")
 
-# --- UNZERSTÖRBAR: ENTPFERNT JEDEN WINDOWS-SCHREIBSCHUTZ VOR DEM SPEICHERN ---
     def ausfuehren_installation(self):
+        """Führt die Mod-Injektion aus und trennt ETS2/ATS Workshop-Links."""
+        import os, shutil, platform, stat, time
+        from tkinter import messagebox
+
         game_name = self.game_combo.get()
         
+        # --- ETS2 UND ATS WORKSHOP LINK TRENNUNG ---
         if game_name == "Euro Truck Simulator 2":
             workshop_mod_id = "3727705125"
-            app_id = "22730"  # KORREKTUR: Richtige Steam-Workshop App-ID (22730 statt 227300)
+            app_id = "22730"
             link_url = "https://steamcommunity.com"
         else:
             workshop_mod_id = "3725174940"
@@ -677,7 +681,7 @@ class RksInstaller:
             btn_zurueck_s5.pack(side="bottom", anchor="e", pady=20)
             return
 
-        # KORREKTUR: Holt den Dateipfad sicher über die neue, OneDrive-gefilterte Profil-Liste
+        # KORREKTUR: Liest Profile sicher über den Index aus
         profil_daten = self.aktuelle_profil_liste[selected_prof_idx]
         unterordner = "steam_profiles" if profil_daten["type"] == "cloud" else "profiles"
         target_file = os.path.join(self.aktueller_spiel_pfad, unterordner, profil_daten["folder"], "controls.sii")
@@ -686,11 +690,8 @@ class RksInstaller:
         ist_erfolgreich = False
 
         try:
-            import stat
-            import time
             zeit_vor_schreiben = time.time()
 
-            # CRITICAL FIX: Zwingt Windows, den Schreibschutz aufzuheben!
             if os.path.exists(target_file):
                 os.chmod(target_file, stat.S_IWRITE)
 
@@ -706,7 +707,6 @@ class RksInstaller:
             R = self.taste_rangier_code
             N = self.taste_notbremse_code
             
-            # DEINE UNVERÄNDERTEN v1.59 FORMELN
             rks_formeln = [
                 f'mix dsteerleft `keyboard.a?0`',
                 f'mix dsteerright `keyboard.d?0`',
@@ -731,7 +731,7 @@ class RksInstaller:
                         parts = line.split("[")
                         if len(parts) > 1:
                             idx_str = parts[1].split("]")
-                            max_index = max(max_index, int(idx_str[0]))
+                            max_index = max(max_index, int(idx_str[0]))  # KORREKTUR: [0] hinzugefügt
                     except: pass
                 
                 if any(x in line for x in ['mix dsteerleft', 'mix dsteerright', 'mix dsteering', 'mix steering', 'mix msteering', 'mix mpedals', 'mix dforward', 'mix dbackward', 'mix aforward', 'mix abackward', 'mix forward', 'mix backward']):
@@ -756,14 +756,12 @@ class RksInstaller:
                 bereinigte_lines.extend(neue_zeilen_block)
                 bereinigte_lines.append("}\n")
                         
-            # Schreiben über nativen OS-Deskriptor erzwingen
             fd = os.open(target_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC)
             with os.fdopen(fd, 'w', encoding='utf-8') as f:
                 f.writelines(bereinigte_lines)
                 f.flush()
                 os.fsync(fd)
 
-            # Unbestechliche Verifikation direkt auf der Hardware
             if os.path.getmtime(target_file) >= (zeit_vor_schreiben - 1.0):
                 with open(target_file, "rb") as f_check:
                     if b"mix dsteering" in f_check.read():
@@ -772,7 +770,6 @@ class RksInstaller:
         except Exception:
             ist_erfolgreich = False
 
-        # Hier wird deine originale Erfolgsseite auf Seite 5 aufgebaut
         if ist_erfolgreich:
             tk.Label(self.end_frame, text="🎉 INSTALLATION ERFOLGREICH!", font=("Arial", 14, "bold"), fg="#27ae60", bg=self.bg_main).pack(anchor="w", pady=(30, 10))
             success_card = tk.Frame(self.end_frame, bg="#d4edda", bd=1, relief="solid", padx=15, pady=15)
