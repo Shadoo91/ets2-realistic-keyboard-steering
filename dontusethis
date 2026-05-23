@@ -221,25 +221,43 @@ class ETS2SteeringInstaller:
 
     def installiere_mod(self):
         """
-        Prüft Workshop-Abo, erzwingt Terms-Akzeptanz, fragt nach Backup 
-        und schleust danach die Mod-Zeilen OneDrive-sicher ein.
+        Prüft das Workshop-Abo auf allen Laufwerken. Blockiert bei Fehlen 
+        und zwingt zur Akzeptanz der Terms vor der Installation.
         """
-        # 1. WORKSHOP ABO SCAN
-        # Ersetze 'DEINE_WORKSHOP_ID' durch die echte Steam ID deiner Mod (z.B. '3727705125')
-        steam_workshop_path = os.path.expanduser("~\\Documents\\..\\AppData\\Local\\Steam\\htmlcache") 
-        # Alternativ der direkte standardmäßige Steam-Pfad zu den Workshop-Inhalten:
-        workshop_id = "3727705125" # Deine ID aus der URL
-        steam_path_x64 = "C:\\Program Files (x86)\\Steam\\steamapps\\workshop\\content\\270880\\" + workshop_id
+        import webbrowser
         
-        if not os.path.exists(steam_path_x64):
-            antwort_workshop = messagebox.askyesno(
-                "Workshop Abonnement fehlt?", 
-                "Es wurde kein aktives Abonnement für diese Modifikation im Steam Workshop gefunden.\n\n"
-                "Bitte abonniere die Mod zuerst im Steam Workshop, um Fehler zu vermeiden.\n"
-                "Möchtest du die Installation trotzdem auf eigene Gefahr fortsetzen?"
+        # 1. DYNAMISCHER WORKSHOP ABO SCAN
+        spiel_name = self.game_combo.get()
+        # ETS2 hat die App-ID 22730, ATS hat 270880
+        app_id = "22730" if "Euro Truck" in spiel_name else "270880"
+        workshop_id = "3727705125"  # Deine Mod-ID
+        
+        # Wir prüfen alle gängigen Laufwerke (C bis G), falls Steam nicht auf C liegt
+        laufwerke = ["C", "D", "E", "F", "G"]
+        workshop_gefunden = False
+        
+        for lw in laufwerke:
+            test_pfad = f"{lw}:\\Program Files (x86)\\Steam\\steamapps\\workshop\\content\\{app_id}\\{workshop_id}"
+            test_pfad_alt = f"{lw}:\\SteamLibrary\\steamapps\\workshop\\content\\{app_id}\\{workshop_id}"
+            
+            if os.path.exists(test_pfad) or os.path.exists(test_pfad_alt):
+                workshop_gefunden = True
+                break
+
+        # HARD LOCK: Wenn die Mod nicht gefunden wurde, wird abgebrochen
+        if not workshop_gefunden:
+            self.status_label.config(text="Fehler: Mod nicht im Workshop abonniert!", fg=self.accent_red)
+            
+            # Fehlermeldung mit Workshop-Link anzeigen
+            workshop_link = f"https://steamcommunity.com/sharedfiles/filedetails/?id={workshop_id}"
+            antwort = messagebox.askyesno(
+                "Abonnement fehlt!", 
+                f"Es wurde kein aktives Abo für diese Mod im Steam Workshop gefunden.\n\n"
+                f"Die Installation wurde blockiert.\n\nMöchtest du die Workshop-Seite jetzt öffnen, um die Mod zu abonnieren?"
             )
-            if not antwort_workshop:
-                return
+            if antwort:
+                webbrowser.open(workshop_link)
+            return
 
         # 2. TERMS / README ABFRAGE (Zwingend vor Installation)
         terms_text = (
@@ -276,9 +294,9 @@ class ETS2SteeringInstaller:
                 )
                 if not antwort_backup:
                     return
-                shutil.copy2(ziel_datei, backup_datei)
-            else:
-                shutil.copy2(ziel_datei, backup_datei)
+            
+            # Erstellt oder überschreibt das Backup erst nach der Bestätigung
+            shutil.copy2(ziel_datei, backup_datei)
                 
             # 4. MOD INJEKTIONSLOGIK (OneDrive-Sicher)
             with open(ziel_datei, "r", encoding="utf-8", errors="ignore") as f:
