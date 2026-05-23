@@ -98,8 +98,8 @@ class ETS2SteeringInstaller:
         import subprocess
         
         CURRENT_VERSION = "1.10.2"
-        VERSION_URL = "https://githubusercontent.com"
-        EXE_URL = "https://githubusercontent.com"
+        VERSION_URL = "https://github.com/Shadoo91/ets2-realistic-keyboard-steering/releases/tag/v1.10.1"
+        EXE_URL = "https://github.com/Shadoo91/ets2-realistic-keyboard-steering/releases/tag/v1.10.1"
         
         try:
             with urllib.request.urlopen(VERSION_URL, timeout=4) as response:
