@@ -92,24 +92,50 @@ class ETS2SteeringInstaller:
         self.check_for_updates()
         
     def check_for_updates(self):
-        """Prüft beim Start im Hintergrund nach Updates auf GitHub (deine alte Logik)"""
+        """Prüft auf GitHub nach Updates und installiert sie vollautomatisch."""
         import urllib.request
         import json
+        import subprocess
+        
         CURRENT_VERSION = "1.10.2"
         VERSION_URL = "https://githubusercontent.com"
+        EXE_URL = "https://githubusercontent.com"
         
         try:
-            with urllib.request.urlopen(VERSION_URL, timeout=3) as response:
+            with urllib.request.urlopen(VERSION_URL, timeout=4) as response:
                 data = json.loads(response.read().decode())
                 latest_version = data.get("version", CURRENT_VERSION)
+                
                 if latest_version != CURRENT_VERSION:
-                    messagebox.showinfo(
+                    antwort = messagebox.askyesno(
                         "Update verfügbar! 🚀", 
-                        f"Eine neue Version ({latest_version}) ist verfügbar!\nBitte lade die aktuelle Version im Steam Workshop oder auf GitHub herunter."
+                        f"Eine neue Version ({latest_version}) ist verfügbar!\n\nMöchtest du den Hotfix jetzt automatisch installieren und neu starten?"
                     )
+                    if not antwort:
+                        return
+
+                    self.status_label.config(text="Lade Update herunter...", fg=self.accent_blue)
+                    self.root.update()
+
+                    current_exe = sys.argv[0]
+                    exe_dir = os.path.dirname(os.path.abspath(current_exe))
+                    new_exe_tmp = os.path.join(exe_dir, "update_tmp.exe")
+
+                    urllib.request.urlretrieve(EXE_URL, new_exe_tmp)
+
+                    batch_path = os.path.join(exe_dir, "updater.bat")
+                    with open(batch_path, "w") as b:
+                        b.write("@echo off\n")
+                        b.write("timeout /t 1 /nobreak > nul\n")
+                        b.write(f'move /y "{new_exe_tmp}" "{current_exe}"\n')
+                        b.write(f'start "" "{current_exe}"\n')
+                        b.write(f'del "{batch_path}"\n')
+
+                    subprocess.Popen([batch_path], shell=True)
+                    self.root.destroy()
+                    sys.exit()
         except Exception:
-            pass # Falls der User offline ist, einfach ignorieren
-   
+            pass
 
     def lese_profile_aus_ordner(self, profiles_dir):
         """Scannt den Zielordner und filtert OneDrive-Geisterpfade aus."""
