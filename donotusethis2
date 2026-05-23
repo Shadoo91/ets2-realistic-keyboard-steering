@@ -422,7 +422,7 @@ class RksInstaller:
             self.prof_combo.config(values=[self.txt["no_profiles"]])
             self.prof_combo.current(0)
             
-        def manueller_pfad_waehlen(self):
+    def manueller_pfad_waehlen(self):
         """Öffnet den Windows-Explorer zur manuellen Auswahl, falls die Automatik versagt."""
         from tkinter import filedialog, messagebox
         import os
