@@ -619,16 +619,15 @@ class RksInstaller:
             self.status_label.config(text="Keine Profile automatisch gefunden. Bitte Pfad manuell wählen!")
 
     def ausfuehren_installation(self):
-        """Führt die Mod-Injektion aus und trennt ETS2/ATS Workshop-Links."""
+        """Führt die Mod-Injektion aus, korrigiert die ETS2-ID und bereinigt das Layout."""
         import os, shutil, platform, stat, time
         from tkinter import messagebox
 
         game_name = self.game_combo.get()
         
-        # --- ETS2 UND ATS WORKSHOP LINK TRENNUNG ---
         if game_name == "Euro Truck Simulator 2":
             workshop_mod_id = "3727705125"
-            app_id = "22730"
+            app_id = "227300"
             link_url = "https://steamcommunity.com"
         else:
             workshop_mod_id = "3725174940"
@@ -681,7 +680,6 @@ class RksInstaller:
             btn_zurueck_s5.pack(side="bottom", anchor="e", pady=20)
             return
 
-        # KORREKTUR: Liest Profile sicher über den Index aus
         profil_daten = self.aktuelle_profil_liste[selected_prof_idx]
         unterordner = "steam_profiles" if profil_daten["type"] == "cloud" else "profiles"
         target_file = os.path.join(self.aktueller_spiel_pfad, unterordner, profil_daten["folder"], "controls.sii")
@@ -731,7 +729,7 @@ class RksInstaller:
                         parts = line.split("[")
                         if len(parts) > 1:
                             idx_str = parts[1].split("]")
-                            max_index = max(max_index, int(idx_str[0]))  # KORREKTUR: [0] hinzugefügt
+                            max_index = max(max_index, int(idx_str[0]))
                     except: pass
                 
                 if any(x in line for x in ['mix dsteerleft', 'mix dsteerright', 'mix dsteering', 'mix steering', 'mix msteering', 'mix mpedals', 'mix dforward', 'mix dbackward', 'mix aforward', 'mix abackward', 'mix forward', 'mix backward']):
