@@ -89,6 +89,26 @@ class ETS2SteeringInstaller:
         
         # Erste automatische Suche beim Start ausführen
         self.suche_profile()
+        
+         def check_for_updates(self):
+        """Prüft beim Start im Hintergrund nach Updates auf GitHub (deine alte Logik)"""
+        import urllib.request
+        import json
+        CURRENT_VERSION = "1.4"
+        VERSION_URL = "https://githubusercontent.com"
+        
+        try:
+            with urllib.request.urlopen(VERSION_URL, timeout=3) as response:
+                data = json.loads(response.read().decode())
+                latest_version = data.get("version", CURRENT_VERSION)
+                if latest_version != CURRENT_VERSION:
+                    messagebox.showinfo(
+                        "Update verfügbar! 🚀", 
+                        f"Eine neue Version ({latest_version}) ist verfügbar!\nBitte lade die aktuelle Version im Steam Workshop oder auf GitHub herunter."
+                    )
+        except Exception:
+            pass # Falls der User offline ist, einfach ignorieren
+   
 
     def lese_profile_aus_ordner(self, profiles_dir):
         """Scannt den Zielordner und filtert OneDrive-Geisterpfade aus."""
@@ -173,7 +193,40 @@ class ETS2SteeringInstaller:
         return self.aktuelle_profil_liste[ausgewaehlter_index]["folder"]
 
     def installiere_mod(self):
-        """Erstellt ein Backup und schleust deine Mod-Zeilen in die controls.sii ein."""
+        """
+        Prüft Workshop-Abo, erzwingt Terms-Akzeptanz, fragt nach Backup 
+        und schleust danach die Mod-Zeilen OneDrive-sicher ein.
+        """
+        # 1. WORKSHOP ABO SCAN
+        # Ersetze 'DEINE_WORKSHOP_ID' durch die echte Steam ID deiner Mod (z.B. '3727705125')
+        steam_workshop_path = os.path.expanduser("~\\Documents\\..\\AppData\\Local\\Steam\\htmlcache") 
+        # Alternativ der direkte standardmäßige Steam-Pfad zu den Workshop-Inhalten:
+        workshop_id = "3727705125" # Deine ID aus der URL
+        steam_path_x64 = "C:\\Program Files (x86)\\Steam\\steamapps\\workshop\\content\\270880\\" + workshop_id
+        
+        if not os.path.exists(steam_path_x64):
+            antwort_workshop = messagebox.askyesno(
+                "Workshop Abonnement fehlt?", 
+                "Es wurde kein aktives Abonnement für diese Modifikation im Steam Workshop gefunden.\n\n"
+                "Bitte abonniere die Mod zuerst im Steam Workshop, um Fehler zu vermeiden.\n"
+                "Möchtest du die Installation trotzdem auf eigene Gefahr fortsetzen?"
+            )
+            if not antwort_workshop:
+                return
+
+        # 2. TERMS / README ABFRAGE (Zwingend vor Installation)
+        terms_text = (
+            "NUTZUNGSBEDINGUNGEN & README:\n\n"
+            "1. Diese Modifikation verändert deine Steuerungseinstellungen für ein realistischeres Fahrgefühl.\n"
+            "2. Vor der Installation wird ein Backup (controls.sii.bak) angelegt.\n"
+            "3. Der Entwickler übernimmt keine Haftung für beschädigte Spielstände.\n\n"
+            "Möchtest du diese Bedingungen akzeptieren und mit der Installation fortfahren?"
+        )
+        akzeptiert = messagebox.askyesno("Nutzungsbedingungen akzeptieren", terms_text)
+        if not akzeptiert:
+            self.status_label.config(text="Installation abgebrochen: Bedingungen nicht akzeptiert.", fg=self.accent_red)
+            return
+
         profil_folder = self.hole_ausgewaehlten_profil_ordner()
         if not profil_folder or not self.aktueller_spiel_pfad:
             messagebox.showerror("Fehler", "Bitte wähle zuerst ein gültiges Profil aus!")
@@ -187,17 +240,24 @@ class ETS2SteeringInstaller:
             return
 
         try:
-            # Backup erstellen falls noch keines existiert
-            if not os.path.exists(backup_datei):
+            # 3. MANUELLE BACKUP ABFRAGE
+            if os.path.exists(backup_datei):
+                antwort_backup = messagebox.askyesno(
+                    "Backup existiert bereits", 
+                    "Es wurde bereits ein Backup (controls.sii.bak) gefunden.\n"
+                    "Möchtest du dieses Backup überschreiben und die Mod neu installieren?"
+                )
+                if not antwort_backup:
+                    return
+                shutil.copy2(ziel_datei, backup_datei)
+            else:
                 shutil.copy2(ziel_datei, backup_datei)
                 
-            # --- MOD INJEKTIONSLOGIK ---
+            # 4. MOD INJEKTIONSLOGIK (OneDrive-Sicher)
             with open(ziel_datei, "r", encoding="utf-8", errors="ignore") as f:
                 zeilen = f.readlines()
                 
             neue_zeilen = []
-            
-            # KORREKTUR: Kürzere Such-Schlüssel, damit die Zeilen sicher gefunden werden
             mod_daten = {
                 'device keyboard': 'config_lines = "device keyboard `di8.keyboard`"',
                 'mix steering': 'config_lines = "mix steering `dsteering - deadzone(-sel(c_jisteer, -sys.steering, j_steering), c_jisteer_dz) * c_jisteer_sens`"',
@@ -208,9 +268,9 @@ class ETS2SteeringInstaller:
             for zeile in zeilen:
                 ersetzt = False
                 for key, value in mod_daten.items():
-                    if key in zeile:  # Flexiblere Suche mit "in" statt "startswith"
+                    if key in zeile:
                         neue_zeilen.append(value + "\n")
-                        ersetzt = True  # KORREKTUR: "ersetbt" zu "ersetzt" ausgebessert
+                        ersetzt = True
                         break
                 if not ersetzt:
                     neue_zeilen.append(zeile)
@@ -223,6 +283,7 @@ class ETS2SteeringInstaller:
             
         except Exception as e:
             messagebox.showerror("Fehler", f"Fehler bei der Installation:\n{str(e)}")
+
 
     def deinstalliere_mod(self):
         """Stelt das automatische Backup wieder her."""
