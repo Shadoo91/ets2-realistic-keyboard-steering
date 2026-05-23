@@ -618,21 +618,22 @@ class RksInstaller:
             self.prof_combo.set("")
             self.status_label.config(text="Keine Profile automatisch gefunden. Bitte Pfad manuell wählen!")
 
-    # --- UNZERSTÖRBAR: ENTPFERNT JEDEN WINDOWS-SCHREIBSCHUTZ VOR DEM SPEICHERN ---
+# --- UNZERSTÖRBAR: ENTPFERNT JEDEN WINDOWS-SCHREIBSCHUTZ VOR DEM SPEICHERN ---
     def ausfuehren_installation(self):
         game_name = self.game_combo.get()
         
         if game_name == "Euro Truck Simulator 2":
             workshop_mod_id = "3727705125"
-            app_id = "227300"
+            app_id = "22730"  # KORREKTUR: Richtige Steam-Workshop App-ID (22730 statt 227300)
             link_url = "https://steamcommunity.com"
         else:
             workshop_mod_id = "3725174940"
             app_id = "270880"
             link_url = "https://steamcommunity.com"
         
-        selected_prof = self.prof_combo.get()
-        if not selected_prof or selected_prof == self.txt["no_profiles"]: return
+        selected_prof_idx = self.prof_combo.current()
+        if selected_prof_idx == -1 or not self.aktueller_spiel_pfad:
+            return
             
         home = os.path.expanduser("~")
         workshop_path = None
@@ -676,7 +677,11 @@ class RksInstaller:
             btn_zurueck_s5.pack(side="bottom", anchor="e", pady=20)
             return
 
-        target_file = self.profile_dict[selected_prof]
+        # KORREKTUR: Holt den Dateipfad sicher über die neue, OneDrive-gefilterte Profil-Liste
+        profil_daten = self.aktuelle_profil_liste[selected_prof_idx]
+        unterordner = "steam_profiles" if profil_daten["type"] == "cloud" else "profiles"
+        target_file = os.path.join(self.aktueller_spiel_pfad, unterordner, profil_daten["folder"], "controls.sii")
+        
         backup_file = target_file + ".bak"
         ist_erfolgreich = False
 
@@ -685,7 +690,7 @@ class RksInstaller:
             import time
             zeit_vor_schreiben = time.time()
 
-            # CRITICAL FIX: Zwingt Windows, den Schreibschutz aufzuheben! [1]
+            # CRITICAL FIX: Zwingt Windows, den Schreibschutz aufzuheben!
             if os.path.exists(target_file):
                 os.chmod(target_file, stat.S_IWRITE)
 
@@ -701,7 +706,7 @@ class RksInstaller:
             R = self.taste_rangier_code
             N = self.taste_notbremse_code
             
-            # DEINE UNVERÄNDERTEN v1.59 FORMELN [ex-1.5.9]
+            # DEINE UNVERÄNDERTEN v1.59 FORMELN
             rks_formeln = [
                 f'mix dsteerleft `keyboard.a?0`',
                 f'mix dsteerright `keyboard.d?0`',
@@ -751,21 +756,37 @@ class RksInstaller:
                 bereinigte_lines.extend(neue_zeilen_block)
                 bereinigte_lines.append("}\n")
                         
-            # Schreiben über nativen OS-Deskriptor erzwingen [1]
+            # Schreiben über nativen OS-Deskriptor erzwingen
             fd = os.open(target_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC)
             with os.fdopen(fd, 'w', encoding='utf-8') as f:
                 f.writelines(bereinigte_lines)
                 f.flush()
                 os.fsync(fd)
 
-            # Unbestechliche Verifikation direkt auf der Hardware [1]
+            # Unbestechliche Verifikation direkt auf der Hardware
             if os.path.getmtime(target_file) >= (zeit_vor_schreiben - 1.0):
                 with open(target_file, "rb") as f_check:
                     if b"mix dsteering" in f_check.read():
                         ist_erfolgreich = True
             
-        except Exception as e:
+        except Exception:
             ist_erfolgreich = False
+
+        # Hier wird deine originale Erfolgsseite auf Seite 5 aufgebaut
+        if ist_erfolgreich:
+            tk.Label(self.end_frame, text="🎉 INSTALLATION ERFOLGREICH!", font=("Arial", 14, "bold"), fg="#27ae60", bg=self.bg_main).pack(anchor="w", pady=(30, 10))
+            success_card = tk.Frame(self.end_frame, bg="#d4edda", bd=1, relief="solid", padx=15, pady=15)
+            success_card.pack(fill="x", pady=(0, 20))
+            tk.Label(success_card, text=self.txt["success_msg"], font=("Arial", 11), fg="#155724", bg="#d4edda", justify="left", wraplength=700).pack(anchor="w")
+        else:
+            tk.Label(self.end_frame, text="❌ FEHLER BEI DER INSTALLATION", font=("Arial", 14, "bold"), fg="#c0392b", bg=self.bg_main).pack(anchor="w", pady=(30, 10))
+            fail_card = tk.Frame(self.end_frame, bg="#f8d7da", bd=1, relief="solid", padx=15, pady=15)
+            fail_card.pack(fill="x", pady=(0, 20))
+            tk.Label(fail_card, text="Die Datei konnte nicht modifiziert werden. Bitte stelle sicher, dass das Spiel geschlossen ist und der Ordner Lese-/Schreibrechte besitzt.", font=("Arial", 11), fg="#721c24", bg="#f8d7da", justify="left", wraplength=700).pack(anchor="w")
+
+        btn_schliessen = tk.Button(self.end_frame, text="Beenden", width=18, height=2, bg="#e1e1e1", font=("Arial", 10, "bold"), relief="flat", command=self.root.destroy)
+        btn_schliessen.pack(side="bottom", anchor="e", pady=20)
+
 
         # OUTPUT ANZEIGE
         if ist_erfolgreich:
