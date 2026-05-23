@@ -92,10 +92,8 @@ class ETS2SteeringInstaller:
         self.check_for_updates()
         
     def check_for_updates(self):
-        """Prüft auf GitHub nach Updates und installiert sie vollautomatisch."""
-        import urllib.request
-        import json
-        import subprocess
+        """Prüft via GitHub-API auf Updates (1.10.2)."""
+        import urllib.request, json, subprocess
         
         CURRENT_VERSION = "1.10.2"
         VERSION_URL = "https://github.com/Shadoo91/ets2-realistic-keyboard-steering/releases/tag/v1.10.1"
@@ -228,9 +226,16 @@ class ETS2SteeringInstaller:
         
         # 1. DYNAMISCHER WORKSHOP ABO SCAN
         spiel_name = self.game_combo.get()
-        # ETS2 hat die App-ID 22730, ATS hat 270880
-        app_id = "22730" if "Euro Truck" in spiel_name else "270880"
-        workshop_id = "3727705125"  # Deine Mod-ID
+        
+        # Trennung der Workshop IDs und Links für ETS2 und ATS
+        if "Euro Truck" in spiel_name:
+            app_id = "22730"
+            workshop_id = "3727705125"  # Deine ETS2 Workshop ID
+            workshop_link = "https://steamcommunity.com/sharedfiles/filedetails/?id=3727705125"
+        else:
+            app_id = "270880"
+            workshop_id = "3725174940"  # Deine ATS Workshop ID
+            workshop_link = "https://steamcommunity.com/sharedfiles/filedetails/?id=3725174940"
         
         # Wir prüfen alle gängigen Laufwerke (C bis G), falls Steam nicht auf C liegt
         laufwerke = ["C", "D", "E", "F", "G"]
