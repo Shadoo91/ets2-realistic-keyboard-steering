@@ -710,4 +710,3 @@ if __name__ == "__main__":
     root.bind("<Key>", app.taste_abfangen)
     root.bind("<Button>", app.universelle_maus_abfangen)
     root.mainloop()
-
