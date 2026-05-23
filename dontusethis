@@ -199,10 +199,10 @@ class ETS2SteeringInstaller:
             
             # KORREKTUR: Kürzere Such-Schlüssel, damit die Zeilen sicher gefunden werden
             mod_daten = {
-                'config_lines = "device keyboard': 'config_lines = "device keyboard `di8.keyboard`"',
-                'config_lines = "mix steering': 'config_lines = "mix steering `dsteering - deadzone(-sel(c_jisteer, -sys.steering, j_steering), c_jisteer_dz) * c_jisteer_sens`"',
-                'config_lines = "mix steerleft': 'config_lines = "mix steerleft `keyboard.a?0 | keyboard.larrow?0`"',
-                'config_lines = "mix steerright': 'config_lines = "mix steerright `keyboard.d?0 | keyboard.rarrow?0`"'
+                'device keyboard': 'config_lines = "device keyboard `di8.keyboard`"',
+                'mix steering': 'config_lines = "mix steering `dsteering - deadzone(-sel(c_jisteer, -sys.steering, j_steering), c_jisteer_dz) * c_jisteer_sens`"',
+                'mix steerleft': 'config_lines = "mix steerleft `keyboard.a?0 | keyboard.larrow?0`"',
+                'mix steerright': 'config_lines = "mix steerright `keyboard.d?0 | keyboard.rarrow?0`"'
             }
             
             for zeile in zeilen:
