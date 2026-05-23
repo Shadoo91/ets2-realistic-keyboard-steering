@@ -185,33 +185,53 @@ class ETS2SteeringInstaller:
         return gueltige_profile
 
     def suche_profile(self):
-        """Versucht automatisch den ETS2/ATS Ordner in den Dokumenten zu finden."""
+        """Sucht automatisch Profile und filtert leere OneDrive-Geisterordner aus."""
         spiel = self.game_combo.get()
         user_docs = os.path.expanduser("~/Documents")
         
+        # Speichert den ermittelten Pfad in der Klasse
         self.aktueller_spiel_pfad = os.path.join(user_docs, spiel)
         profiles_path = os.path.join(self.aktueller_spiel_pfad, "profiles")
         
-        self.aktuelle_profil_liste = self.lese_profile_aus_ordner(profiles_path)
+        gueltige_profile = []
+        if os.path.isdir(profiles_path):
+            for folder in os.listdir(profiles_path):
+                vollstaendiger_pfad = os.path.join(profiles_path, folder)
+                controls_datei = os.path.join(vollstaendiger_pfad, "controls.sii")
+                
+                # CRITICAL REPAIR: Nur hinzufügen, wenn die controls.sii WIRKLICH lokal existiert
+                if os.path.isdir(vollstaendiger_pfad) and os.path.isfile(controls_datei):
+                    try:
+                        lesbarer_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
+                        display_name = f"{lesbarer_name} ({folder})" if lesbarer_name.strip() else folder
+                    except Exception:
+                        display_name = folder
+                    
+                    # Wir speichern das Profil als Dictionary, um Hex-Ordner und Anzeigename zu behalten
+                    gueltige_profile.append({"folder": folder, "name": display_name})
         
-        if self.aktuelle_profil_liste:
-            anzuzeigende_namen = [p["name"] for p in self.aktuelle_profil_liste]
+        # Speichert die echten Profile für die Installation ab
+        self.aktuelle_profil_liste = gueltige_profile
+        
+        if gueltige_profile:
+            anzuzeigende_namen = [p["name"] for p in gueltige_profile]
             self.prof_combo["values"] = anzuzeigende_namen
             self.prof_combo.current(0)
-            self.status_label.config(text=f"Automatisch {len(self.aktuelle_profil_liste)} echte Profile gefunden.", fg=self.accent_green)
+            self.status_label.config(text=f"Automatisch {len(gueltige_profile)} echte Profile gefunden.", fg=self.accent_green)
         else:
             self.prof_combo["values"] = []
             self.prof_combo.set("")
             self.status_label.config(text="Keine Profile automatisch gefunden. Bitte Pfad manuell wählen!", fg=self.accent_red)
 
     def manueller_pfad_waehlen(self):
-        """Erlaubt dem User, den Pfad selbst auszuwählen."""
+        """Öffnet den Explorer zur manuellen Pfadwahl, falls die Automatik versagt."""
         initial_dir = os.path.expanduser("~/Documents")
         gewaehlter_pfad = filedialog.askdirectory(title="Wähle den ETS2/ATS Hauptordner aus", initialdir=initial_dir)
         
         if not gewaehlter_pfad:
             return
 
+        # Korrektur, falls der User direkt den 'profiles'-Unterordner anklickt
         if os.path.basename(gewaehlter_pfad).lower() == "profiles":
             base_dir = os.path.dirname(gewaehlter_pfad)
         else:
@@ -224,13 +244,28 @@ class ETS2SteeringInstaller:
             messagebox.showerror("Ordner ungültig", f"Unter:\n{base_dir}\nwurde kein 'profiles'-Ordner gefunden!")
             return
 
-        self.aktuelle_profil_liste = self.lese_profile_aus_ordner(profiles_path)
+        # Profile aus dem manuellen Pfad einlesen mit dem gleichen OneDrive-Schutz
+        gueltige_profile = []
+        if os.path.isdir(profiles_path):
+            for folder in os.listdir(profiles_path):
+                vollstaendiger_pfad = os.path.join(profiles_path, folder)
+                controls_datei = os.path.join(vollstaendiger_pfad, "controls.sii")
+                
+                if os.path.isdir(vollstaendiger_pfad) and os.path.isfile(controls_datei):
+                    try:
+                        lesbarer_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
+                        display_name = f"{lesbarer_name} ({folder})" if lesbarer_name.strip() else folder
+                    except Exception:
+                        display_name = folder
+                    gueltige_profile.append({"folder": folder, "name": display_name})
 
-        if self.aktuelle_profil_liste:
-            anzuzeigende_namen = [p["name"] for p in self.aktuelle_profil_liste]
+        self.aktuelle_profil_liste = gueltige_profile
+
+        if gueltige_profile:
+            anzuzeigende_namen = [p["name"] for p in gueltige_profile]
             self.prof_combo["values"] = anzuzeigende_namen
             self.prof_combo.current(0)
-            messagebox.showinfo("Erfolg", f"Es wurden {len(self.aktuelle_profil_liste)} echte Profile gefunden!")
+            messagebox.showinfo("Erfolg", f"Es wurden {len(gueltige_profile)} echte Profile gefunden!")
             self.status_label.config(text="Manueller Pfad aktiv.", fg=self.accent_green)
         else:
             self.prof_combo["values"] = []
@@ -281,7 +316,6 @@ class ETS2SteeringInstaller:
             self.status_label.config(text="Fehler: Mod nicht im Workshop abonniert!", fg=self.accent_red)
             
             # Fehlermeldung mit Workshop-Link anzeigen
-            workshop_link = f"https://steamcommunity.com/sharedfiles/filedetails/?id={workshop_id}"
             antwort = messagebox.askyesno(
                 "Abonnement fehlt!", 
                 f"Es wurde kein aktives Abo für diese Mod im Steam Workshop gefunden.\n\n"
@@ -304,10 +338,13 @@ class ETS2SteeringInstaller:
             self.status_label.config(text="Installation abgebrochen: Bedingungen nicht akzeptiert.", fg=self.accent_red)
             return
 
-        profil_folder = self.hole_ausgewaehlten_profil_ordner()
-        if not profil_folder or not self.aktueller_spiel_pfad:
+        # NEU & KORRIGIERT: Sicherer Zugriff über den ausgewählten Listen-Index
+        ausgewaehlter_index = self.prof_combo.current()
+        if ausgewaehlter_index == -1 or not self.aktueller_spiel_pfad:
             messagebox.showerror("Fehler", "Bitte wähle zuerst ein gültiges Profil aus!")
             return
+            
+        profil_folder = self.aktuelle_profil_liste[ausgewaehlter_index]["folder"]
             
         ziel_datei = os.path.join(self.aktueller_spiel_pfad, "profiles", profil_folder, "controls.sii")
         backup_datei = ziel_datei + ".bak"
