@@ -627,14 +627,13 @@ class RksInstaller:
         
         if game_name == "Euro Truck Simulator 2":
             workshop_mod_id = "3727705125"
-            app_id = "227300"  # KORREKTUR: Sechsstellige ID für den ETS2-Workshop-Pfad
+            app_id = "227300"  # Sechsstellige ID für den ETS2-Workshop-Pfad
             link_url = "https://steamcommunity.com"
         else:
             workshop_mod_id = "3725174940"
             app_id = "270880"
             link_url = "https://steamcommunity.com"
         
-        # KORREKTUR: Holt den Index sicher aus der neuen Profilauswahl
         selected_prof_idx = self.prof_combo.current()
         if selected_prof_idx == -1 or not self.aktueller_spiel_pfad:
             return
@@ -664,7 +663,6 @@ class RksInstaller:
         self.eula_frame.pack_forget()
         self.end_frame.pack(fill="both", expand=True)
         
-        # KORREKTUR: Bereinigt alte Oberflächen-Reste auf Seite 5 vor dem Laden
         for widget in self.end_frame.winfo_children():
             widget.destroy()
 
@@ -682,45 +680,9 @@ class RksInstaller:
             btn_zurueck_s5.pack(side="bottom", anchor="e", pady=20)
             return
 
-        # KORREKTUR: Ermittelt den echten Hex-Ordner und ob es ein Cloud-Profil ist
         profil_daten = self.aktuelle_profil_liste[selected_prof_idx]
         unterordner = "steam_profiles" if profil_daten["type"] == "cloud" else "profiles"
         target_file = os.path.join(self.aktueller_spiel_pfad, unterordner, profil_daten["folder"], "controls.sii")
         
         backup_file = target_file + ".bak"
         ist_erfolgreich = False
-
-
-    def aktiviere_schliessen_button(self):
-        self.btn_close.config(text=self.txt["btn_close"], bg=self.accent_blue, fg="white", state="normal")
-
-if __name__ == "__main__":
-    import ctypes
-    
-    def ist_admin():
-        try: return ctypes.windll.shell32.IsUserAnAdmin()
-        except: return False
-
-    if platform.system() == "Windows" and not ist_admin():
-        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
-        sys.exit()
-    else:
-        root = tk.Tk()
-        app = RksInstaller(root)
-        
-        # SCHARFE BEFEHLS-WEICHE [ex-1.3.4]
-        app.btn_start.config(command=app.seite_config)
-        app.btn_weiter.config(command=app.seite_readme)
-        app.btn_back3.config(command=app.zurueck_zu_config)
-        app.btn_to_eula.config(command=app.seite_eula)
-        app.btn_back4.config(command=app.zurueck_zu_readme)
-        app.btn_install.config(command=app.ausfuehren_installation)
-        app.btn_uninstall.config(command=app.ausfuehren_deinstallation)
-        app.chk_terms.config(command=app.toggle_install_button)
-        app.game_combo.bind("<<ComboboxSelected>>", lambda e: app.suche_profile())
-        
-        app.btn_turbo.config(command=lambda: app.starte_listener("turbo"))
-        app.btn_rangier.config(command=lambda: app.starte_listener("rangier"))
-        app.btn_not.config(command=lambda: app.starte_listener("notbremse"))
-
-        root.mainloop()
