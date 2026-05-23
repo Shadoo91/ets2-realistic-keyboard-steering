@@ -187,17 +187,20 @@ class ETS2SteeringInstaller:
             return
 
         try:
+            # Backup erstellen falls noch keines existiert
             if not os.path.exists(backup_datei):
                 shutil.copy2(ziel_datei, backup_datei)
                 
+            # --- MOD INJEKTIONSLOGIK ---
             with open(ziel_datei, "r", encoding="utf-8", errors="ignore") as f:
                 zeilen = f.readlines()
                 
             neue_zeilen = []
-            # Hier stecken deine 4 Modifikations-Zeilen
+            
+            # KORREKTUR: Kürzere Such-Schlüssel, damit die Zeilen sicher gefunden werden
             mod_daten = {
-                'config_lines': 'config_lines = "device keyboard `di8.keyboard`"',
-                'mix steering': 'config_lines = "mix steering `dsteering - deadzone(-sel(c_jisteer, -sys.steering, j_steering), c_jisteer_dz) * c_jisteer_sens`"',
+                'config_lines = "device keyboard': 'config_lines = "device keyboard `di8.keyboard`"',
+                'config_lines = "mix steering': 'config_lines = "mix steering `dsteering - deadzone(-sel(c_jisteer, -sys.steering, j_steering), c_jisteer_dz) * c_jisteer_sens`"',
                 'config_lines = "mix steerleft': 'config_lines = "mix steerleft `keyboard.a?0 | keyboard.larrow?0`"',
                 'config_lines = "mix steerright': 'config_lines = "mix steerright `keyboard.d?0 | keyboard.rarrow?0`"'
             }
@@ -205,9 +208,9 @@ class ETS2SteeringInstaller:
             for zeile in zeilen:
                 ersetzt = False
                 for key, value in mod_daten.items():
-                    if key in zeile: # Flexiblere Suche
-                        # ... Logik zur Zeilenersetzung
-                        ersetzt = True # Tippfehler "ersetbt" behoben
+                    if key in zeile:  # Flexiblere Suche mit "in" statt "startswith"
+                        neue_zeilen.append(value + "\n")
+                        ersetzt = True  # KORREKTUR: "ersetbt" zu "ersetzt" ausgebessert
                         break
                 if not ersetzt:
                     neue_zeilen.append(zeile)
