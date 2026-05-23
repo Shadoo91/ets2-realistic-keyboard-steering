@@ -72,8 +72,6 @@ class ETS2SteeringInstaller:
         tk.Label(prof_frame, text=self.txt["profile_select"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=15, anchor="w").pack(side="left")
         self.prof_combo = ttk.Combobox(prof_frame, state="readonly", width=30, font=("Arial", 11))
         self.prof_combo.pack(side="left")
-        self.suche_profile()
-        self.check_for_updates()
 
         self.btn_browse = tk.Button(prof_frame, text="📁 Pfad wählen...", command=self.manueller_pfad_waehlen, font=("Arial", 10), bg="#e0e0e0", fg="black", relief="groove")
         self.btn_browse.pack(side="left", padx=10)
@@ -91,8 +89,9 @@ class ETS2SteeringInstaller:
         
         # Erste automatische Suche beim Start ausführen
         self.suche_profile()
+        self.check_for_updates()
         
-        def check_for_updates(self):
+    def check_for_updates(self):
         """Prüft beim Start im Hintergrund nach Updates auf GitHub (deine alte Logik)"""
         import urllib.request
         import json
