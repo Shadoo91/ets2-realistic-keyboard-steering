@@ -92,7 +92,7 @@ class ETS2SteeringInstaller:
         # Erste automatische Suche beim Start ausführen
         self.suche_profile()
         
-         def check_for_updates(self):
+        def check_for_updates(self):
         """Prüft beim Start im Hintergrund nach Updates auf GitHub (deine alte Logik)"""
         import urllib.request
         import json
