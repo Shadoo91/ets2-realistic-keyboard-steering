@@ -627,7 +627,7 @@ class RksInstaller:
         
         if game_name == "Euro Truck Simulator 2":
             workshop_mod_id = "3727705125"
-            app_id = "227300"  # Sechsstellige ID für den ETS2-Workshop-Pfad
+            app_id = "227300"
             link_url = "https://steamcommunity.com"
         else:
             workshop_mod_id = "3725174940"
@@ -686,7 +686,85 @@ class RksInstaller:
         
         backup_file = target_file + ".bak"
         ist_erfolgreich = False
-        
+
+        try:
+            zeit_vor_schreiben = time.time()
+
+            if os.path.exists(target_file):
+                os.chmod(target_file, stat.S_IWRITE)
+
+            if not os.path.exists(backup_file):
+                shutil.copyfile(target_file, backup_file)
+                if os.path.exists(backup_file):
+                    os.chmod(backup_file, stat.S_IWRITE)
+                
+            with open(target_file, "r", encoding="utf-8", errors="ignore") as f:
+                lines = f.readlines()
+                
+            T = self.taste_turbo_code
+            R = self.taste_rangier_code
+            N = self.taste_notbremse_code
+            
+            rks_formeln = [
+                f"mix dsteerleft `keyboard.a?0`",
+                f"mix dsteerright `keyboard.d?0`",
+                f"mix dsteering `(keyboard.a?0 - keyboard.d?0) * (0.30 + ({T} * (0.60 - (keyboard.s?0 * 0.25)))) * (1.00 + (keyboard.s?0 * {N} * 1.20)) * (c_steer_func * (4.2 - steering_speed_coef))`",
+                f"mix steering `(dsteering * (1.00 - c_steer_func)) + (({R}) * (keyboard.a?0 - keyboard.d?0) * 0.35)`",
+                f"mix msteering `-mouse.rel_position.x?0 * c_msens`",
+                f"mix mpedals `mouse.rel_position.y?0 * c_msens`",
+                f"mix dforward `0`",
+                f"mix dbackward `0`",
+                f"mix aforward `((keyboard.w?0 * 0.35) + ({N} * 0.55)) * (! keyboard.s?0)`",
+                f"mix abackward `keyboard.s?0 * (0.10 + ({T} * 0.35) + ({N} * 1.00))`",
+                f"mix forward `aforward`",
+                f"mix backward `abackward`"
+            ]
+            
+            bereinigte_lines = []
+            max_index = 320
+            
+            for line in lines:
+                if "config_lines[" in line:
+                    try:
+                        parts = line.split("[")
+                        if len(parts) > 1:
+                            idx_str = parts[1].split("]")[0]  # REPARIERT: Holt den reinen Text-Index aus den eckigen Klammern
+                            max_index = max(max_index, int(idx_str))  # REPARIERT: Lässt sich jetzt fehlerfrei in eine Zahl umwandeln
+                    except: pass
+                
+                if any(x in line for x in ["mix dsteerleft", "mix dsteerright", "mix dsteering", "mix steering", "mix msteering", "mix mpedals", "mix dforward", "mix dbackward", "mix aforward", "mix abackward", "mix forward", "mix backward"]):
+                    continue
+                bereinigte_lines.append(line)
+            
+            klammer_index = -1
+            for idx in range(len(bereinigte_lines) - 1, -1, -1):
+                if "}" in bereinigte_lines[idx]:
+                    klammer_index = idx
+                    break
+            
+            neue_zeilen_block = []
+            current_idx = max_index + 1
+            for formel in rks_formeln:
+                neue_zeilen_block.append(f" config_lines[{current_idx}]: \"{formel}\"\n")
+                current_idx += 1
+            
+            if klammer_index != -1:
+                bereinigte_lines[klammer_index:klammer_index] = neue_zeilen_block
+            else:
+                bereinigte_lines.extend(neue_zeilen_block)
+                bereinigte_lines.append("}\n")
+                        
+            fd = os.open(target_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC)
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                f.writelines(bereinigte_lines)
+                f.flush()
+                os.fsync(fd)
+
+            if os.path.getmtime(target_file) >= (zeit_vor_schreiben - 1.0):
+                with open(target_file, "rb") as f_check:
+                    if b"mix dsteering" in f_check.read():
+                        ist_erfolgreich = True
+            
         except Exception:
             ist_erfolgreich = False
 
