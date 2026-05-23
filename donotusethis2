@@ -688,9 +688,8 @@ class RksInstaller:
         ist_erfolgreich = False
         
         except Exception:
-            ist_erfolgreich = False        
+            ist_erfolgreich = False
 
-        # Zeigt deine originale Erfolgsseite auf Seite 5 an
         if ist_erfolgreich:
             tk.Label(self.end_frame, text="🎉 INSTALLATION ERFOLGREICH!", font=("Arial", 14, "bold"), fg="#27ae60", bg=self.bg_main).pack(anchor="w", pady=(30, 10))
             success_card = tk.Frame(self.end_frame, bg="#d4edda", bd=1, relief="solid", padx=15, pady=15)
@@ -708,7 +707,7 @@ class RksInstaller:
 if __name__ == "__main__":
     root = tk.Tk()
     app = RksInstaller(root)
-    # Reaktiviert das Abfangen deiner Tasten- & Mauseingaben
     root.bind("<Key>", app.taste_abfangen)
     root.bind("<Button>", app.universelle_maus_abfangen)
     root.mainloop()
+
