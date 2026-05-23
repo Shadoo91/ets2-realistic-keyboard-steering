@@ -686,3 +686,29 @@ class RksInstaller:
         
         backup_file = target_file + ".bak"
         ist_erfolgreich = False
+        
+        except Exception:
+            ist_erfolgreich = False        
+
+        # Zeigt deine originale Erfolgsseite auf Seite 5 an
+        if ist_erfolgreich:
+            tk.Label(self.end_frame, text="🎉 INSTALLATION ERFOLGREICH!", font=("Arial", 14, "bold"), fg="#27ae60", bg=self.bg_main).pack(anchor="w", pady=(30, 10))
+            success_card = tk.Frame(self.end_frame, bg="#d4edda", bd=1, relief="solid", padx=15, pady=15)
+            success_card.pack(fill="x", pady=(0, 20))
+            tk.Label(success_card, text=self.txt["success_msg"], font=("Arial", 11), fg="#155724", bg="#d4edda", justify="left", wraplength=700).pack(anchor="w")
+        else:
+            tk.Label(self.end_frame, text="❌ FEHLER BEI DER INSTALLATION", font=("Arial", 14, "bold"), fg="#c0392b", bg=self.bg_main).pack(anchor="w", pady=(30, 10))
+            fail_card = tk.Frame(self.end_frame, bg="#f8d7da", bd=1, relief="solid", padx=15, pady=15)
+            fail_card.pack(fill="x", pady=(0, 20))
+            tk.Label(fail_card, text="Die Datei konnte nicht modifiziert werden. Bitte stelle sicher, dass das Spiel geschlossen ist und der Ordner Lese-/Schreibrechte besitzt.", font=("Arial", 11), fg="#721c24", bg="#f8d7da", justify="left", wraplength=700).pack(anchor="w")
+
+        btn_schliessen = tk.Button(self.end_frame, text="Beenden", width=18, height=2, bg="#e1e1e1", font=("Arial", 10, "bold"), relief="flat", command=self.root.destroy)
+        btn_schliessen.pack(side="bottom", anchor="e", pady=20)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = RksInstaller(root)
+    # Reaktiviert das Abfangen deiner Tasten- & Mauseingaben
+    root.bind("<Key>", app.taste_abfangen)
+    root.bind("<Button>", app.universelle_maus_abfangen)
+    root.mainloop()
