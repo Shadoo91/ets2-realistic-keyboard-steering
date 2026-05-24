@@ -609,6 +609,63 @@ class RksInstaller:
             self.prof_combo["values"] = []
             self.prof_combo.set("")
             self.status_label.config(text="Keine Profile automatisch gefunden. Bitte Pfad manuell wählen!")
+        
+    def manueller_pfad_waehlen(self):
+        """Öffnet den Explorer zur manuellen Auswahl und ignoriert Ordner-Schreibweisen."""
+        initial_dir = os.path.expanduser("~/Documents")
+        gewaehlter_pfad = filedialog.askdirectory(title="Wähle den ETS2/ATS Hauptordner aus", initialdir=initial_dir)
+        
+        if not gewaehlter_pfad:
+            return
+
+        ordner_name = os.path.basename(gewaehlter_pfad).lower()
+        if ordner_name in ["profiles", "steam_profiles"]:
+            base_dir = os.path.dirname(gewaehlter_pfad)
+        else:
+            base_dir = gewaehlter_pfad
+
+        self.aktueller_spiel_pfad = base_dir
+        gueltige_profile = []
+
+        if os.path.isdir(base_dir):
+            for eintrag in os.listdir(base_dir):
+                eintrag_pfad = os.path.join(base_dir, eintrag)
+                if not os.path.isdir(eintrag_pfad): continue
+                
+                if eintrag.lower() == "profiles":
+                    for folder in os.listdir(eintrag_pfad):
+                        vollstaendiger_pfad = os.path.join(eintrag_pfad, folder)
+                        controls_datei = os.path.join(vollstaendiger_pfad, "controls.sii")
+                        if os.path.isdir(vollstaendiger_pfad) and os.path.isfile(controls_datei):
+                            try:
+                                readable_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
+                                display_str = f"{readable_name} ({folder[:6]}...)"
+                            except: display_str = folder
+                            gueltige_profile.append({"folder": folder, "name": display_str, "type": "local", "sub": eintrag})
+
+                if eintrag.lower() == "steam_profiles":
+                    for folder in os.listdir(eintrag_pfad):
+                        vollstaendiger_pfad = os.path.join(eintrag_pfad, folder)
+                        controls_datei = os.path.join(vollstaendiger_pfad, "controls.sii")
+                        if os.path.isdir(vollstaendiger_pfad) and os.path.isfile(controls_datei):
+                            try:
+                                readable_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
+                                display_str = f"[Cloud] {readable_name} ({folder[:6]}...)"
+                            except: display_str = f"[Cloud] {folder}"
+                            gueltige_profile.append({"folder": folder, "name": display_str, "type": "cloud", "sub": eintrag})
+
+        self.aktuelle_profil_liste = gueltige_profile
+
+        if gueltige_profile:
+            anzuzeigende_namen = [p["name"] for p in gueltige_profile]
+            self.prof_combo.config(values=anzuzeigende_namen)
+            self.prof_combo.current(0)
+            messagebox.showinfo("Erfolg 🎉", f"Es wurden {len(gueltige_profile)} echte Profile im manuellen Pfad gefunden!")
+            self.status_label.config(text="Manueller Pfad aktiv.")
+        else:
+            self.prof_combo.config(values=[self.txt["no_profiles"]])
+            self.prof_combo.current(0)
+            messagebox.showwarning("Keine Profile ⚠️", "Der ausgewählte Ordner enthält keine gültigen Profile mit einer controls.sii.")
 
     def ausfuehren_installation(self):
         """Führt die Mod-Injektion aus, korrigiert die ETS2-ID und bereinigt das Layout."""
@@ -673,7 +730,6 @@ class RksInstaller:
             return
 
         profil_daten = self.aktuelle_profil_liste[selected_prof_idx]
-                # Nutzt den exakt auf der Festplatte gefundenen Ordnernamen (Schutz vor Groß-/Kleinschreibung)
         unterordner = profil_daten["sub"]
         target_file = os.path.join(self.aktueller_spiel_pfad, unterordner, profil_daten["folder"], "controls.sii")
         
@@ -721,8 +777,8 @@ class RksInstaller:
                     try:
                         parts = line.split("[")
                         if len(parts) > 1:
-                            idx_str = parts[1].split("]")[0]  # REPARIERT: Holt den reinen Text-Index aus den eckigen Klammern
-                            max_index = max(max_index, int(idx_str))  # REPARIERT: Lässt sich jetzt fehlerfrei in eine Zahl umwandeln
+                            idx_str = parts[1].split("]")[0]  # KORREKTUR: Isoliert die Zahl aus der Liste fehlerfrei
+                            max_index = max(max_index, int(idx_str))
                     except: pass
                 
                 if any(x in line for x in ["mix dsteerleft", "mix dsteerright", "mix dsteering", "mix steering", "mix msteering", "mix mpedals", "mix dforward", "mix dbackward", "mix aforward", "mix abackward", "mix forward", "mix backward"]):
