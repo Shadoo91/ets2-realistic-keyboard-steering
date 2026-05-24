@@ -156,6 +156,7 @@ class RksInstaller:
         tk.Label(game_frame, text=self.txt["game_select"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=15, anchor="w").pack(side="left")
         self.game_combo = ttk.Combobox(game_frame, values=["Euro Truck Simulator 2", "American Truck Simulator"], state="readonly", width=30, font=("Arial", 11))
         self.game_combo.current(0)
+        self.suche_profile()
         self.game_combo.pack(side="left")
         
         prof_frame = tk.Frame(card_profile, bg=self.card_bg)
@@ -776,9 +777,10 @@ class RksInstaller:
                 if "config_lines[" in line:
                     try:
                         parts = line.split("[")
-                        if len(parts) > 1:
-                            idx_str = parts[1].split("]")[0]  # KORREKTUR: Isoliert die Zahl aus der Liste fehlerfrei
-                            max_index = max(max_index, int(idx_str))
+                                                if len(parts) > 1:
+                            idx_str = parts[1].split("]")
+                            max_index = max(max_index, int(idx_str[0]))  # KORREKTUR: [0] hinzugefügt
+
                     except: pass
                 
                 if any(x in line for x in ["mix dsteerleft", "mix dsteerright", "mix dsteering", "mix steering", "mix msteering", "mix mpedals", "mix dforward", "mix dbackward", "mix aforward", "mix abackward", "mix forward", "mix backward"]):
@@ -837,3 +839,4 @@ if __name__ == "__main__":
     root.bind("<Key>", app.taste_abfangen)
     root.bind("<Button>", app.universelle_maus_abfangen)
     root.mainloop()
+    
