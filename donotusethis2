@@ -158,9 +158,6 @@ class RksInstaller:
         self.game_combo = ttk.Combobox(game_frame, values=["Euro Truck Simulator 2", "American Truck Simulator"], state="readonly", width=30, font=("Arial", 11))
         self.game_combo.current(0)
         self.game_combo.pack(side="left")
-        self.game_combo.current(0)  # Wählt Euro Truck Simulator 2 als Standard vor
-        self.suche_profile()        # Startet den Profil-Scan jetzt sicher, da alle Boxen existieren
-
         self.game_combo.bind("<<ComboboxSelected>>", lambda e: self.suche_profile())
 
         prof_frame = tk.Frame(card_profile, bg=self.card_bg)
@@ -823,7 +820,13 @@ class RksInstaller:
 if __name__ == "__main__":
     root = tk.Tk()
     app = RksInstaller(root)
+
+    # KORREKTUR: Startet die Vorauswahl und den Profilscan erst, wenn die gesamte App fertig geladen ist!
+    app.game_combo.current(0)
+    app.suche_profile()
+
     root.bind("<Key>", app.taste_abfangen)
     root.bind("<Button>", app.universelle_maus_abfangen)
     root.mainloop()
+
     
