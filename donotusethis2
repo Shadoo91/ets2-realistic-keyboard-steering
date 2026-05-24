@@ -181,29 +181,38 @@ class RksInstaller:
         f_turbo = tk.Frame(card_keys, bg=self.card_bg)
         f_turbo.pack(fill="x", pady=5)
         tk.Label(f_turbo, text=self.txt["btn_turbo"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=22, anchor="w").pack(side="left")
-
         # Button 1
-        self.btn_turbo = tk.Button(f_turbo, text=self.taste_turbo_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1, command=lambda: self.starte_listener("turbo"))
+        def klick_turbo():
+            self.aktueller_listener = "turbo"
+            self.btn_turbo.config(text="❓ DRÜCKE TASTE...", bg="#ffeaa7")
+            
+        self.btn_turbo = tk.Button(f_turbo, text=self.taste_turbo_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1, command=klick_turbo)
         self.btn_turbo.pack(side="left")
         
         # Button 2
         f_rangier = tk.Frame(card_keys, bg=self.bg_main, pady=5)
         f_rangier.pack(fill="x")
         tk.Label(f_rangier, text="Rangier-Modus:", font=("Arial", 11, "bold"), bg=self.bg_main, width=15, anchor="w").pack(side="left")
-        self.btn_rangier = tk.Button(f_rangier, text=self.taste_rangier_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1, command=lambda: self.starte_listener("rangier"))
+        
+        def klick_rangier():
+            self.aktueller_listener = "rangier"
+            self.btn_rangier.config(text="❓ DRÜCKE TASTE...", bg="#ffeaa7")
+            
+        self.btn_rangier = tk.Button(f_rangier, text=self.taste_rangier_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1, command=klick_rangier)
         self.btn_rangier.pack(side="left")
         
         # Button 3
         f_not = tk.Frame(card_keys, bg=self.bg_main, pady=5)
         f_not.pack(fill="x")
         tk.Label(f_not, text="Notbremse:", font=("Arial", 11, "bold"), bg=self.bg_main, width=15, anchor="w").pack(side="left")
-        self.btn_not = tk.Button(f_not, text=self.taste_notbremse_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1, command=lambda: self.starte_listener("notbremse"))
+        
+        def klick_not():
+            self.aktueller_listener = "notbremse"
+            self.btn_not.config(text="❓ DRÜCKE TASTE...", bg="#ffeaa7")
+            
+        self.btn_not = tk.Button(f_not, text=self.taste_notbremse_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1, command=klick_not)
         self.btn_not.pack(side="left")
 
-        self.status_label = tk.Label(card_keys, text="", font=("Arial", 12, "italic"), fg="green", bg=self.card_bg)
-        self.status_label.pack(pady=(10, 0))
-        self.btn_weiter = tk.Button(self.config_frame, text=self.txt["weiter"], width=20, height=2, bg=self.accent_blue, fg="white", font=("Arial", 11, "bold"), relief="flat", command=self.seite_readme)
-        self.btn_weiter.pack(side="bottom", anchor="e")
 
         # --- SEITE 3: README / ÜBERSICHT FRAME ---
         self.readme_frame = tk.Frame(self.root, padx=30, pady=15, bg=self.bg_main)
