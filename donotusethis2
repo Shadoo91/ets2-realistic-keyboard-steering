@@ -333,11 +333,14 @@ class RksInstaller:
         self.readme_frame.pack_forget()
         self.config_frame.pack(fill="both", expand=True)
 
-   def seite_readme(self):
+    def seite_readme(self):
+        """Schaltet auf die Readme-Seite um und blendet die alten Panels aus."""
         selected_prof = self.prof_combo.get()
         if selected_prof == self.txt["no_profiles"] or not selected_prof:
+            from tkinter import messagebox
             messagebox.showerror("Error", "Kein gültiges Profil ausgewählt!")
             return
+            
         self.config_frame.pack_forget()
         self.eula_frame.pack_forget()
         self.readme_frame.pack(fill="both", expand=True)
