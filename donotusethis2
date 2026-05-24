@@ -231,51 +231,45 @@ class RksInstaller:
         self.btn_weiter.pack(side="right", padx=15, pady=5)
 
     def seite_readme(self):
-
-        # --- SEITE 3: README / ÜBERSICHT FRAME ---
-        self.readme_frame = tk.Frame(self.root, padx=30, pady=15, bg=self.bg_main)
-        tk.Label(self.readme_frame, text=self.txt["readme_head"], font=("Arial", 15, "bold"), fg=self.accent_blue, bg=self.bg_main).pack(anchor="w", pady=(0, 2))
-        tk.Label(self.readme_frame, text=self.txt["readme_sub"], font=("Arial", 10, "italic"), fg=self.fg_text, bg=self.bg_main).pack(anchor="w", pady=(0, 10))
-        self.readme_card = tk.Frame(self.readme_frame, bg=self.card_bg, bd=1, relief="solid", padx=20, pady=15)
-        self.readme_card.pack(fill="both", expand=True, pady=(0, 15))
-        self.readme_content_frame = tk.Frame(self.readme_card, bg=self.card_bg)
-        self.readme_content_frame.pack(fill="both", expand=True)
-        btn_box3 = tk.Frame(self.readme_frame, bg=self.bg_main)
-        btn_box3.pack(fill="x", side="bottom")
-        self.btn_back3 = tk.Button(btn_box3, text=self.txt["btn_zurueck"], width=15, height=2, font=("Arial", 11, "bold"), bg="#e1e1e1", relief="flat")
-        self.btn_back3.pack(side="left")
-        self.btn_to_eula = tk.Button(btn_box3, text="Weiter zur Lizenz >", width=18, height=2, bg=self.accent_blue, fg="white", font=("Arial", 11, "bold"), relief="flat")
-        self.btn_to_eula.pack(side="right")
-
-        # --- SEITE 4: EULA FRAME ---
-        self.eula_frame = tk.Frame(self.root, padx=30, pady=20, bg=self.bg_main)
-        tk.Label(self.eula_frame, text=self.txt["terms_head"], font=("Arial", 15, "bold"), fg=self.accent_blue, bg=self.bg_main).pack(anchor="w", pady=(0, 2))
-        tk.Label(self.eula_frame, text=self.txt["terms_sub"], font=("Arial", 10, "italic"), fg=self.fg_text, bg=self.bg_main).pack(anchor="w", pady=(0, 15))
-        scroll_container = tk.Frame(self.eula_frame, bd=1, relief="solid", bg=self.card_bg)
-        scroll_container.pack(fill="x", pady=(0, 15))
-        scrollbar = tk.Scrollbar(scroll_container)
-        scrollbar.pack(side="right", fill="y")
-        self.terms_box = tk.Text(scroll_container, height=18, width=80, font=("Arial", 10), fg="#444444", bg="#f8f9fa", relief="flat", padx=10, pady=10, yscrollcommand=scrollbar.set)
-        self.terms_box.insert(tk.END, self.txt["terms_text"])
-        self.terms_box.config(state="disabled")
-        self.terms_box.pack(side="left", fill="x", expand=True)
-        scrollbar.config(command=self.terms_box.yview)
+        """Schaltet auf die Readme-/Übersichtsseite (Seite 3) um und generiert den Text."""
+        selected_prof = self.prof_combo.get()
+        if selected_prof == self.txt["no_profiles"] or not selected_prof:
+            from tkinter import messagebox
+            messagebox.showerror("Error", "Kein gültiges Profil ausgewählt!")
+            return
+            
+        # Blendet die alten Seiten aus und zeigt die Readme-Karte
+        self.welcome_frame.pack_forget()
+        self.config_frame.pack_forget()
+        self.eula_frame.pack_forget()
+        self.end_frame.pack_forget()
         
-        self.chk_state = tk.BooleanVar()
-        self.chk_terms = tk.Checkbutton(self.eula_frame, text=self.txt["terms_accept"], variable=self.chk_state, font=("Arial", 11, "bold"), fg=self.fg_text, bg=self.bg_main, activebackground=self.bg_main)
-        self.chk_terms.pack(anchor="w", pady=(0, 20))
+        self.readme_frame.pack(fill="both", expand=True)
+        self.generiere_readme_text(selected_prof)
+
+    def seite_eula(self):
+        """Schaltet auf die Lizenz-/EULA-Seite (Seite 4) um."""
+        self.welcome_frame.pack_forget()
+        self.config_frame.pack_forget()
+        self.readme_frame.pack_forget()
+        self.end_frame.pack_forget()
         
-        btn_box4 = tk.Frame(self.eula_frame, bg=self.bg_main)
-        btn_box4.pack(fill="x", side="bottom")
-        self.btn_back4 = tk.Button(btn_box4, text=self.txt["btn_zurueck"], width=15, height=2, font=("Arial", 11, "bold"), bg="#e1e1e1", relief="flat")
-        self.btn_back4.pack(side="left")
-        self.btn_install = tk.Button(btn_box4, text=self.txt["btn_install"], width=18, height=2, bg="#e1e1e1", fg="#888888", font=("Arial", 11, "bold"), state="disabled", relief="flat")
-        self.btn_install.pack(side="right")
+        self.eula_frame.pack(fill="both", expand=True)
+        self.chk_state.set(False) 
+        self.btn_install.config(text=self.txt["btn_install"], bg="#e1e1e1", fg="#888888", state="disabled")
 
-        # --- SEITE 5: STATUS END-ANZEIGE ---
-        self.end_frame = tk.Frame(self.root, padx=30, pady=25, bg=self.bg_main)
+    def zurueck_zu_readme(self):
+        """Ermöglicht dem Nutzer, von der Lizenzseite zurück zur Readme (Seite 3) zu gehen."""
+        self.eula_frame.pack_forget()
+        self.readme_frame.pack(fill="both", expand=True)
 
-    # --- AUTOMATISCHER GITHUB-UPDATER MECHANISMUS ---
+    def toggle_install_button(self):
+        """Schaltet den Installieren-Button frei, sobald die Checkbox angehakt ist."""
+        if self.chk_state.get():
+            self.btn_install.config(state="normal", bg=self.accent_green, fg="white")
+        else:
+            self.btn_install.config(state="disabled", bg="#e1e1e1", fg="#888888")
+
     def pruefe_auf_updates(self):
         if platform.system() != "Windows":
             return 
