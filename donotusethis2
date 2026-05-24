@@ -46,6 +46,11 @@ class RksInstaller:
         self.root.configure(bg=self.bg_main)
         self.is_de = True
         
+        # Pfad- und Profillisten-Variablen für die Logik
+        self.aktueller_spiel_pfad = None
+        self.aktuelle_profil_liste = []
+        self.aktueller_listener = None
+        
         # Standard-Belegungen (Daumentaste 1 als Standard)
         self.taste_turbo_code = "keyboard.space?0"
         self.taste_rangier_code = "mouse.button_4?0" 
@@ -54,9 +59,6 @@ class RksInstaller:
         self.taste_turbo_display = "SPACE"
         self.taste_rangier_display = "MAUS DAUMEN 1"
         self.taste_notbremse_display = "LEFT ALT"
-        
-        self.aktueller_listener = []
-        self.profile_dict = {}
 
         self.txt = {
             "titel": f"RKS-MOD INSTALLER ~ by Shadoo91 ({self.aktuelle_version})",
