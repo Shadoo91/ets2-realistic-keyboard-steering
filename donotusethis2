@@ -49,6 +49,7 @@ class RksInstaller:
         # Pfad- und Profillisten-Variablen für die Logik
         self.aktueller_spiel_pfad = None
         self.aktuelle_profil_liste = []
+        self.profile_dict = {}
         self.aktueller_listener = None
         
         # Standard-Belegungen (Daumentaste 1 als Standard)
@@ -481,6 +482,10 @@ class RksInstaller:
         else:
             self.prof_combo.config(values=[self.txt["no_profiles"]])
             self.prof_combo.current(0)
+                    for p in gueltige_profile:
+                        self.profile_dict[p["name"]] = os.path.join(base_path, p["sub"], p["folder"], "controls.sii")
+
+            
             
             # Die geforderte Fehlermeldung mit klarem Hinweis für den Nutzer
             from tkinter import messagebox
@@ -520,7 +525,6 @@ class RksInstaller:
         if ziel == "turbo": self.btn_turbo.config(text="❓ ...", bg="#ffcc00")
         elif ziel == "rangier": self.btn_rangier.config(text="❓ ...", bg="#ffcc00")
         elif ziel == "notbremse": self.btn_not.config(text="❓ ...", bg="#ffcc00")
-        self.status_label.config(text=self.txt["status_wait"], fg="#d35400")
 
     def taste_abfangen(self, event):
         if not self.aktueller_listener: return
@@ -563,9 +567,7 @@ class RksInstaller:
         elif self.aktueller_listener == "notbremse":
             self.taste_notbremse_display, self.taste_notbremse_code = display_name, scs_code
             self.btn_not.config(text=self.taste_notbremse_display, bg="#e1e1e1")
-            
-        self.status_label.config(text=f"{self.txt['status_done']}{display_name}", fg="green")
-        self.aktueller_listener = None
+            self.aktueller_listener = None
 
     def ausfuehren_deinstallation(self):
         selected_prof = self.prof_combo.get()
@@ -645,6 +647,11 @@ class RksInstaller:
             self.prof_combo.config(values=[self.txt["no_profiles"]])
             self.prof_combo.current(0)
             messagebox.showwarning("Keine Profile ⚠️", "Der ausgewählte Ordner enthält keine gültigen Profile mit einer controls.sii.")
+            
+            for p in gueltige_profile:
+                self.profile_dict[p["name"]] = os.path.join(base_dir, p["sub"], p["folder"], "controls.sii")
+
+
 
     def ausfuehren_installation(self):
         """Führt die Mod-Injektion aus, korrigiert die ETS2-ID und bereinigt das Layout."""
