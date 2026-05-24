@@ -393,7 +393,8 @@ class RksInstaller:
                 tk.Label(f, text=f"    {normal_part}", font=("Arial", 9), fg="#444444", bg=self.card_bg).pack(side="left")
 
     def suche_profile(self):
-        """Sucht automatisch echte Profile (inklusive Steam Cloud) und filtert OneDrive-Geisterordner aus."""
+        """Sucht automatisch Profile, ignoriert Groß-/Kleinschreibung und warnt bei Fehlern sprachunabhängig."""
+        import os, platform
         game_name = self.game_combo.get()
         home = os.path.expanduser("~")
         base_path = None
@@ -411,10 +412,12 @@ class RksInstaller:
                 local_documents = os.path.join(home, "Documents") 
                 
             local_path = os.path.join(local_documents, game_name)
-            onedrive_path = os.path.join(os.environ.get("USERPROFILE", ""), "OneDrive", "Documents", game_name)
+            onedrive_path = os.path.join(home, "OneDrive", "Dokumente", game_name)
+            onedrive_path_en = os.path.join(home, "OneDrive", "Documents", game_name)
             
             if os.path.exists(local_path): base_path = local_path
             elif os.path.exists(onedrive_path): base_path = onedrive_path
+            elif os.path.exists(onedrive_path_en): base_path = onedrive_path_en
         else:
             app_id = "227300" if game_name == "Euro Truck Simulator 2" else "270880"
             linux_steam_path = os.path.join(home, ".steam", "steam", "steamapps", "compatdata", app_id, "pfx", "drive_c", "users", "steamuser", "Documents", game_name)
@@ -423,71 +426,13 @@ class RksInstaller:
         self.aktueller_spiel_pfad = base_path
         gueltige_profile = []
 
-        if base_path:
-            profiles_dir = os.path.join(base_path, "profiles")
-            steam_dir = os.path.join(base_path, "steam_profiles")
-            
-            # 1. Lokale Profile OneDrive-sicher scannen
-            if os.path.isdir(profiles_dir):
-                for folder in os.listdir(profiles_dir):
-                    vollstaendiger_pfad = os.path.join(profiles_dir, folder)
-                    controls_datei = os.path.join(vollstaendiger_pfad, "controls.sii")
-                    
-                    if os.path.isdir(vollstaendiger_pfad) and os.path.isfile(controls_datei):
-                        try:
-                            readable_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
-                            display_str = f"{readable_name} ({folder[:6]}...)" if readable_name.strip() else folder
-                        except:
-                            display_str = folder
-                        gueltige_profile.append({"folder": folder, "name": display_str, "type": "local"})
-
-            # 2. Steam Cloud Profile OneDrive-sicher scannen
-            if os.path.isdir(steam_dir):
-                for folder in os.listdir(steam_dir):
-                    vollstaendiger_pfad = os.path.join(steam_dir, folder)
-                    controls_datei = os.path.join(vollstaendiger_pfad, "controls.sii")
-                    
-                    if os.path.isdir(vollstaendiger_pfad) and os.path.isfile(controls_datei):
-                        try:
-                            readable_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
-                            display_str = f"[Cloud] {readable_name} ({folder[:6]}...)" if readable_name.strip() else f"[Cloud] {folder}"
-                        except:
-                            display_str = f"[Cloud] {folder}"
-                        gueltige_profile.append({"folder": folder, "name": display_str, "type": "cloud"})
-
-        self.aktuelle_profil_liste = gueltige_profile
-                        
-        if gueltige_profile:
-            anzuzeigende_namen = [p["name"] for p in gueltige_profile]
-            self.prof_combo.config(values=anzuzeigende_namen)
-            self.prof_combo.current(0)
-        else:
-            self.prof_combo.config(values=[self.txt["no_profiles"]])
-            self.prof_combo.current(0)
-
-                def manueller_pfad_waehlen(self):
-        """Öffnet den Explorer zur manuellen Auswahl und ignoriert Ordner-Schreibweisen."""
-        initial_dir = os.path.expanduser("~/Documents")
-        gewaehlter_pfad = filedialog.askdirectory(title="Wähle den ETS2/ATS Hauptordner aus", initialdir=initial_dir)
-        
-        if not gewaehlter_pfad:
-            return
-
-        # Korrektur, falls der Nutzer versehentlich zu tief klickt
-        ordner_name = os.path.basename(gewaehlter_pfad).lower()
-        if ordner_name in ["profiles", "steam_profiles"]:
-            base_dir = os.path.dirname(gewaehlter_pfad)
-        else:
-            base_dir = gewaehlter_pfad
-
-        self.aktueller_spiel_pfad = base_dir
-        gueltige_profile = []
-
-        if os.path.isdir(base_dir):
-            for eintrag in os.listdir(base_dir):
-                eintrag_pfad = os.path.join(base_dir, eintrag)
+        if base_path and os.path.isdir(base_path):
+            # Scannt das Verzeichnis und ignoriert Groß-/Kleinschreibung der Systemordner
+            for eintrag in os.listdir(base_path):
+                eintrag_pfad = os.path.join(base_path, eintrag)
                 if not os.path.isdir(eintrag_pfad): continue
                 
+                # 1. Lokale Profile scannen
                 if eintrag.lower() == "profiles":
                     for folder in os.listdir(eintrag_pfad):
                         vollstaendiger_pfad = os.path.join(eintrag_pfad, folder)
@@ -495,10 +440,11 @@ class RksInstaller:
                         if os.path.isdir(vollstaendiger_pfad) and os.path.isfile(controls_datei):
                             try:
                                 readable_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
-                                display_str = f"{readable_name} ({folder[:6]}...)"
+                                display_str = f"{readable_name} ({folder[:6]}...)" if readable_name.strip() else folder
                             except: display_str = folder
                             gueltige_profile.append({"folder": folder, "name": display_str, "type": "local", "sub": eintrag})
 
+                # 2. Steam Cloud Profile scannen
                 if eintrag.lower() == "steam_profiles":
                     for folder in os.listdir(eintrag_pfad):
                         vollstaendiger_pfad = os.path.join(eintrag_pfad, folder)
@@ -506,22 +452,32 @@ class RksInstaller:
                         if os.path.isdir(vollstaendiger_pfad) and os.path.isfile(controls_datei):
                             try:
                                 readable_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
-                                display_str = f"[Cloud] {readable_name} ({folder[:6]}...)"
+                                display_str = f"[Cloud] {readable_name} ({folder[:6]}...)" if readable_name.strip() else f"[Cloud] {folder}"
                             except: display_str = f"[Cloud] {folder}"
                             gueltige_profile.append({"folder": folder, "name": display_str, "type": "cloud", "sub": eintrag})
 
         self.aktuelle_profil_liste = gueltige_profile
-
+                        
         if gueltige_profile:
             anzuzeigende_namen = [p["name"] for p in gueltige_profile]
             self.prof_combo.config(values=anzuzeigende_namen)
             self.prof_combo.current(0)
-            messagebox.showinfo("Erfolg 🎉", f"Es wurden {len(gueltige_profile)} echte Profile im manuellen Pfad gefunden!")
-            self.status_label.config(text="Manueller Pfad aktiv.")
+            self.status_label.config(text=f"Automatisch {len(gueltige_profile)} echte Profile gefunden.")
         else:
             self.prof_combo.config(values=[self.txt["no_profiles"]])
             self.prof_combo.current(0)
-            messagebox.showwarning("Keine Profile ⚠️", "Der ausgewählte Ordner enthält keine gültigen Profile mit einer controls.sii.")
+            self.status_label.config(text="Keine Profile automatisch gefunden.")
+            
+            # Die geforderte Fehlermeldung mit klarem Hinweis für den Nutzer
+            from tkinter import messagebox
+            messagebox.showwarning(
+                "Pfad nicht gefunden ⚠️",
+                f"Der Standardordner für {game_name} konnte nicht automatisch ermittelt werden.\n\n"
+                "Mögliche Ursachen:\n"
+                "• Das Spiel wurde noch nie gestartet.\n"
+                "• Die Dokumente wurden auf ein anderes Laufwerk verschoben.\n\n"
+                "Bitte nutze den Button 'Pfad wählen...', um den Hauptordner des Spiels manuell herauszusuchen!"
+            )
 
 
     def starte_listener(self, ziel):
