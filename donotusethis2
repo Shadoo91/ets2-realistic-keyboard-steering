@@ -477,11 +477,10 @@ class RksInstaller:
             anzuzeigende_namen = [p["name"] for p in gueltige_profile]
             self.prof_combo.config(values=anzuzeigende_namen)
             self.prof_combo.current(0)
-            self.status_label.config(text=f"Automatisch {len(gueltige_profile)} echte Profile gefunden.")
+            
         else:
             self.prof_combo.config(values=[self.txt["no_profiles"]])
             self.prof_combo.current(0)
-            self.status_label.config(text="Keine Profile automatisch gefunden.")
             
             # Die geforderte Fehlermeldung mit klarem Hinweis für den Nutzer
             from tkinter import messagebox
