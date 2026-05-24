@@ -163,7 +163,7 @@ class RksInstaller:
         prof_frame = tk.Frame(card_profile, bg=self.card_bg)
         prof_frame.pack(fill="x", pady=(8, 0))
         tk.Label(prof_frame, text=self.txt["profile_select"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=15, anchor="w").pack(side="left")
-
+        
         # 1. Das Profil-Dropdown (wird links platziert)
         self.prof_combo = ttk.Combobox(prof_frame, state="readonly", font=("Arial", 11), width=25)
         self.prof_combo.pack(side="left")
