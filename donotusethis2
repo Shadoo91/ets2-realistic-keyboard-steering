@@ -165,22 +165,21 @@ class RksInstaller:
         tk.Label(prof_frame, text=self.txt["profile_select"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=15, anchor="w").pack(side="left")
 
         # 1. Das Profil-Dropdown (wird links platziert)
-        self.prof_combo = ttk.Combobox(prof_frame, state="readonly", width=30, font=("Arial", 11))
+        self.prof_combo = ttk.Combobox(prof_frame, state="readonly", font=("Arial", 11), width=25)
         self.prof_combo.pack(side="left")
-
-        # 2. Der NEUE Pfad-Auswahl-Button (wird direkt rechts neben dem Dropdown platziert)
-        self.btn_browse = tk.Button(prof_frame, text="📁 Pfad wählen...", command=self.manueller_pfad_waehlen, font=("Arial", 9), bg="#e1e1e1", relief="groove")
+        
+        self.btn_browse = tk.Button(prof_frame, text="📁 Pfad wählen...", command=self.manueller_pfad_waehlen, font=("Arial", 10), bg="#f0f0f0", fg="#333333", relief="groove", padx=8, pady=2)
         self.btn_browse.pack(side="left", padx=5)
-
-        # 3. Der Deinstallations-Button (wird bündig an der rechten Kante platziert)
+        
         self.btn_uninstall = tk.Button(prof_frame, text="Mod deinstallieren ❌", bg=self.accent_red, fg="white", font=("Arial", 10, "bold"), relief="flat", padx=10, command=self.ausfuehren_deinstallation)
         self.btn_uninstall.pack(side="right", padx=5)
- 
-        card_keys = tk.Frame(self.config_frame, bg=self.card_bg, bd=1, relief="solid", padx=15, pady=15)
-        card_keys.pack(fill="both", expand=True, pady=(0, 15))
-        f_turbo = tk.Frame(card_keys, bg=self.card_bg)
-        f_turbo.pack(fill="x", pady=5)
-        tk.Label(f_turbo, text=self.txt["btn_turbo"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=22, anchor="w").pack(side="left")
+        
+        card_keys = tk.Frame(self.config_frame, bg=self.bg_main, pady=10)
+        card_keys.pack(fill="x", pady=(0, 20))
+        
+        f_turbo = tk.Frame(card_keys, bg=self.bg_main, pady=5)
+        f_turbo.pack(fill="x")
+        tk.Label(f_turbo, text="Stadt- / Turbo-Taste:", font=("Arial", 11, "bold"), bg=self.bg_main, width=15, anchor="w").pack(side="left")
         
         def klick_turbo():
             self.aktueller_listener = "turbo"
@@ -189,7 +188,6 @@ class RksInstaller:
         self.btn_turbo = tk.Button(f_turbo, text=self.taste_turbo_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1, command=klick_turbo)
         self.btn_turbo.pack(side="left")
         
-        # Button 2: Rangier-Modus
         f_rangier = tk.Frame(card_keys, bg=self.bg_main, pady=5)
         f_rangier.pack(fill="x")
         tk.Label(f_rangier, text="Rangier-Modus:", font=("Arial", 11, "bold"), bg=self.bg_main, width=15, anchor="w").pack(side="left")
@@ -201,7 +199,6 @@ class RksInstaller:
         self.btn_rangier = tk.Button(f_rangier, text=self.taste_rangier_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1, command=klick_rangier)
         self.btn_rangier.pack(side="left")
         
-        # Button 3: Notbremse
         f_not = tk.Frame(card_keys, bg=self.bg_main, pady=5)
         f_not.pack(fill="x")
         tk.Label(f_not, text="Notbremse:", font=("Arial", 11, "bold"), bg=self.bg_main, width=15, anchor="w").pack(side="left")
@@ -213,22 +210,13 @@ class RksInstaller:
         self.btn_not = tk.Button(f_not, text=self.taste_notbremse_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1, command=klick_not)
         self.btn_not.pack(side="left")
 
-        # --- NAVIGATION: DER WEITER-BUTTON WIRD SICHTBAR PLATZIERT ---
         btn_nav_frame = tk.Frame(self.config_frame, bg=self.bg_main)
         btn_nav_frame.pack(side="bottom", fill="x", pady=(20, 10))
-        
-        self.btn_weiter = tk.Button(
-            btn_nav_frame, 
-            text="➔ Weiter zur Übersicht", 
-            width=22, 
-            height=2, 
-            bg=self.accent_blue, 
-            fg="white", 
-            font=("Arial", 11, "bold"), 
-            relief="flat",
-            command=self.seite_readme
-        )
+        self.btn_weiter = tk.Button(btn_nav_frame, text="➔ Weiter zur Übersicht", width=22, height=2, bg=self.accent_blue, fg="white", font=("Arial", 11, "bold"), relief="flat", command=self.seite_readme)
         self.btn_weiter.pack(side="right", padx=15, pady=5)
+        
+        # Start-Zustand des Wizards festlegen: Erste Seite anzeigen
+        self.seite_willkommen()
 
     def seite_readme(self):
         """Schaltet auf die Readme-/Übersichtsseite (Seite 3) um und generiert den Text."""
