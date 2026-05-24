@@ -330,14 +330,14 @@ class RksInstaller:
 
     def toggle_install_button(self):
         if self.chk_state.get():
-            self.btn_install.config(text="Bitte warten (2s)...", bg="#e1e1e1", fg="#888888", state="disabled")
-            self.root.after(2000, self.freischalten_install_jetzt)
+           self.btn_install.config(text="Bitte warten (2s)...", bg="#e1e1e1", fg="#888888", state="disabled")
+           self.root.after(2000, self.freischalten_install_jetzt)
         else:
             self.btn_install.config(text=self.txt["btn_install"], bg="#e1e1e1", fg="#888888", state="disabled")
 
     def freischalten_install_jetzt(self):
         if self.chk_state.get():
-            self.btn_install.config(text=self.txt["btn_install"], bg=self.accent_green, fg="white", state="normal")
+           self.btn_install.config(text=self.txt["btn_install"], bg=self.accent_green, fg="white", state="normal")
 
     def generiere_readme_text(self, selected_prof):
         for widget in self.readme_content_frame.winfo_children():
@@ -459,6 +459,28 @@ class RksInstaller:
                             gueltige_profile.append({"folder": folder, "name": display_str, "type": "cloud", "sub": eintrag})
 
         self.aktuelle_profil_liste = gueltige_profile
+                        
+        if gueltige_profile:
+            anzuzeigende_namen = [p["name"] for p in gueltige_profile]
+            self.prof_combo.config(values=anzuzeigende_namen)
+            self.prof_combo.current(0)
+            self.status_label.config(text=f"Automatisch {len(gueltige_profile)} echte Profile gefunden.")
+        else:
+            self.prof_combo.config(values=[self.txt["no_profiles"]])
+            self.prof_combo.current(0)
+            self.status_label.config(text="Keine Profile automatisch gefunden.")
+            
+            # Die geforderte Fehlermeldung mit klarem Hinweis für den Nutzer
+            from tkinter import messagebox
+            messagebox.showwarning(
+                "Pfad nicht gefunden ⚠️",
+                f"Der Standardordner für {game_name} konnte nicht automatisch ermittelt werden.\n\n"
+                "Mögliche Ursachen:\n"
+                "• Das Spiel wurde noch nie gestartet.\n"
+                "• Die Dokumente wurden auf ein anderes Laufwerk verschoben.\n\n"
+                "Bitte nutze den Button 'Pfad wählen...', um den Hauptordner des Spiels manuell herauszusuchen!"
+            )
+
                         
         if gueltige_profile:
             anzuzeigende_namen = [p["name"] for p in gueltige_profile]
