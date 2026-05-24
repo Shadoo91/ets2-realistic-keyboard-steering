@@ -181,7 +181,8 @@ class RksInstaller:
         f_turbo = tk.Frame(card_keys, bg=self.card_bg)
         f_turbo.pack(fill="x", pady=5)
         tk.Label(f_turbo, text=self.txt["btn_turbo"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=22, anchor="w").pack(side="left")
-        # Button 1
+        
+        # Button 1: Turbo-Modus
         def klick_turbo():
             self.aktueller_listener = "turbo"
             self.btn_turbo.config(text="❓ DRÜCKE TASTE...", bg="#ffeaa7")
@@ -189,7 +190,7 @@ class RksInstaller:
         self.btn_turbo = tk.Button(f_turbo, text=self.taste_turbo_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1, command=klick_turbo)
         self.btn_turbo.pack(side="left")
         
-        # Button 2
+        # Button 2: Rangier-Modus
         f_rangier = tk.Frame(card_keys, bg=self.bg_main, pady=5)
         f_rangier.pack(fill="x")
         tk.Label(f_rangier, text="Rangier-Modus:", font=("Arial", 11, "bold"), bg=self.bg_main, width=15, anchor="w").pack(side="left")
@@ -201,7 +202,7 @@ class RksInstaller:
         self.btn_rangier = tk.Button(f_rangier, text=self.taste_rangier_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1, command=klick_rangier)
         self.btn_rangier.pack(side="left")
         
-        # Button 3
+        # Button 3: Notbremse
         f_not = tk.Frame(card_keys, bg=self.bg_main, pady=5)
         f_not.pack(fill="x")
         tk.Label(f_not, text="Notbremse:", font=("Arial", 11, "bold"), bg=self.bg_main, width=15, anchor="w").pack(side="left")
@@ -213,6 +214,23 @@ class RksInstaller:
         self.btn_not = tk.Button(f_not, text=self.taste_notbremse_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1, command=klick_not)
         self.btn_not.pack(side="left")
 
+        # --- NAVIGATION: DER WEITER-BUTTON ZU SEITE 3 ---
+        # Verpackt den Navigationsknopf sauber in den unteren Hauptrahmen deines Wizards
+        btn_nav_frame = tk.Frame(self.config_frame, bg=self.bg_main, pady=10)
+        btn_nav_frame.pack(side="bottom", fill="x")
+        
+        self.btn_weiter = tk.Button(
+            btn_nav_frame, 
+            text=self.txt["weiter"] if "weiter" in self.txt else "➔ Weiter zur Übersicht", 
+            width=22, 
+            height=2, 
+            bg=self.accent_blue, 
+            fg="white", 
+            font=("Arial", 11, "bold"), 
+            relief="flat",
+            command=self.seite_readme
+        )
+        self.btn_weiter.pack(side="right", padx=15, pady=15)
 
         # --- SEITE 3: README / ÜBERSICHT FRAME ---
         self.readme_frame = tk.Frame(self.root, padx=30, pady=15, bg=self.bg_main)
@@ -408,7 +426,7 @@ class RksInstaller:
                 tk.Label(f, text=f"    {normal_part}", font=("Arial", 9), fg="#444444", bg=self.card_bg).pack(side="left")
 
     def suche_profile(self):
-        """Sucht automatisch Profile, ignoriert Groß-/Kleinschreibung und warnt bei Fehlern sprachunabhängig."""
+        """Sucht automatisch Profile, ignoriert Groß-/Kleinschreibung und warnt sprachunabhängig bei Fehlern."""
         import os, platform
         game_name = self.game_combo.get()
         home = os.path.expanduser("~")
@@ -442,12 +460,10 @@ class RksInstaller:
         gueltige_profile = []
 
         if base_path and os.path.isdir(base_path):
-            # Scannt das Verzeichnis und ignoriert Groß-/Kleinschreibung der Systemordner
             for eintrag in os.listdir(base_path):
                 eintrag_pfad = os.path.join(base_path, eintrag)
                 if not os.path.isdir(eintrag_pfad): continue
                 
-                # 1. Lokale Profile scannen
                 if eintrag.lower() == "profiles":
                     for folder in os.listdir(eintrag_pfad):
                         vollstaendiger_pfad = os.path.join(eintrag_pfad, folder)
@@ -459,7 +475,6 @@ class RksInstaller:
                             except: display_str = folder
                             gueltige_profile.append({"folder": folder, "name": display_str, "type": "local", "sub": eintrag})
 
-                # 2. Steam Cloud Profile scannen
                 if eintrag.lower() == "steam_profiles":
                     for folder in os.listdir(eintrag_pfad):
                         vollstaendiger_pfad = os.path.join(eintrag_pfad, folder)
@@ -472,49 +487,29 @@ class RksInstaller:
                             gueltige_profile.append({"folder": folder, "name": display_str, "type": "cloud", "sub": eintrag})
 
         self.aktuelle_profil_liste = gueltige_profile
+        
+        # Sicherer Brückenaufbau für die Installation
+        if not hasattr(self, 'profile_dict') or self.profile_dict is None:
+            self.profile_dict = {}
+        self.profile_dict.clear()
+        
+        if base_path and gueltige_profile:
+            for p in gueltige_profile:
+                self.profile_dict[p["name"]] = os.path.join(base_path, p["sub"], p["folder"], "controls.sii")
                         
         if gueltige_profile:
             anzuzeigende_namen = [p["name"] for p in gueltige_profile]
             self.prof_combo.config(values=anzuzeigende_namen)
             self.prof_combo.current(0)
-            
-        else:
-            self.prof_combo.config(values=[self.txt["no_profiles"]])
-            self.prof_combo.current(0)
-        for p in gueltige_profile:
-            self.profile_dict[p["name"]] = os.path.join(base_path, p["sub"], p["folder"], "controls.sii")
-
-            
-            
-            # Die geforderte Fehlermeldung mit klarem Hinweis für den Nutzer
-            from tkinter import messagebox
-            messagebox.showwarning(
-                "Pfad nicht gefunden ⚠️",
-                f"Der Standardordner für {game_name} konnte nicht automatisch ermittelt werden.\n\n"
-                "Mögliche Ursachen:\n"
-                "• Das Spiel wurde noch nie gestartet.\n"
-                "• Die Dokumente wurden auf ein anderes Laufwerk verschoben.\n\n"
-                "Bitte nutze den Button 'Pfad wählen...', um den Hauptordner des Spiels manuell herauszusuchen!"
-            )
-
-                        
-        if gueltige_profile:
-            anzuzeigende_namen = [p["name"] for p in gueltige_profile]
-            self.prof_combo.config(values=anzuzeigende_namen)
-            self.prof_combo.current(0)
-            
         else:
             self.prof_combo.config(values=[self.txt["no_profiles"]])
             self.prof_combo.current(0)
             
-            # Die geforderte Fehlermeldung mit klarem Hinweis für den Nutzer
+            # Zeigt die Fehlermeldung nur, wenn der Nutzer die automatische Pfadwahl nutzt
             from tkinter import messagebox
             messagebox.showwarning(
                 "Pfad nicht gefunden ⚠️",
                 f"Der Standardordner für {game_name} konnte nicht automatisch ermittelt werden.\n\n"
-                "Mögliche Ursachen:\n"
-                "• Das Spiel wurde noch nie gestartet.\n"
-                "• Die Dokumente wurden auf ein anderes Laufwerk verschoben.\n\n"
                 "Bitte nutze den Button 'Pfad wählen...', um den Hauptordner des Spiels manuell herauszusuchen!"
             )
 
@@ -828,5 +823,3 @@ if __name__ == "__main__":
     root.bind("<Key>", app.taste_abfangen)
     root.bind("<Button>", app.universelle_maus_abfangen)
     root.mainloop()
-
-    
