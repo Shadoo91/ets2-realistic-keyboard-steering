@@ -214,14 +214,13 @@ class RksInstaller:
         self.btn_not = tk.Button(f_not, text=self.taste_notbremse_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1, command=klick_not)
         self.btn_not.pack(side="left")
 
-        # --- NAVIGATION: DER WEITER-BUTTON ZU SEITE 3 ---
-        # Verpackt den Navigationsknopf sauber in den unteren Hauptrahmen deines Wizards
-        btn_nav_frame = tk.Frame(self.config_frame, bg=self.bg_main, pady=10)
-        btn_nav_frame.pack(side="bottom", fill="x")
+        # --- NAVIGATION: DER WEITER-BUTTON WIRD SICHTBAR PLATZIERT ---
+        btn_nav_frame = tk.Frame(self.config_frame, bg=self.bg_main)
+        btn_nav_frame.pack(side="bottom", fill="x", pady=(20, 10))
         
         self.btn_weiter = tk.Button(
             btn_nav_frame, 
-            text=self.txt["weiter"] if "weiter" in self.txt else "➔ Weiter zur Übersicht", 
+            text="➔ Weiter zur Übersicht", 
             width=22, 
             height=2, 
             bg=self.accent_blue, 
@@ -230,7 +229,7 @@ class RksInstaller:
             relief="flat",
             command=self.seite_readme
         )
-        self.btn_weiter = tk.Button(btn_nav_frame, text=self.txt["weiter"] if "weiter" in self.txt else "➔ Weiter zur Übersicht", width=22, height=2, bg=self.accent_blue, fg="white", font=("Arial", 11, "bold"), relief="flat", command=self.seite_readme)
+        self.btn_weiter.pack(side="right", padx=15, pady=5)
 
         # --- SEITE 3: README / ÜBERSICHT FRAME ---
         self.readme_frame = tk.Frame(self.root, padx=30, pady=15, bg=self.bg_main)
@@ -588,9 +587,10 @@ class RksInstaller:
     
     def manueller_pfad_waehlen(self):
         """Öffnet den Explorer zur manuellen Auswahl und ignoriert Ordner-Schreibweisen."""
+        from tkinter import filedialog  # KORREKTUR: Ermöglicht das Öffnen des Explorers!
         initial_dir = os.path.expanduser("~/Documents")
         gewaehlter_pfad = filedialog.askdirectory(title="Wähle den ETS2/ATS Hauptordner aus", initialdir=initial_dir)
-        
+
         if not gewaehlter_pfad:
             return
 
