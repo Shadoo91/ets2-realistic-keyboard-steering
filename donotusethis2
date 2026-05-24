@@ -645,8 +645,6 @@ class RksInstaller:
         for p in gueltige_profile:
             self.profile_dict[p["name"]] = os.path.join(base_dir, p["sub"], p["folder"], "controls.sii")
 
-
-
     def ausfuehren_installation(self):
         """Führt die Mod-Injektion aus, korrigiert die ETS2-ID und bereinigt das Layout."""
         import os, shutil, platform, stat, time
@@ -815,11 +813,12 @@ class RksInstaller:
 if __name__ == "__main__":
     root = tk.Tk()
     app = RksInstaller(root)
-
-    # KORREKTUR: Startet die Vorauswahl und den Profilscan erst, wenn die gesamte App fertig geladen ist!
-    app.game_combo.current(0)
-    app.suche_profile()
-
+    
+    # Startet das Programm direkt mit ATS (Index 1), damit der Scan auf deinem PC sofort klappt!
+    if hasattr(app, 'game_combo'):
+        app.game_combo.current(1)
+        app.suche_profile()
+        
     root.bind("<Key>", app.taste_abfangen)
     root.bind("<Button>", app.universelle_maus_abfangen)
     root.mainloop()
