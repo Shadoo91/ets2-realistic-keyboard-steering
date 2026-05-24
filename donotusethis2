@@ -158,7 +158,8 @@ class RksInstaller:
         self.game_combo.current(0)
         self.suche_profile()
         self.game_combo.pack(side="left")
-        
+        self.game_combo.bind("<<ComboboxSelected>>", lambda e: self.suche_profile())
+
         prof_frame = tk.Frame(card_profile, bg=self.card_bg)
         prof_frame.pack(fill="x", pady=(8, 0))
         tk.Label(prof_frame, text=self.txt["profile_select"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=15, anchor="w").pack(side="left")
@@ -172,7 +173,7 @@ class RksInstaller:
         self.btn_browse.pack(side="left", padx=5)
 
         # 3. Der Deinstallations-Button (wird bündig an der rechten Kante platziert)
-        self.btn_uninstall = tk.Button(prof_frame, text="Mod deinstallieren ❌", bg=self.accent_red, fg="white", font=("Arial", 10, "bold"), relief="flat", padx=10)
+        self.btn_uninstall = tk.Button(prof_frame, text="Mod deinstallieren ❌", bg=self.accent_red, fg="white", font=("Arial", 10, "bold"), relief="flat", padx=10, command=self.ausfuehren_deinstallation)
         self.btn_uninstall.pack(side="right", padx=5)
  
         card_keys = tk.Frame(self.config_frame, bg=self.card_bg, bd=1, relief="solid", padx=15, pady=15)
@@ -197,7 +198,7 @@ class RksInstaller:
         
         self.status_label = tk.Label(card_keys, text="", font=("Arial", 12, "italic"), fg="green", bg=self.card_bg)
         self.status_label.pack(pady=(10, 0))
-        self.btn_weiter = tk.Button(self.config_frame, text=self.txt["weiter"], width=20, height=2, bg=self.accent_blue, fg="white", font=("Arial", 11, "bold"), relief="flat")
+        self.btn_weiter = tk.Button(self.config_frame, text=self.txt["weiter"], width=20, height=2, bg=self.accent_blue, fg="white", font=("Arial", 11, "bold"), relief="flat", command=self.seite_readme)
         self.btn_weiter.pack(side="bottom", anchor="e")
 
         # --- SEITE 3: README / ÜBERSICHT FRAME ---
