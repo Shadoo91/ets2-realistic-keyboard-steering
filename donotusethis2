@@ -55,7 +55,7 @@ class RksInstaller:
         self.taste_rangier_display = "MAUS DAUMEN 1"
         self.taste_notbremse_display = "LEFT ALT"
         
-        self.aktueller_listener = None
+        self.aktueller_listener = []
         self.profile_dict = {}
 
         self.txt = {
@@ -139,7 +139,7 @@ class RksInstaller:
         self.welcome_box.tag_config("italic", font=("Arial", 12, "italic"), foreground="#555555")
         self.welcome_box.config(state="disabled")
         
-        self.btn_start = tk.Button(self.welcome_frame, text=self.txt["btn_start"], width=25, height=2, bg=self.accent_blue, fg="white", font=("Arial", 11, "bold"), relief="flat")
+        self.btn_start = tk.Button(self.welcome_frame, text=self.txt["btn_start"], ..., command=self.seite_config)
         self.btn_start.pack(side="bottom", anchor="e")
 
         # --- SEITE 2: CONFIG FRAME ---
