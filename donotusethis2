@@ -777,7 +777,7 @@ class RksInstaller:
                 if "config_lines[" in line:
                     try:
                         parts = line.split("[")
-                                                if len(parts) > 1:
+                        if len(parts) > 1:
                             idx_str = parts[1].split("]")
                             max_index = max(max_index, int(idx_str[0]))  # KORREKTUR: [0] hinzugefügt
 
