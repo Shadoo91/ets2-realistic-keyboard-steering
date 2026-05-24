@@ -465,71 +465,63 @@ class RksInstaller:
             self.prof_combo.config(values=[self.txt["no_profiles"]])
             self.prof_combo.current(0)
 
-            
-    def manueller_pfad_waehlen(self):
-        """Öffnet den Windows-Explorer zur manuellen Auswahl, falls die Automatik versagt."""
-        from tkinter import filedialog, messagebox
-        import os
-        
+                def manueller_pfad_waehlen(self):
+        """Öffnet den Explorer zur manuellen Auswahl und ignoriert Ordner-Schreibweisen."""
         initial_dir = os.path.expanduser("~/Documents")
         gewaehlter_pfad = filedialog.askdirectory(title="Wähle den ETS2/ATS Hauptordner aus", initialdir=initial_dir)
         
         if not gewaehlter_pfad:
             return
 
-        if os.path.basename(gewaehlter_pfad).lower() == "profiles" or os.path.basename(gewaehlter_pfad).lower() == "steam_profiles":
+        # Korrektur, falls der Nutzer versehentlich zu tief klickt
+        ordner_name = os.path.basename(gewaehlter_pfad).lower()
+        if ordner_name in ["profiles", "steam_profiles"]:
             base_dir = os.path.dirname(gewaehlter_pfad)
         else:
             base_dir = gewaehlter_pfad
 
         self.aktueller_spiel_pfad = base_dir
-        profiles_path = os.path.join(base_dir, "profiles")
-        steam_cloud_path = os.path.join(base_dir, "steam_profiles")
-
-        if not os.path.isdir(profiles_path) and not os.path.isdir(steam_cloud_path):
-            messagebox.showerror("Ordner ungültig", f"Unter:\n{base_dir}\nwurde weder ein 'profiles'- noch ein 'steam_profiles'-Ordner gefunden!")
-            return
-
         gueltige_profile = []
-        
-        # Manuellen lokalen Pfad scannen
-        if os.path.isdir(profiles_path):
-            for folder in os.listdir(profiles_path):
-                vollstaendiger_pfad = os.path.join(profiles_path, folder)
-                controls_datei = os.path.join(vollstaendiger_pfad, "controls.sii")
-                if os.path.isdir(vollstaendiger_pfad) and os.path.isfile(controls_datei):
-                    try:
-                        lesbarer_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
-                        display_name = f"{lesbarer_name} ({folder})" if lesbarer_name.strip() else folder
-                    except Exception:
-                        display_name = folder
-                    gueltige_profile.append({"folder": folder, "name": display_name, "type": "local"})
 
-        # Manuellen Cloud Pfad scannen
-        if os.path.isdir(steam_cloud_path):
-            for folder in os.listdir(steam_cloud_path):
-                vollstaendiger_pfad = os.path.join(steam_cloud_path, folder)
-                controls_datei = os.path.join(vollstaendiger_pfad, "controls.sii")
-                if os.path.isdir(vollstaendiger_pfad) and os.path.isfile(controls_datei):
-                    try:
-                        lesbarer_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
-                        display_name = f"[Cloud] {lesbarer_name} ({folder})" if lesbarer_name.strip() else f"[Cloud] {folder}"
-                    except Exception:
-                        display_name = f"[Cloud] {folder}"
-                    gueltige_profile.append({"folder": folder, "name": display_name, "type": "cloud"})
+        if os.path.isdir(base_dir):
+            for eintrag in os.listdir(base_dir):
+                eintrag_pfad = os.path.join(base_dir, eintrag)
+                if not os.path.isdir(eintrag_pfad): continue
+                
+                if eintrag.lower() == "profiles":
+                    for folder in os.listdir(eintrag_pfad):
+                        vollstaendiger_pfad = os.path.join(eintrag_pfad, folder)
+                        controls_datei = os.path.join(vollstaendiger_pfad, "controls.sii")
+                        if os.path.isdir(vollstaendiger_pfad) and os.path.isfile(controls_datei):
+                            try:
+                                readable_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
+                                display_str = f"{readable_name} ({folder[:6]}...)"
+                            except: display_str = folder
+                            gueltige_profile.append({"folder": folder, "name": display_str, "type": "local", "sub": eintrag})
+
+                if eintrag.lower() == "steam_profiles":
+                    for folder in os.listdir(eintrag_pfad):
+                        vollstaendiger_pfad = os.path.join(eintrag_pfad, folder)
+                        controls_datei = os.path.join(vollstaendiger_pfad, "controls.sii")
+                        if os.path.isdir(vollstaendiger_pfad) and os.path.isfile(controls_datei):
+                            try:
+                                readable_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
+                                display_str = f"[Cloud] {readable_name} ({folder[:6]}...)"
+                            except: display_str = f"[Cloud] {folder}"
+                            gueltige_profile.append({"folder": folder, "name": display_str, "type": "cloud", "sub": eintrag})
 
         self.aktuelle_profil_liste = gueltige_profile
 
         if gueltige_profile:
             anzuzeigende_namen = [p["name"] for p in gueltige_profile]
-            self.prof_combo["values"] = anzuzeigende_namen
+            self.prof_combo.config(values=anzuzeigende_namen)
             self.prof_combo.current(0)
-            messagebox.showinfo("Erfolg", f"Es wurden {len(gueltige_profile)} echte Profile im manuellen Pfad gefunden!")
+            messagebox.showinfo("Erfolg 🎉", f"Es wurden {len(gueltige_profile)} echte Profile im manuellen Pfad gefunden!")
             self.status_label.config(text="Manueller Pfad aktiv.")
         else:
-            self.prof_combo["values"] = []
-            self.prof_combo.set("")
-            messagebox.showwarning("Keine Profile", "Der Ordner enthält keine echten Profile mit einer controls.sii.")
+            self.prof_combo.config(values=[self.txt["no_profiles"]])
+            self.prof_combo.current(0)
+            messagebox.showwarning("Keine Profile ⚠️", "Der ausgewählte Ordner enthält keine gültigen Profile mit einer controls.sii.")
 
 
     def starte_listener(self, ziel):
@@ -725,7 +717,8 @@ class RksInstaller:
             return
 
         profil_daten = self.aktuelle_profil_liste[selected_prof_idx]
-        unterordner = "steam_profiles" if profil_daten["type"] == "cloud" else "profiles"
+                # Nutzt den exakt auf der Festplatte gefundenen Ordnernamen (Schutz vor Groß-/Kleinschreibung)
+        unterordner = profil_daten["sub"]
         target_file = os.path.join(self.aktueller_spiel_pfad, unterordner, profil_daten["folder"], "controls.sii")
         
         backup_file = target_file + ".bak"
