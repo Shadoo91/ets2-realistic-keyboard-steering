@@ -482,8 +482,8 @@ class RksInstaller:
         else:
             self.prof_combo.config(values=[self.txt["no_profiles"]])
             self.prof_combo.current(0)
-                    for p in gueltige_profile:
-                        self.profile_dict[p["name"]] = os.path.join(base_path, p["sub"], p["folder"], "controls.sii")
+        for p in gueltige_profile:
+            self.profile_dict[p["name"]] = os.path.join(base_path, p["sub"], p["folder"], "controls.sii")
 
             
             
@@ -648,8 +648,8 @@ class RksInstaller:
             self.prof_combo.current(0)
             messagebox.showwarning("Keine Profile ⚠️", "Der ausgewählte Ordner enthält keine gültigen Profile mit einer controls.sii.")
             
-            for p in gueltige_profile:
-                self.profile_dict[p["name"]] = os.path.join(base_dir, p["sub"], p["folder"], "controls.sii")
+        for p in gueltige_profile:
+            self.profile_dict[p["name"]] = os.path.join(base_dir, p["sub"], p["folder"], "controls.sii")
 
 
 
