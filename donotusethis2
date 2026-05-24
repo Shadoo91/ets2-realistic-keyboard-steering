@@ -393,6 +393,7 @@ class RksInstaller:
                 tk.Label(f, text=f"    {normal_part}", font=("Arial", 9), fg="#444444", bg=self.card_bg).pack(side="left")
 
     def suche_profile(self):
+        """Sucht automatisch echte Profile (inklusive Steam Cloud) und filtert OneDrive-Geisterordner aus."""
         game_name = self.game_combo.get()
         home = os.path.expanduser("~")
         base_path = None
@@ -419,19 +420,45 @@ class RksInstaller:
             linux_steam_path = os.path.join(home, ".steam", "steam", "steamapps", "compatdata", app_id, "pfx", "drive_c", "users", "steamuser", "Documents", game_name)
             if os.path.exists(linux_steam_path): base_path = linux_steam_path
 
-        self.profile_dict.clear()
-        if base_path and os.path.exists(os.path.join(base_path, "profiles")):
+        self.aktueller_spiel_pfad = base_path
+        gueltige_profile = []
+
+        if base_path:
             profiles_dir = os.path.join(base_path, "profiles")
-            for folder in os.listdir(profiles_dir):
-                if os.path.isdir(os.path.join(profiles_dir, folder)):
-                    try:
-                        readable_name = bytes.fromhex(folder).decode('utf-8')
-                        display_str = f"{readable_name} ({folder[:6]}...)"
-                        self.profile_dict[display_str] = os.path.join(profiles_dir, folder, "controls.sii")
-                    except: pass
+            steam_dir = os.path.join(base_path, "steam_profiles")
+            
+            # 1. Lokale Profile OneDrive-sicher scannen
+            if os.path.isdir(profiles_dir):
+                for folder in os.listdir(profiles_dir):
+                    vollstaendiger_pfad = os.path.join(profiles_dir, folder)
+                    controls_datei = os.path.join(vollstaendiger_pfad, "controls.sii")
+                    
+                    if os.path.isdir(vollstaendiger_pfad) and os.path.isfile(controls_datei):
+                        try:
+                            readable_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
+                            display_str = f"{readable_name} ({folder[:6]}...)" if readable_name.strip() else folder
+                        except:
+                            display_str = folder
+                        gueltige_profile.append({"folder": folder, "name": display_str, "type": "local"})
+
+            # 2. Steam Cloud Profile OneDrive-sicher scannen
+            if os.path.isdir(steam_dir):
+                for folder in os.listdir(steam_dir):
+                    vollstaendiger_pfad = os.path.join(steam_dir, folder)
+                    controls_datei = os.path.join(vollstaendiger_pfad, "controls.sii")
+                    
+                    if os.path.isdir(vollstaendiger_pfad) and os.path.isfile(controls_datei):
+                        try:
+                            readable_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
+                            display_str = f"[Cloud] {readable_name} ({folder[:6]}...)" if readable_name.strip() else f"[Cloud] {folder}"
+                        except:
+                            display_str = f"[Cloud] {folder}"
+                        gueltige_profile.append({"folder": folder, "name": display_str, "type": "cloud"})
+
+        self.aktuelle_profil_liste = gueltige_profile
                         
-        if self.aktuelle_profil_liste:
-            anzuzeigende_namen = [p["name"] for p in self.aktuelle_profil_liste]
+        if gueltige_profile:
+            anzuzeigende_namen = [p["name"] for p in gueltige_profile]
             self.prof_combo.config(values=anzuzeigende_namen)
             self.prof_combo.current(0)
         else:
