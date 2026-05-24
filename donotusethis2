@@ -8,6 +8,19 @@ import shutil
 import urllib.request
 import json
 import subprocess
+import ctypes
+
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+
+# Erzwingt den Neustart als Administrator
+if not is_admin():
+    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+    sys.exit()
+
 
 class RksInstaller:
     def __init__(self, root):
@@ -415,12 +428,14 @@ class RksInstaller:
                         self.profile_dict[display_str] = os.path.join(profiles_dir, folder, "controls.sii")
                     except: pass
                         
-        if self.profile_dict:
-            self.prof_combo.config(values=list(self.profile_dict.keys()))
+        if self.aktuelle_profil_liste:
+            anzuzeigende_namen = [p["name"] for p in self.aktuelle_profil_liste]
+            self.prof_combo.config(values=anzuzeigende_namen)
             self.prof_combo.current(0)
         else:
             self.prof_combo.config(values=[self.txt["no_profiles"]])
             self.prof_combo.current(0)
+
             
     def manueller_pfad_waehlen(self):
         """Öffnet den Windows-Explorer zur manuellen Auswahl, falls die Automatik versagt."""
