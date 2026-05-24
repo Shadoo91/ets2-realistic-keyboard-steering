@@ -141,7 +141,7 @@ class RksInstaller:
         self.welcome_box.tag_config("italic", font=("Arial", 12, "italic"), foreground="#555555")
         self.welcome_box.config(state="disabled")
         
-        self.btn_start = tk.Button(self.welcome_frame, text=self.txt["btn_start"], ..., command=self.seite_config)
+        self.btn_start = tk.Button(self.welcome_frame, text=self.txt["btn_start"], font=("Arial", 11, "bold"), bg=self.accent_blue, fg="white", relief="flat", height=2, command=self.seite_config)
         self.btn_start.pack(side="bottom", anchor="e")
 
         # --- SEITE 2: CONFIG FRAME ---
