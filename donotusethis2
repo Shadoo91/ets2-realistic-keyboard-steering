@@ -216,7 +216,8 @@ class RksInstaller:
         self.btn_weiter.pack(side="right", padx=15, pady=5)
         
         # Start-Zustand des Wizards festlegen: Erste Seite anzeigen
-        self.seite_willkommen()
+        self.seite_welcome()
+
 
     def seite_readme(self):
         """Schaltet auf die Readme-/Übersichtsseite (Seite 3) um und generiert den Text."""
