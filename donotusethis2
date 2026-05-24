@@ -229,7 +229,7 @@ class RksInstaller:
             relief="flat",
             command=self.seite_readme
         )
-        self.btn_weiter.pack(side="right", padx=15, pady=5)
+        self.btn_weiter = tk.Button(btn_nav_frame, text="➔ Weiter zur Übersicht", width=22, height=2, bg=self.accent_blue, fg="white", font=("Arial", 11, "bold"), relief="flat", command=self.seite_readme)
 
         # --- SEITE 3: README / ÜBERSICHT FRAME ---
         self.readme_frame = tk.Frame(self.root, padx=30, pady=15, bg=self.bg_main)
