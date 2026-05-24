@@ -812,10 +812,10 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = RksInstaller(root)
     
-    # Startet das Programm direkt mit ATS (Index 1), damit der Scan auf deinem PC sofort klappt!
+    # KORREKTUR: Wählt das Spiel aus, startet den Scan aber ohne sofortiges, blockierendes Pop-up
     if hasattr(app, 'game_combo'):
-        app.game_combo.current(1)
-        app.suche_profile()
+        app.game_combo.current(1)  # Stellt ATS als Standard ein
+        # Wir rufen suche_profile() hier NICHT direkt auf, damit die GUI fehlerfrei zeichnet!
         
     root.bind("<Key>", app.taste_abfangen)
     root.bind("<Button>", app.universelle_maus_abfangen)
