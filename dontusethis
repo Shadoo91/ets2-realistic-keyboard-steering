@@ -786,6 +786,8 @@ class RksInstaller:
                         ist_erfolgreich = True
             except:
                 ist_erfolgreich = False
+        except Exception as e:
+            ist_erfolgreich = False
 
         # OUTPUT ANZEIGE
         if ist_erfolgreich:
