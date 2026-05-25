@@ -395,29 +395,47 @@ class RksInstaller:
                 tk.Label(f, text=f"    {normal_part}", font=("Arial", 9), fg="#444444", bg=self.card_bg).pack(side="left")
 
     def suche_profile(self):
-        """Sucht automatisch nach ETS2-Profilen und filtert Ghost-Ordner aus."""
+        """Sucht plattformübergreifend (Windows & Linux) nach echten ETS2/ATS-Profilen."""
+        import platform
         self.profile_dict = {}
-        standard_pfad = os.path.expanduser(r"~\Documents\Euro Truck Simulator 2\profiles")
-        
-        if os.path.exists(standard_pfad):
-            for ordner in os.listdir(standard_pfad):
-                pfad_zur_datei = os.path.join(standard_pfad, ordner, "controls.sii")
-                
-                # GHOST-FILTER
-                if os.path.exists(pfad_zur_datei) and os.path.getsize(pfad_zur_datei) > 100:
-                    try:
-                        klartext_name = bytes.fromhex(ordner).decode('utf-8', errors='ignore')
-                    except Exception:
-                        klartext_name = ordner
-                    
-                    anzeige_name = f"👤 {klartext_name} (Lokal: {ordner[:6]}...)"
-                    self.profile_dict[anzeige_name] = pfad_zur_datei
+        such_pfade = []
 
-        # PRÄZISE KORREKTUR: Nutzt jetzt self.prof_combo anstatt self.combo_profil
+        # 1. PLATTFORM-SPEZIFISCHE PFADE ERMITTELN
+        if platform.system() == "Windows":
+            # Windows Standard-Pfad
+            such_pfade.append(os.path.expanduser(r"~\Documents\Euro Truck Simulator 2\profiles"))
+        else:
+            # Linux Pfade (Native Installation & Steam/Proton Kompatibilitätsordner)
+            such_pfade.append(os.path.expanduser("~/.local/share/Euro Truck Simulator 2/profiles"))
+            such_pfade.append(os.path.expanduser("~/.local/share/Steam/steamapps/compatdata/227300/pfx/drive_c/users/steamuser/Documents/Euro Truck Simulator 2/profiles"))
+            such_pfade.append(os.path.expanduser("~/.var/app/com.valvesoftware.Steam/data/Steam/steamapps/compatdata/227300/pfx/drive_c/users/steamuser/Documents/Euro Truck Simulator 2/profiles"))
+
+        # 2. PFADE SCANNEN & GHOST-ORDNER FILTERN
+        for pfad in such_pfade:
+            if os.path.exists(pfad):
+                for ordner in os.listdir(pfad):
+                    pfad_zur_datei = os.path.join(pfad, ordner, "controls.sii")
+                    
+                    # GHOST-FILTER: Datei muss existieren und Daten enthalten
+                    if os.path.exists(pfad_zur_datei) and os.path.getsize(pfad_zur_datei) > 100:
+                        try:
+                            # Hex-Ordnername in lesbaren Klartext umwandeln
+                            klartext_name = bytes.fromhex(ordner).decode('utf-8', errors='ignore')
+                        except Exception:
+                            klartext_name = ordner
+                        
+                        # System-Präfix zur besseren Unterscheidung für den User hinzufügen
+                        prefix = "☁ [Proton]" if "compatdata" in pfad else "👤 [Lokal]"
+                        anzeige_name = f"{prefix} {klartext_name} ({ordner[:6]}...)"
+                        
+                        # Speichert den Pfad ab
+                        self.profile_dict[anzeige_name] = pfad_zur_datei
+
+        # 3. UI-DROP-DOWN CODESCHNITT BEFÜLLEN
         if self.profile_dict:
             self.prof_combo['values'] = list(self.profile_dict.keys())
             self.prof_combo.current(0)
-            self.lbl_status_p2.config(text="✓ Profile automatisch im Standardpfad gefunden.", fg="green")
+            self.lbl_status_p2.config(text=f"✓ {len(self.profile_dict)} Profil(e) erfolgreich geladen.", fg="green")
         else:
             self.prof_combo['values'] = ["Keine Profile automatisch gefunden!"]
             self.prof_combo.current(0)
