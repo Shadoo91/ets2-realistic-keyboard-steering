@@ -391,39 +391,58 @@ class RksInstaller:
                 tk.Label(f, text=f"    {normal_part}", font=("Arial", 9), fg="#444444", bg=self.card_bg).pack(side="left")
 
     def suche_profile(self):
-        """
-        Sucht nach gültigen ETS2-Profilen. 
-        Kombiniert die saubere Anzeige von Z. 373 mit einem Filter gegen Ghost-Ordner.
-        """
+        """Sucht automatisch nach ETS2-Profilen und filtert Ghost-Ordner aus."""
         self.profile_dict = {}
         standard_pfad = os.path.expanduser(r"~\Documents\Euro Truck Simulator 2\profiles")
         
         if os.path.exists(standard_pfad):
-            # Alle Unterordner im Profilverzeichnis durchgehen
             for ordner in os.listdir(standard_pfad):
                 pfad_zur_datei = os.path.join(standard_pfad, ordner, "controls.sii")
                 
-                # GHOST-FILTER: Nur Ordner mit einer echten, beschreibbaren controls.sii aufnehmen
+                # GHOST-FILTER
                 if os.path.exists(pfad_zur_datei) and os.path.getsize(pfad_zur_datei) > 100:
                     try:
-                        # Versuche den Hex-Ordnernamen in lesbaren Text zu übersetzen
                         klartext_name = bytes.fromhex(ordner).decode('utf-8', errors='ignore')
                     except Exception:
                         klartext_name = ordner
                     
-                    anzeige_name = f"{klartext_name} ({ordner[:8]}...)"
+                    anzeige_name = f"👤 {klartext_name} (Lokal: {ordner[:6]}...)"
                     self.profile_dict[anzeige_name] = pfad_zur_datei
 
-        # Dropdown-Menü aktualisieren
         if self.profile_dict:
             self.combo_profil['values'] = list(self.profile_dict.keys())
             self.combo_profil.current(0)
-            self.lbl_status.config(text="Profile erfolgreich geladen.", fg="green")
+            self.lbl_status_p2.config(text="✓ Profile automatisch im Standardpfad gefunden.", fg="green")
         else:
-            self.combo_profil['values'] = ["Keine Profile gefunden! Bitte manuell suchen."]
+            self.combo_profil['values'] = ["Keine Profile automatisch gefunden!"]
             self.combo_profil.current(0)
-            self.lbl_status.config(text="Fehler: Nutzen Sie den 'Durchsuchen'-Button für Steam Cloud!", fg="orange")
+            self.lbl_status_p2.config(text="⚠ Kein Profil gefunden. Bitte 'Manuelle Suche' nutzen!", fg="orange")
 
+    def manuelle_dateiauswahl(self):
+        """Ermöglicht das manuelle Heraussuchen der controls.sii bei Steam Cloud / Sonderpfaden."""
+        dateipfad = filedialog.askopenfilename(
+            title="Wähle deine aktive controls.sii aus",
+            filetypes=[("ETS2 Steuerung", "controls.sii"), ("Alle Dateien", "*.*")]
+        )
+        
+        if dateipfad:
+            if os.path.basename(dateipfad) != "controls.sii":
+                messagebox.showerror("Falsche Datei", "Bitte wählen Sie exakt die Datei 'controls.sii' aus!")
+                return
+                
+            if os.path.getsize(dateipfad) <= 100:
+                messagebox.showerror("Ghost-Datei", "Diese Datei enthält keine Daten (Ghost-Datei). Bitte wählen Sie die aktive Datei!")
+                return
+                
+            if "userdata" in dateipfad.lower() or "remote" in dateipfad.lower():
+                anzeige_name = "☁ [Steam Cloud] " + os.path.basename(os.path.dirname(os.path.dirname(dateipfad)))
+            else:
+                anzeige_name = "📂 [Manuell] " + os.path.basename(os.path.dirname(dateipfad))
+                
+            self.profile_dict[anzeige_name] = dateipfad
+            self.combo_profil['values'] = list(self.profile_dict.keys())
+            self.combo_profil.set(anzeige_name)
+            self.lbl_status_p2.config(text="✓ Externe controls.sii erfolgreich geladen!", fg="green")
 
     def starte_listener(self, ziel):
         self.aktueller_listener = ziel
