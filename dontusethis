@@ -395,62 +395,93 @@ class RksInstaller:
                 tk.Label(f, text=f"    {normal_part}", font=("Arial", 9), fg="#444444", bg=self.card_bg).pack(side="left")
 
     def suche_profile(self):
-        """Sucht plattformübergreifend (Windows & Linux) nach echten ETS2/ATS-Profilen."""
-        import platform
-        self.profile_dict = {}
-        such_pfade = []
+        """
+        Sucht vollautomatisch, plattformübergreifend und absolut ausfallsicher 
+        nach ETS2/ATS-Profilen (Lokal, OneDrive, SteamCloud & Proton) [ex-1.3.4].
+        """
+        game_name = self.game_combo.get()
+        app_id = "227300" if game_name == "Euro Truck Simulator 2" else "270880"
+        home = os.path.expanduser("~")
+        
+        # Liste aller potenziellen Stammverzeichnisse für dieses Spiel
+        basis_ordner_liste = []
 
-        # Spiel-Unterscheidung anhand Ihrer GUI-Auswahl (ETS2 oder ATS)
-        spiel_ordner = "Euro Truck Simulator 2"
-        spiel_id = "227300"
-        if hasattr(self, "game_combo") and "American" in self.game_combo.get():
-            spiel_ordner = "American Truck Simulator"
-            spiel_id = "270880"
-
-        # 1. PLATTFORM-SPEZIFISCHE DOCUMENT-PFADE ERMITTELN
+        # 1. WINDOWS PFAD-ERMITTLUNG (INKL. ONEDRIVE & CO)
         if platform.system() == "Windows":
-            such_pfade.append(os.path.expanduser(f"~\\Documents\\{spiel_ordner}\\profiles"))
-            such_pfade.append(os.path.expanduser(f"~\\Documents\\{spiel_ordner}\\steam_profiles"))
+            try:
+                import ctypes
+                from ctypes import wintypes
+                CSIDL_PERSONAL = 5       
+                SHGFP_TYPE_CURRENT = 0
+                buf = ctypes.create_unicode_buffer(wintypes.MAX_PATH)
+                ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
+                local_documents = buf.value
+            except:
+                local_documents = os.path.join(home, "Documents") 
+                
+            # Pfade zu den Dokumenten-Ordnern hinzufügen
+            basis_ordner_liste.append(os.path.join(local_documents, game_name))
+            basis_ordner_liste.append(os.path.join(os.environ.get("USERPROFILE", ""), "OneDrive", "Documents", game_name))
+            
+            # MASSEN-FALLBACK: Direkte Suche im Standard-Steam-Cloud Pfad auf Windows (Sehr häufig!)
+            program_files = os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)")
+            steam_userdata = os.path.join(program_files, "Steam", "userdata")
+            if os.path.exists(steam_userdata):
+                for user_id in os.listdir(steam_userdata):
+                    cloud_pfad = os.path.join(steam_userdata, user_id, app_id, "remote")
+                    if os.path.exists(cloud_pfad):
+                        basis_ordner_liste.append(cloud_pfad)
+
+        # 2. LINUX PFAD-ERMITTLUNG (NATIV & PROTON-EMULATION)
         else:
-            # Linux (Native Installationen & Steam-Proton-Präfixe)
-            such_pfade.append(os.path.expanduser(f"~/.local/share/{spiel_ordner}/profiles"))
-            such_pfade.append(os.path.expanduser(f"~/.local/share/{spiel_ordner}/steam_profiles"))
-            such_pfade.append(os.path.expanduser(f"~/.local/share/Steam/steamapps/compatdata/{spiel_id}/pfx/drive_c/users/steamuser/Documents/{spiel_ordner}/profiles"))
-            such_pfade.append(os.path.expanduser(f"~/.local/share/Steam/steamapps/compatdata/{spiel_id}/pfx/drive_c/users/steamuser/Documents/{spiel_ordner}/steam_profiles"))
-            such_pfade.append(os.path.expanduser(f"~/.var/app/com.valvesoftware.Steam/data/Steam/steamapps/compatdata/{spiel_id}/pfx/drive_c/users/steamuser/Documents/{spiel_ordner}/profiles"))
+            # Ihr funktionierender Linux-Pfad
+            basis_ordner_liste.append(os.path.join(home, ".steam", "steam", "steamapps", "compatdata", app_id, "pfx", "drive_c", "users", "steamuser", "Documents", game_name))
+            # Native Linux-Installation Fallback
+            basis_ordner_liste.append(os.path.join(home, ".local", "share", game_name))
+            # Flatpak-Steam Fallback
+            basis_ordner_liste.append(os.path.join(home, ".var", "app", "com.valvesoftware.Steam", "data", "Steam", "steamapps", "compatdata", app_id, "pfx", "drive_c", "users", "steamuser", "Documents", game_name))
 
-        # 2. PFADE PRÄZISE SCANNEN
-        for pfad in such_pfade:
-            if os.path.exists(pfad) and os.path.isdir(pfad):
-                for ordner in os.listdir(pfad):
-                    pfad_zur_datei = os.path.join(pfad, ordner, "controls.sii")
-                    
-                    # SICHERE PRÜFUNG: Datei muss existieren und lesbar sein (Größenfilter entfernt)
-                    if os.path.exists(pfad_zur_datei) and os.path.isfile(pfad_zur_datei):
-                        try:
-                            # Hex-Ordnername in lesbaren Klartext umwandeln
-                            klartext_name = bytes.fromhex(ordner).decode('utf-8', errors='ignore')
-                        except Exception:
-                            klartext_name = ordner
-                        
-                        # System-Präfixe setzen
-                        if "compatdata" in pfad:
-                            prefix = "☁ [Proton]"
-                        elif "steam_profiles" in pfad:
-                            prefix = "☁ [SteamCloud]"
-                        else:
-                            prefix = "👤 [Lokal]"
+        # 3. PROFILE AUS ALLEN QUELLEN ERFASSEN
+        self.profile_dict.clear()
+        
+        # Die 3 Ordner-Typen, in denen ETS2 Profile speichert [ex-1.3.4]
+        profil_sub_ordner = ["profiles", "steam_profiles", "profiles_cloud"]
+
+        for basis in basis_ordner_liste:
+            if not basis or not os.path.exists(basis):
+                continue
+                
+            # Falls wir direkt im Steam "remote"-Ordner gelandet sind, gibt es dort kein Sub-Verzeichnis
+            ordner_zum_scannen = [basis] if os.path.basename(basis) == "remote" else [os.path.join(basis, sub) for sub in profil_sub_ordner]
+
+            for s_dir in ordner_zum_scannen:
+                if os.path.exists(s_dir) and os.path.isdir(s_dir):
+                    for folder in os.listdir(s_dir):
+                        profil_pfad = os.path.join(s_dir, folder)
+                        if os.path.isdir(profil_pfad):
+                            datei_pfad = os.path.join(profil_pfad, "controls.sii")
                             
-                        anzeige_name = f"{prefix} {klartext_name} ({ordner[:6]}...)"
-                        self.profile_dict[anzeige_name] = pfad_zur_datei
-
-        # 3. UI-ELEMENTE BEFÜLLEN
+                            # GHOST-FILTER: Nur aufnehmen, wenn die Datei wirklich existiert
+                            if os.path.exists(datei_pfad) and os.path.isfile(datei_pfad):
+                                try:
+                                    readable_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
+                                    # Visueller Indikator, woher das Profil stammt (Cloud oder Lokal)
+                                    prefix = "☁ [Cloud]" if "steam" in s_dir.lower() or "remote" in s_dir.lower() else "👤 [Lokal]"
+                                    display_str = f"{prefix} {readable_name} ({folder[:6]}...)"
+                                    
+                                    # Verhindert doppelte Einträge, falls ein Profil in mehreren Pfaden liegt
+                                    if display_str not in self.profile_dict:
+                                        self.profile_dict[display_str] = datei_pfad
+                                except:
+                                    pass
+                        
+        # 4. UI-DROPDOWN AKTUALISIEREN & STATUS AUSGEBEN
         if self.profile_dict:
-            self.prof_combo['values'] = list(self.profile_dict.keys())
+            self.prof_combo.config(values=list(self.profile_dict.keys()))
             self.prof_combo.current(0)
             self.lbl_status_p2.config(text=f"✓ {len(self.profile_dict)} Profil(e) erfolgreich geladen.", fg="green")
         else:
-            self.prof_combo['values'] = ["Keine Profile automatisch gefunden!"]
+            self.prof_combo.config(values=[self.txt["no_profiles"]])
             self.prof_combo.current(0)
             self.lbl_status_p2.config(text="⚠ Kein Profil gefunden. Bitte 'Manuelle Suche' nutzen!", fg="orange")
 
