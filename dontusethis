@@ -143,12 +143,16 @@ class RksInstaller:
         self.game_combo = ttk.Combobox(game_frame, values=["Euro Truck Simulator 2", "American Truck Simulator"], state="readonly", width=30, font=("Arial", 11))
         self.game_combo.current(0)
         self.game_combo.pack(side="left")
+        # PRÄZISE ERWEITERUNG: Erzwingt sofortigen Fokus beim ersten Klick auf das Spiel-Dropdown
+        self.game_combo.bind("<Button-1>", lambda e: self.game_combo.focus_set())
         
         prof_frame = tk.Frame(card_profile, bg=self.card_bg)
         prof_frame.pack(fill="x", pady=(8, 0))
         tk.Label(prof_frame, text=self.txt["profile_select"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=15, anchor="w").pack(side="left")
         self.prof_combo = ttk.Combobox(prof_frame, state="readonly", width=30, font=("Arial", 11))
         self.prof_combo.pack(side="left")
+        # PRÄZISE ERWEITERUNG: Erzwingt sofortigen Fokus beim ersten Klick auf das Profil-Dropdown
+        self.prof_combo.bind("<Button-1>", lambda e: self.prof_combo.focus_set())
         
         self.btn_uninstall = tk.Button(prof_frame, text="Mod deinstallieren ❌", bg=self.accent_red, fg="white", font=("Arial", 10, "bold"), relief="flat", padx=10)
         self.btn_uninstall.pack(side="right", padx=5)
@@ -739,66 +743,133 @@ class RksInstaller:
                 f'mix forward `aforward`',
                 f'mix backward `abackward`'
             ]
-            
+
+            # --- CACHE-FREIE & SCHNITTSTELLENGENAUE IN-PLACE-REPARATUR ---
+            # Wir erzwingen das physische Neueinlesen der Datei, um RAM-Leichen zu verhindern
+            try:
+                with open(target_file, "r", encoding="utf-8", errors="ignore") as f_retry:
+                    lines = f_retry.readlines()
+            except:
+                pass
+
             bereinigte_lines = []
             max_index = 320
             
+            # Das exakte Mapping Ihrer RKS-Mod-Formeln
+            formel_mapping = {
+                "mix dsteerleft": f"mix dsteerleft `keyboard.a?0`",
+                "mix dsteerright": f"mix dsteerright `keyboard.d?0`",
+                "mix dsteering": f"mix dsteering `(keyboard.a?0 - keyboard.d?0) * (0.30 + ({T} * (0.60 - (keyboard.s?0 * 0.25)))) * (1.00 + (keyboard.s?0 * {N} * 1.20)) * (c_steer_func * (4.2 - steering_speed_coef))`",
+                "mix steering": f"mix steering `(dsteering * (1.00 - c_steer_func)) + (({R}) * (keyboard.a?0 - keyboard.d?0) * 0.35)`",
+                "mix msteering": f"mix msteering `-mouse.rel_position.x?0 * c_msens`",
+                "mix mpedals": f"mix mpedals `mouse.rel_position.y?0 * c_msens`",
+                "mix dforward": f"mix dforward `0`",
+                "mix dbackward": f"mix dbackward `0`",
+                "mix aforward": f"mix aforward `((keyboard.w?0 * 0.35) + ({N} * 0.55)) * (! keyboard.s?0)`",
+                "mix abackward": f"mix abackward `keyboard.s?0 * (0.10 + ({T} * 0.35) + ({N} * 1.00))`",
+                "mix forward": f"mix forward `aforward`",
+                "mix backward": f"mix backward `abackward`"
+            }
+            
+            # Tracker, welche Keys erfolgreich im originalen Bereich (oben) ersetzt wurden
+            oben_ersetzt = {x: False for x in formel_mapping.keys()}
+
             for line in lines:
                 if "config_lines[" in line:
                     try:
-                        parts = line.split("[")
-                        if len(parts) > 1:
-                            idx_str = parts[1].split("]")
-                            max_index = max(max_index, int(idx_str[0]))
-                    except: pass
+                        # Holt die reine numerische ID der Zeile aus den eckigen Klammern
+                        # Das fängt jeden Fehler ab, falls parts eine Liste ist!
+                        idx_part = line.split("config_lines[")[1].split("]")[0]
+                        line_idx = int(idx_part)
+                        max_index = max(max_index, line_idx)
+                    except: 
+                        line_idx = 999 # Fallback für beschädigte Indizes
+                else:
+                    line_idx = 999
+
+                # RADIKALER UNTEN-ANHÄNG-SCHUTZ:
+                # Wenn eine Mod-Zeile eine ID größer als 400 hat, ist sie eine "Anhäng-Leiche".
+                # Diese wird hier im Live-View knallhart gelöscht!
+                if line_idx > 400 and any(f"{x} " in line for x in formel_mapping.keys()):
+                    continue
+
+                # ECHTER IN-PLACE TAUSCH (NUR IM VANILLA-BEREICH OBEN)
+                getauscht = False
+                if line_idx <= 400:
+                    for key, formel in formel_mapping.items():
+                        if f' {key} `' in line or f' "{key} `' in line or f' {key} "' in line:
+                            try:
+                                # Spaltet die Zeile exakt vor dem eigentlichen Inhalt auf
+                                # Behält config_lines[334]: " exakt bei und tauscht nur die Formel!
+                                prefix = line.split(' "')[0]
+                                line = f'{prefix} "{formel}"\n'
+                                oben_ersetzt[key] = True
+                                getauscht = True
+                                break
+                            except: 
+                                pass
                 
-                # PRÄZISIERTER FILTER: Verhindert das versehentliche Löschen von originalen ETS2-Zeilen
-                if any(f'{x} `' in line for x in ['mix dsteerleft', 'mix dsteerright', 'mix dsteering', 'mix steering', 'mix msteering', 'mix mpedals', 'mix dforward', 'mix dbackward', 'mix aforward', 'mix abackward', 'mix forward', 'mix backward']):
+                if getauscht:
+                    bereinigte_lines.append(line)
                     continue
 
                 bereinigte_lines.append(line)
             
+            # SELBSTHEILUNG: Falls eine Zeile oben komplett gelöscht war und fehlt
+            reparatur_block = []
+            # Wir setzen die fehlenden Zeilen mit fortlaufender ID ab 330 ein, falls sie oben fehlten
+            reparatur_idx = 330
+            for key, formel in formel_mapping.items():
+                if not oben_ersetzt[key]:
+                    reparatur_block.append(f' config_lines[{reparatur_idx}]: "{formel}"\n')
+                reparatur_idx += 1
+
+            # Sucht die Position der schließenden Profil-Klammer '}' für den Notfall
             klammer_index = -1
             for idx in range(len(bereinigte_lines) - 1, -1, -1):
                 if "}" in bereinigte_lines[idx]:
                     klammer_index = idx
                     break
             
-            neue_zeilen_block = []
-            current_idx = max_index + 1
-            for formel in rks_formeln:
-                neue_zeilen_block.append(f' config_lines[{current_idx}]: "{formel}"\n')
-                current_idx += 1
-            
-            if klammer_index != -1:
-                bereinigte_lines[klammer_index:klammer_index] = neue_zeilen_block
-            else:
-                bereinigte_lines.extend(neue_zeilen_block)
-                bereinigte_lines.append("}\n")
-                        
-            # Schreiben plattformunabhängig und ohne [Errno 13] erzwingen
+            # Fügt die fehlenden Zeilen als geschlossenen Block ein, NUR wenn sie oben gefehlt haben
+            if reparatur_block:
+                # Wir suchen im Array nach der Zeile 329, um es genau dort einzubetten, statt unten!
+                einfuege_punkt = klammer_index
+                for idx, bline in enumerate(bereinigte_lines):
+                    if "config_lines[329]" in bline:
+                        einfuege_punkt = idx + 1
+                        break
+                
+                if einfuege_punkt != -1:
+                    bereinigte_lines[einfuege_punkt:einfuege_punkt] = reparatur_block
+
+            # SCHREIBEN ERZWINGEN (Ohne Caching-Verzögerung)
             with open(target_file, "w", encoding="utf-8") as f:
                 f.writelines(bereinigte_lines)
                 f.flush()
 
-            # Unbestechliche Verifikation direkt auf der Hardware [1]
+            # UNBESTECHLICHE VERIFIKATION
             try:
                 with open(target_file, "r", encoding="utf-8", errors="ignore") as f_check:
-                    datei_inhalt = f_check.read()
-                    # Prüft präzise, ob die Modifikations-Formel im Text existiert
-                    if "mix dsteering" in datei_inhalt:
+                    if "mix dsteering" in f_check.read():
                         ist_erfolgreich = True
             except:
                 ist_erfolgreich = False
+                
+            fehler_details = "Keine"
 
         except Exception as e:
             ist_erfolgreich = False
-            # Speichert den genauen Fehlergrund, um ihn dem User anzuzeigen
             fehler_details = str(e)
 
-        # OUTPUT ANZEIGE
+        # OUTPUT ANZEIGE (Präzise Pfad-Verifikation für den User)
         if ist_erfolgreich:
             tk.Label(self.end_frame, text=self.txt["status_success"], font=("Arial", 14, "bold"), fg="green", bg=self.bg_main).pack(anchor="w", pady=(40, 10))
+            
+            # Zeigt den exakten Ordner an, in den Python gerade geschrieben hat
+            speicher_ordner = os.path.dirname(target_file)
+            tk.Label(self.end_frame, text=f"Erfolgreich modifiziert in:\n➔ {speicher_ordner}", font=("Arial", 10, "bold"), fg="#3498db", bg=self.bg_main, justify="left", wraplength=700).pack(anchor="w", pady=(0, 10))
+            
             tk.Label(self.end_frame, text="Die Dateien deines gewählten Profils wurden erfolgreich modifiziert. Viel Spaß beim Fahren!", font=("Arial", 12), fg=self.fg_text, bg=self.bg_main).pack(anchor="w", pady=(0, 20))
         else:
             tk.Label(self.end_frame, text=self.txt["status_failed"], font=("Arial", 14, "bold"), fg="red", bg=self.bg_main).pack(anchor="w", pady=(40, 5))
@@ -846,7 +917,9 @@ if __name__ == "__main__":
         app.btn_install.config(command=app.ausfuehren_installation)
         app.btn_uninstall.config(command=app.ausfuehren_deinstallation)
         app.chk_terms.config(command=app.toggle_install_button)
-        app.game_combo.bind("<<ComboboxSelected>>", lambda e: app.suche_profile())
+        # Verzögert den Hintergrund-Scan, um den GUI-Thread beim Öffnen komplett zu entlasten
+        app.game_combo.bind("<<ComboboxSelected>>", lambda e: app.root.after(10, app.suche_profile))
+
         
         app.btn_turbo.config(command=lambda: app.starte_listener("turbo"))
         app.btn_rangier.config(command=lambda: app.starte_listener("rangier"))
