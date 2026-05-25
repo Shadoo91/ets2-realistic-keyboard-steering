@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
+from tkinter import filedialog
 import os
 import platform
 import sys
@@ -412,13 +413,14 @@ class RksInstaller:
                     anzeige_name = f"👤 {klartext_name} (Lokal: {ordner[:6]}...)"
                     self.profile_dict[anzeige_name] = pfad_zur_datei
 
+        # PRÄZISE KORREKTUR: Nutzt jetzt self.prof_combo anstatt self.combo_profil
         if self.profile_dict:
-            self.combo_profil['values'] = list(self.profile_dict.keys())
-            self.combo_profil.current(0)
+            self.prof_combo['values'] = list(self.profile_dict.keys())
+            self.prof_combo.current(0)
             self.lbl_status_p2.config(text="✓ Profile automatisch im Standardpfad gefunden.", fg="green")
         else:
-            self.combo_profil['values'] = ["Keine Profile automatisch gefunden!"]
-            self.combo_profil.current(0)
+            self.prof_combo['values'] = ["Keine Profile automatisch gefunden!"]
+            self.prof_combo.current(0)
             self.lbl_status_p2.config(text="⚠ Kein Profil gefunden. Bitte 'Manuelle Suche' nutzen!", fg="orange")
 
     def manuelle_dateiauswahl(self):
@@ -443,8 +445,10 @@ class RksInstaller:
                 anzeige_name = "📂 [Manuell] " + os.path.basename(os.path.dirname(dateipfad))
                 
             self.profile_dict[anzeige_name] = dateipfad
-            self.combo_profil['values'] = list(self.profile_dict.keys())
-            self.combo_profil.set(anzeige_name)
+            
+            # PRÄZISE KORREKTUR: Nutzt jetzt self.prof_combo anstatt self.combo_profil
+            self.prof_combo['values'] = list(self.profile_dict.keys())
+            self.prof_combo.set(anzeige_name)
             self.lbl_status_p2.config(text="✓ Externe controls.sii erfolgreich geladen!", fg="green")
 
     def starte_listener(self, ziel):
