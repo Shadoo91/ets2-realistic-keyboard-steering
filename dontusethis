@@ -709,6 +709,10 @@ class RksInstaller:
             if os.path.exists(target_file):
                 os.chmod(target_file, stat.S_IWRITE)
 
+            # LINUX FIX: Erteilt dem Skript unter Linux/Proton uneingeschränkte Schreibrechte
+            if platform.system() != "Windows" and os.path.exists(target_file):
+                os.chmod(target_file, 0o666)
+
             if not os.path.exists(backup_file):
                 shutil.copyfile(target_file, backup_file)
                 if os.path.exists(backup_file):
@@ -770,12 +774,10 @@ class RksInstaller:
                 bereinigte_lines.extend(neue_zeilen_block)
                 bereinigte_lines.append("}\n")
                         
-            # Schreiben über nativen OS-Deskriptor erzwingen [1]
-            fd = os.open(target_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC)
-            with os.fdopen(fd, 'w', encoding='utf-8') as f:
+            # Schreiben plattformunabhängig und ohne [Errno 13] erzwingen
+            with open(target_file, "w", encoding="utf-8") as f:
                 f.writelines(bereinigte_lines)
                 f.flush()
-                os.fsync(fd)
 
             # Unbestechliche Verifikation direkt auf der Hardware [1]
             try:
@@ -786,8 +788,11 @@ class RksInstaller:
                         ist_erfolgreich = True
             except:
                 ist_erfolgreich = False
+
         except Exception as e:
             ist_erfolgreich = False
+            # Speichert den genauen Fehlergrund, um ihn dem User anzuzeigen
+            fehler_details = str(e)
 
         # OUTPUT ANZEIGE
         if ist_erfolgreich:
@@ -795,7 +800,8 @@ class RksInstaller:
             tk.Label(self.end_frame, text="Die Dateien deines gewählten Profils wurden erfolgreich modifiziert. Viel Spaß beim Fahren!", font=("Arial", 12), fg=self.fg_text, bg=self.bg_main).pack(anchor="w", pady=(0, 20))
         else:
             tk.Label(self.end_frame, text=self.txt["status_failed"], font=("Arial", 14, "bold"), fg="red", bg=self.bg_main).pack(anchor="w", pady=(40, 5))
-            tk.Label(self.end_frame, text="Fehler: Das Schreiben wurde blockiert. Bitte stelle sicher, dass ETS2/ATS geschlossen sind und versuche es erneut!", font=("Arial", 11), fg=self.fg_text, bg=self.bg_main, justify="left", wraplength=700).pack(anchor="w", pady=(0, 20))
+            # NEU: Zeigt dem User jetzt exakt an, WARUM Python abgestürzt ist, statt pauschal ATS zu beschuldigen
+            tk.Label(self.end_frame, text=f"Fehler beim Schreiben: {fehler_details}\nBitte stelle sicher, dass ETS2/ATS geschlossen sind und versuche es erneut!", font=("Arial", 11), fg=self.fg_text, bg=self.bg_main, justify="left", wraplength=700).pack(anchor="w", pady=(0, 20))
 
         line_end = tk.Frame(self.end_frame, height=2, bg="#dddddd")
         line_end.pack(fill="x", pady=10)
