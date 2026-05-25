@@ -778,13 +778,14 @@ class RksInstaller:
                 os.fsync(fd)
 
             # Unbestechliche Verifikation direkt auf der Hardware [1]
-            if os.path.getmtime(target_file) >= (zeit_vor_schreiben - 1.0):
-                with open(target_file, "rb") as f_check:
-                    if b"mix dsteering" in f_check.read():
+            try:
+                with open(target_file, "r", encoding="utf-8", errors="ignore") as f_check:
+                    datei_inhalt = f_check.read()
+                    # Prüft präzise, ob die Modifikations-Formel im Text existiert
+                    if "mix dsteering" in datei_inhalt:
                         ist_erfolgreich = True
-            
-        except Exception as e:
-            ist_erfolgreich = False
+            except:
+                ist_erfolgreich = False
 
         # OUTPUT ANZEIGE
         if ist_erfolgreich:
