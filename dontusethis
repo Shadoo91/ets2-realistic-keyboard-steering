@@ -566,21 +566,32 @@ class RksInstaller:
         self.aktueller_listener = None
 
     def ausfuehren_deinstallation(self):
+        """Führt die saubere Mod-Deinstallation im ausgewählten Profil durch."""
         selected_prof = self.prof_combo.get()
-        if not selected_prof or selected_prof == self.txt["no_profiles"]:
-            messagebox.showerror("Fehler", "Bitte wähle zuerst ein gültiges Profil aus!")
+        
+        if selected_prof == self.txt["no_profiles"] or not selected_prof:
+            messagebox.showerror(self.txt["err_title"], self.txt["err_no_prof"])
+            return
+
+        # Ausfallsichere Pfad-Ermittlung trotz Emojis/Präfixen
+        target_file = self.profile_dict.get(selected_prof)
+        if not target_file:
+            for key, path in self.profile_dict.items():
+                if selected_prof in key or key in selected_prof:
+                    target_file = path
+                    break
+
+        if not target_file or not os.path.exists(target_file):
+            messagebox.showerror(self.txt["err_title"], "Der Pfad zur controls.sii wurde nicht gefunden!")
             return
             
-        target_file = self.profile_dict[selected_prof]
         backup_file = target_file + ".bak"
-        
-        if os.path.exists(backup_file):
-            if messagebox.askyesno("Deinstallieren", f"Möchtest du die RKS-Mod für das Profil '{selected_prof}' wirklich deinstallieren und das originale Backup wiederherstellen?"):
-                try:
+
+        try:
                     os.remove(target_file)
                     shutil.copyfile(backup_file, target_file)
                     messagebox.showinfo("Erfolg", f"Die RKS-Mod wurde erfolgreich für das Profil '{selected_prof}' deinstalliert!")
-                except Exception as e:
+        except Exception as e:
                     messagebox.showerror("Fehler", f"Deinstallation fehlgeschlagen: {str(e)}")
         else:
             messagebox.showinfo("Info", f"Für das Profil '{selected_prof}' ist die RKS-Mod noch gar nicht installiert!")
