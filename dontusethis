@@ -654,8 +654,50 @@ class RksInstaller:
             btn_zurueck_s5.pack(side="bottom", anchor="e", pady=20)
             return
 
-        target_file = self.profile_dict[selected_prof]
+        # Ausfallsichere Pfad-Ermittlung trotz Emojis/Präfixen
+        target_file = self.profile_dict.get(selected_prof)
+        if not target_file:
+            for key, path in self.profile_dict.items():
+                if selected_prof in key or key in selected_prof:
+                    target_file = path
+                    break
+
+        if not target_file or not os.path.exists(target_file):
+            messagebox.showerror(self.txt["err_title"], "Der Pfad zur controls.sii wurde nicht gefunden!")
+            return
+
         backup_file = target_file + ".bak"
+        neues_backup_erstellen = True
+
+        # DIE GEWÜNSCHTE BACKUP-WEICHE: Fragt den User bei bestehender Datei
+        if os.path.exists(backup_file):
+            antwort = messagebox.askyesno(
+                "Backup überschreiben?", 
+                "Ein bestehendes Backup (controls.sii.bak) wurde gefunden!\n\n"
+                "Hast du seit der letzten Installation deine eigenen Tasten im Spiel geändert?\n\n"
+                "JA = Altes Backup überschreiben (empfohlen bei neuen Einstellungen).\n"
+                "NEIN = Altes Backup behalten (deine allerersten Originaleinstellungen bleiben geschützt)."
+            )
+            if not antwort:
+                neues_backup_erstellen = False
+
+        # Schreibrechte verifizieren
+        try:
+            os.chmod(target_file, 0o666)
+            if os.path.exists(backup_file):
+                os.chmod(backup_file, 0o666)
+        except Exception:
+            pass
+
+        # Backup nur überschreiben, wenn der User zustimmt
+        if neues_backup_erstellen:
+            try:
+                import shutil
+                shutil.copy2(target_file, backup_file)
+            except Exception as e:
+                messagebox.showerror(self.txt["err_title"], f"Backup-Erstellung fehlgeschlagen: {str(e)}")
+                return
+
         ist_erfolgreich = False
 
         try:
