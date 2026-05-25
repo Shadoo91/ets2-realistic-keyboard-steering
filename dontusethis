@@ -170,16 +170,16 @@ class RksInstaller:
         f_not.pack(fill="x", pady=5)
         # --- HIER DEN NEUEN BUTTON UND DAS STATUSLABEL EINFÜGEN ---
         self.btn_browse = tk.Button(
-        self.config_frame, 
-        text="📂 controls.sii manuell suchen (Steam Cloud Fallback)...", 
-        font=("Arial", 10),
-        command=self.manuelle_dateiauswahl,
-        bg=self.card_bg,      # Passt sich farblich perfekt an
-        fg=self.fg_text, 
-        bd=1, 
-        relief="solid", 
-        padx=10,
-        pady=5
+            self.config_frame, 
+            text="📂 controls.sii manuell suchen (Steam Cloud Fallback)...", 
+            font=("Arial", 10),
+            command=self.manuelle_dateiauswahl,
+            bg=self.card_bg,      # Passt sich farblich perfekt an
+            fg=self.fg_text, 
+            bd=1, 
+            relief="solid", 
+            padx=10,
+            pady=5
         )
         self.btn_browse.pack(pady=10)
 
