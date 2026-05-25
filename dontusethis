@@ -9,6 +9,7 @@ import shutil
 import urllib.request
 import json
 import subprocess
+import requests
 
 class RksInstaller:
     def __init__(self, root):
@@ -607,11 +608,11 @@ class RksInstaller:
         if game_name == "Euro Truck Simulator 2":
             workshop_mod_id = "3727705125"
             app_id = "227300"
-            link_url = "https://steamcommunity.com"
+            link_url = "https://steamcommunity.com/sharedfiles/filedetails/?id=3727705125"
         else:
             workshop_mod_id = "3725174940"
             app_id = "270880"
-            link_url = "https://steamcommunity.com"
+            link_url = "https://steamcommunity.com/sharedfiles/filedetails/?id=3725174940"
         
         selected_prof = self.prof_combo.get()
         if not selected_prof or selected_prof == self.txt["no_profiles"]: return
