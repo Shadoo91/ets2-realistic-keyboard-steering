@@ -168,6 +168,26 @@ class RksInstaller:
         
         f_not = tk.Frame(card_keys, bg=self.card_bg)
         f_not.pack(fill="x", pady=5)
+        # --- HIER DEN NEUEN BUTTON UND DAS STATUSLABEL EINFÜGEN ---
+        self.btn_browse = tk.Button(
+        self.config_frame, 
+        text="📂 controls.sii manuell suchen (Steam Cloud Fallback)...", 
+        font=("Arial", 10),
+        command=self.manuelle_dateiauswahl,
+        bg=self.card_bg,      # Passt sich farblich perfekt an
+        fg=self.fg_text, 
+        bd=1, 
+        relief="solid", 
+        padx=10,
+        pady=5
+        )
+        self.btn_browse.pack(pady=10)
+
+        # Dieses Label fängt Fehlermeldungen ab, falls die automatische Suche fehlschlägt
+        self.lbl_status_p2 = tk.Label(self.config_frame, text="", bg=self.bg_main, font=("Arial", 10, "bold"))
+        self.lbl_status_p2.pack(pady=5)
+        # ---------------------------------------------------------
+
         tk.Label(f_not, text=self.txt["btn_not"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=22, anchor="w").pack(side="left")
         self.btn_not = tk.Button(f_not, text=self.taste_notbremse_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1)
         self.btn_not.pack(side="left")
