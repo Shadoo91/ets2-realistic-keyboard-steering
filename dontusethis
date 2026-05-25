@@ -371,49 +371,39 @@ class RksInstaller:
                 tk.Label(f, text=f"    {normal_part}", font=("Arial", 9), fg="#444444", bg=self.card_bg).pack(side="left")
 
     def suche_profile(self):
-        game_name = self.game_combo.get()
-        home = os.path.expanduser("~")
-        base_path = None
+        """
+        Sucht nach gültigen ETS2-Profilen. 
+        Kombiniert die saubere Anzeige von Z. 373 mit einem Filter gegen Ghost-Ordner.
+        """
+        self.profile_dict = {}
+        standard_pfad = os.path.expanduser(r"~\Documents\Euro Truck Simulator 2\profiles")
         
-        if platform.system() == "Windows":
-            try:
-                import ctypes
-                from ctypes import wintypes
-                CSIDL_PERSONAL = 5       
-                SHGFP_TYPE_CURRENT = 0
-                buf = ctypes.create_unicode_buffer(wintypes.MAX_PATH)
-                ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
-                local_documents = buf.value
-            except:
-                local_documents = os.path.join(home, "Documents") 
+        if os.path.exists(standard_pfad):
+            # Alle Unterordner im Profilverzeichnis durchgehen
+            for ordner in os.listdir(standard_pfad):
+                pfad_zur_datei = os.path.join(standard_pfad, ordner, "controls.sii")
                 
-            local_path = os.path.join(local_documents, game_name)
-            onedrive_path = os.path.join(os.environ.get("USERPROFILE", ""), "OneDrive", "Documents", game_name)
-            
-            if os.path.exists(local_path): base_path = local_path
-            elif os.path.exists(onedrive_path): base_path = onedrive_path
-        else:
-            app_id = "227300" if game_name == "Euro Truck Simulator 2" else "270880"
-            linux_steam_path = os.path.join(home, ".steam", "steam", "steamapps", "compatdata", app_id, "pfx", "drive_c", "users", "steamuser", "Documents", game_name)
-            if os.path.exists(linux_steam_path): base_path = linux_steam_path
-
-        self.profile_dict.clear()
-        if base_path and os.path.exists(os.path.join(base_path, "profiles")):
-            profiles_dir = os.path.join(base_path, "profiles")
-            for folder in os.listdir(profiles_dir):
-                if os.path.isdir(os.path.join(profiles_dir, folder)):
+                # GHOST-FILTER: Nur Ordner mit einer echten, beschreibbaren controls.sii aufnehmen
+                if os.path.exists(pfad_zur_datei) and os.path.getsize(pfad_zur_datei) > 100:
                     try:
-                        readable_name = bytes.fromhex(folder).decode('utf-8')
-                        display_str = f"{readable_name} ({folder[:6]}...)"
-                        self.profile_dict[display_str] = os.path.join(profiles_dir, folder, "controls.sii")
-                    except: pass
-                        
+                        # Versuche den Hex-Ordnernamen in lesbaren Text zu übersetzen
+                        klartext_name = bytes.fromhex(ordner).decode('utf-8', errors='ignore')
+                    except Exception:
+                        klartext_name = ordner
+                    
+                    anzeige_name = f"{klartext_name} ({ordner[:8]}...)"
+                    self.profile_dict[anzeige_name] = pfad_zur_datei
+
+        # Dropdown-Menü aktualisieren
         if self.profile_dict:
-            self.prof_combo.config(values=list(self.profile_dict.keys()))
-            self.prof_combo.current(0)
+            self.combo_profil['values'] = list(self.profile_dict.keys())
+            self.combo_profil.current(0)
+            self.lbl_status.config(text="Profile erfolgreich geladen.", fg="green")
         else:
-            self.prof_combo.config(values=[self.txt["no_profiles"]])
-            self.prof_combo.current(0)
+            self.combo_profil['values'] = ["Keine Profile gefunden! Bitte manuell suchen."]
+            self.combo_profil.current(0)
+            self.lbl_status.config(text="Fehler: Nutzen Sie den 'Durchsuchen'-Button für Steam Cloud!", fg="orange")
+
 
     def starte_listener(self, ziel):
         self.aktueller_listener = ziel
@@ -486,72 +476,6 @@ class RksInstaller:
                     messagebox.showerror("Fehler", f"Deinstallation fehlgeschlagen: {str(e)}")
         else:
             messagebox.showinfo("Info", f"Für das Profil '{selected_prof}' ist die RKS-Mod noch gar nicht installiert!")
-
-    # --- FIXED: FINDET JETZT AUCH STEAM-CLOUD-PROFILE IM USERDATA-ORDNER ---
-    # --- FIXED V3: PERFEKTER STEAM-CLOUD-TIEFENSCAN FÜR USERDATA ---
-    def suche_profile(self):
-        game_name = self.game_combo.get()
-        app_id = "227300" if game_name == "Euro Truck Simulator 2" else "270880"
-        home = os.path.expanduser("~")
-        
-        moegliche_basis_pfade = []
-        
-        if platform.system() == "Windows":
-            try:
-                import ctypes
-                from ctypes import wintypes
-                CSIDL_PERSONAL = 5       
-                SHGFP_TYPE_CURRENT = 0
-                buf = ctypes.create_unicode_buffer(wintypes.MAX_PATH)
-                ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
-                local_documents = buf.value
-            except:
-                local_documents = os.path.join(home, "Documents") 
-                
-            moegliche_basis_pfade.append(os.path.join(local_documents, game_name))
-            moegliche_basis_pfade.append(os.path.join(os.environ.get("USERPROFILE", ""), "OneDrive", "Documents", game_name))
-            
-            # FIXED: Der Tiefenscan sucht jetzt exakt nach dem verborgenen "remote/profiles" Ordner von Steam!
-            steam_base = os.path.join(os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)"), "Steam", "userdata")
-            if not os.path.exists(steam_base):
-                steam_base = os.path.join(os.environ.get("ProgramFiles", "C:\\Program Files"), "Steam", "userdata")
-                
-            if os.path.exists(steam_base):
-                for user_folder in os.listdir(steam_base):
-                    # Pfad zu den Steam-Cloud-Profilen exakt spiegeln
-                    cloud_profile_path = os.path.join(steam_base, user_folder, app_id, "remote", "profiles")
-                    if os.path.exists(cloud_profile_path):
-                        moegliche_basis_pfade.append(cloud_profile_path)
-        else:
-            moegliche_basis_pfade.append(os.path.join(home, ".steam", "steam", "steamapps", "compatdata", app_id, "pfx", "drive_c", "users", "steamuser", "Documents", game_name))
-
-        self.profile_dict.clear()
-        
-        for b_path in moegliche_basis_pfade:
-            if not os.path.exists(b_path): continue
-            
-            # Wenn der Pfad direkt auf den Steam-Cloud-Zweig zeigt, nutzen wir ihn direkt als profiles_dir
-            if b_path.endswith("profiles"):
-                profiles_dir = b_path
-            else:
-                profiles_dir = os.path.join(b_path, "profiles")
-                
-            if os.path.exists(profiles_dir):
-                for folder in os.listdir(profiles_dir):
-                    if os.path.isdir(os.path.join(profiles_dir, folder)):
-                        try:
-                            readable_name = bytes.fromhex(folder).decode('utf-8')
-                            display_str = f"{readable_name} ({folder[:6]}...)"
-                            if display_str not in self.profile_dict:
-                                self.profile_dict[display_str] = os.path.join(profiles_dir, folder, "controls.sii")
-                        except: pass
-                        
-        if self.profile_dict:
-            self.prof_combo.config(values=list(self.profile_dict.keys()))
-            self.prof_combo.current(0)
-        else:
-            self.prof_combo.config(values=[self.txt["no_profiles"]])
-            self.prof_combo.current(0)
 
     # --- UNZERSTÖRBAR: ENTPFERNT JEDEN WINDOWS-SCHREIBSCHUTZ VOR DEM SPEICHERN ---
     def ausfuehren_installation(self):
