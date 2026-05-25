@@ -686,7 +686,7 @@ if __name__ == "__main__":
         app = RksInstaller(root)
         
         # SCHARFE BEFEHLS-WEICHE [ex-1.3.4]
-        app.btn_start.config(command=app.seite_config)
+        app.btn_start.config(command=lambda: [app.seite_config(), app.suche_profile()])
         app.btn_weiter.config(command=app.seite_readme)
         app.btn_back3.config(command=app.zurueck_zu_config)
         app.btn_to_eula.config(command=app.seite_eula)
