@@ -752,8 +752,10 @@ class RksInstaller:
                             max_index = max(max_index, int(idx_str[0]))
                     except: pass
                 
-                if any(x in line for x in ['mix dsteerleft', 'mix dsteerright', 'mix dsteering', 'mix steering', 'mix msteering', 'mix mpedals', 'mix dforward', 'mix dbackward', 'mix aforward', 'mix abackward', 'mix forward', 'mix backward']):
+                # PRÄZISIERTER FILTER: Verhindert das versehentliche Löschen von originalen ETS2-Zeilen
+                if any(f'{x} `' in line for x in ['mix dsteerleft', 'mix dsteerright', 'mix dsteering', 'mix steering', 'mix msteering', 'mix mpedals', 'mix dforward', 'mix dbackward', 'mix aforward', 'mix abackward', 'mix forward', 'mix backward']):
                     continue
+
                 bereinigte_lines.append(line)
             
             klammer_index = -1
