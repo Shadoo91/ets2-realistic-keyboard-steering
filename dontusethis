@@ -151,6 +151,28 @@ class RksInstaller:
         
         self.btn_uninstall = tk.Button(prof_frame, text="Mod deinstallieren ❌", bg=self.accent_red, fg="white", font=("Arial", 10, "bold"), relief="flat", padx=10)
         self.btn_uninstall.pack(side="right", padx=5)
+
+        # === PRÄZISE PLATZIERUNG: Direkt als Zusatz-Aktion in der Profil-Kachel ===
+        f_browse = tk.Frame(card_profile, bg=self.card_bg)
+        f_browse.pack(fill="x", pady=(8, 0))
+        
+        self.btn_browse = tk.Button(
+            f_browse, 
+            text="📂 controls.sii manuell suchen (Steam Cloud Fallback)...", 
+            font=("Arial", 10),
+            command=self.manuelle_dateiauswahl,
+            bg=self.bg_main,       # Hebt sich edel von der card_bg ab
+            fg=self.fg_text, 
+            bd=1, 
+            relief="solid", 
+            padx=10,
+            pady=3
+        )
+        self.btn_browse.pack(side="left", padx=(122, 0)) # Perfekt bündig mit den Comboboxen darüber!
+
+        self.lbl_status_p2 = tk.Label(card_profile, text="", bg=self.card_bg, font=("Arial", 10, "bold"))
+        self.lbl_status_p2.pack(anchor="w", padx=(122, 0), pady=(4, 0))
+        # =========================================================================
         
         card_keys = tk.Frame(self.config_frame, bg=self.card_bg, bd=1, relief="solid", padx=15, pady=15)
         card_keys.pack(fill="both", expand=True, pady=(0, 15))
@@ -168,26 +190,6 @@ class RksInstaller:
         
         f_not = tk.Frame(card_keys, bg=self.card_bg)
         f_not.pack(fill="x", pady=5)
-        # --- HIER DEN NEUEN BUTTON UND DAS STATUSLABEL EINFÜGEN ---
-        self.btn_browse = tk.Button(
-            self.config_frame, 
-            text="📂 controls.sii manuell suchen (Steam Cloud Fallback)...", 
-            font=("Arial", 10),
-            command=self.manuelle_dateiauswahl,
-            bg=self.card_bg,      # Passt sich farblich perfekt an
-            fg=self.fg_text, 
-            bd=1, 
-            relief="solid", 
-            padx=10,
-            pady=5
-        )
-        self.btn_browse.pack(pady=10)
-
-        # Dieses Label fängt Fehlermeldungen ab, falls die automatische Suche fehlschlägt
-        self.lbl_status_p2 = tk.Label(self.config_frame, text="", bg=self.bg_main, font=("Arial", 10, "bold"))
-        self.lbl_status_p2.pack(pady=5)
-        # ---------------------------------------------------------
-
         tk.Label(f_not, text=self.txt["btn_not"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=22, anchor="w").pack(side="left")
         self.btn_not = tk.Button(f_not, text=self.taste_notbremse_display, width=22, bg="#e1e1e1", font=("Arial", 11, "bold"), relief="solid", bd=1)
         self.btn_not.pack(side="left")
@@ -196,6 +198,7 @@ class RksInstaller:
         self.status_label.pack(pady=(10, 0))
         self.btn_weiter = tk.Button(self.config_frame, text=self.txt["weiter"], width=20, height=2, bg=self.accent_blue, fg="white", font=("Arial", 11, "bold"), relief="flat")
         self.btn_weiter.pack(side="bottom", anchor="e")
+
 
         # --- SEITE 3: README / ÜBERSICHT FRAME ---
         self.readme_frame = tk.Frame(self.root, padx=30, pady=15, bg=self.bg_main)
