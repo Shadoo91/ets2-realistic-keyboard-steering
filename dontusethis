@@ -19,7 +19,7 @@ class RksInstaller:
         self.root.resizable(False, False)
         
         # GITHUB-EINSTELLUNGEN FÜR DEN AUTO-UPDATER
-        self.aktuelle_version = "v1.10.1"
+        self.aktuelle_version = "v1.10.2 (Hotfix)"
         self.github_user = "Shadoo91"       
         self.github_repo = "ets2-realistic-keyboard-steering"   
         
@@ -72,7 +72,7 @@ class RksInstaller:
             "terms_sub": "Bitte lies und scrolle die Bedingungen vollständig durch, um die Installation freizuschalten:",
             "terms_accept": "Ich habe die Lizenzvereinbarung gelesen und akzeptiere alle Bedingungen bedingungslos.",
             "terms_text": (
-                "SOFTWARE-LIZENZ & NUTZUNGSBEDINGUNGEN (RKS-Mod v1.10.1)\n"
+                "SOFTWARE-LIZENZ & NUTZUNGSBEDINGUNGEN (RKS-Mod v1.10.2)\n"
                 "Urheberrecht (c) 2026 von Shadoo91. Alle Rechte vorbehalten.\n"
                 "----------------------------------------------------------------------------------\n\n"
                 "1. GEWÄHRUNG DER LIZENZ\n"
@@ -104,23 +104,50 @@ class RksInstaller:
         tk.Label(self.welcome_frame, text=self.txt["welcome_head"], font=("Arial", 16, "bold"), fg=self.accent_blue, bg=self.bg_main).pack(anchor="w", pady=(0, 15))
         self.welcome_box = tk.Text(self.welcome_frame, height=18, width=90, font=("Arial", 12), fg=self.fg_text, bg=self.card_bg, bd=1, relief="solid", padx=20, pady=20, wrap="word")
         self.welcome_box.pack(fill="both", expand=True, pady=(0, 20))
+        
         self.welcome_box.insert(tk.END, "Wahnsinn! Ein riesiges ")
-        self.welcome_box.insert(tk.END, "DANKESCHÖN für über 300 Abonnenten", "bold_blue")
+        self.welcome_box.insert(tk.END, "DANKESCHÖN für über 700 Abonnenten", "bold_blue")
         self.welcome_box.insert(tk.END, " auf Steam!\n\n")
-        self.welcome_box.insert(tk.END, "Das hier ist meine ")
-        self.welcome_box.insert(tk.END, "allererste Mod", "bold")
-        self.welcome_box.insert(tk.END, " für ")
-        self.welcome_box.insert(tk.END, "ETS2 & ATS", "bold_blue")
-        self.welcome_box.insert(tk.END, ", und euer genialer Support und euer ")
+        self.welcome_box.insert(tk.END, "Euer genialer Support und das massive ")
         self.welcome_box.insert(tk.END, "Vertrauen", "bold")
-        self.welcome_box.insert(tk.END, " hauen mich einfach um. Danke!\n\n")
-        self.welcome_box.insert(tk.END, "Dieses Tool installiert oder entfernt dein erweitertes RKS-Tastatur-Lenksystem ab jetzt absolut dummysicher und vollautomatisch auf deinem PC.\n\n\n")
+        self.welcome_box.insert(tk.END, " in meine ")
+        self.welcome_box.insert(tk.END, "RKS-MOD", "bold_blue")
+        self.welcome_box.insert(tk.END, " für ETS2 & ATS")
+        self.welcome_box.insert(tk.END, " hauen mich einfach um.")  
+        self.welcome_box.insert(tk.END, " Vielen Dank!", "bold")   
+        self.welcome_box.insert(tk.END, "\n\n")
+        self.welcome_box.insert(tk.END, "🛠️ WAS IST NEU IN DIESEM HOTFIX (v1.10.2)?\n", "bold_orange")
+        self.welcome_box.insert(tk.END, "\n")
+        self.welcome_box.insert(tk.END, "• ")
+        self.welcome_box.insert(tk.END, "Steam Cloud & Proton Support:", "bold")
+        self.welcome_box.insert(tk.END, " Volle automatische Erkennung von Cloud-Profilen auf Windows und Linux. Leere 'Ghost-Ordner' werden nun ignoriert.\n")        
+        self.welcome_box.insert(tk.END, "\n")        
+        self.welcome_box.insert(tk.END, "• ")
+        self.welcome_box.insert(tk.END, "Manuelle Ordnerauswahl:", "bold")
+        self.welcome_box.insert(tk.END, " Ein neuer Button auf Seite 2 erlaubt es dir, deine 'controls.sii' bei Sonderpfaden direkt selbst auszuwählen.\n")
+        self.welcome_box.insert(tk.END, "\n")        
+        self.welcome_box.insert(tk.END, "• ")
+        self.welcome_box.insert(tk.END, "Selbstheilende Reparatur:", "bold")
+        self.welcome_box.insert(tk.END, " Der Installer erkennt nun beschädigte oder unvollständige Profildateien und stellt gelöschte Originalzeilen automatisch wieder her.\n")
+        self.welcome_box.insert(tk.END, "\n")        
+        self.welcome_box.insert(tk.END, "• ")
+        self.welcome_box.insert(tk.END, "Intelligenter Backup-Schutz:", "bold")
+        self.welcome_box.insert(tk.END, " Bei Updates wirst du gefragt, ob du dein bestehendes Backup überschreiben willst – so bleiben deine eigenen Tastenänderungen geschützt.\n") 
+        self.welcome_box.insert(tk.END, "\n")        
+        self.welcome_box.insert(tk.END, "• ")
+        self.welcome_box.insert(tk.END, "GUI Performance:", "bold")
+        self.welcome_box.insert(tk.END, " Ein Klick-Lag bei den Dropdown-Menüs wurde behoben, sie reagieren jetzt sofort und flüssig beim ersten Klick.\n\n\n")
         self.welcome_box.insert(tk.END, "📢 KLEINER WUNSCH VOM MODDER:\n", "bold_orange")
-        self.welcome_box.insert(tk.END, "Wenn dir die neue, feine Physik gefällt und der Lkw damit so richtig Bock macht, lass dem Projekt doch bitte eine kurze positive Bewertung da!\n\n")
+        self.welcome_box.insert(tk.END, "\n")
+        self.welcome_box.insert(tk.END, "Wenn dir die meine Mod gefällt, lass dem Projekt doch bitte eine kurze positive Bewertung da!")
         self.welcome_box.insert(tk.END, "Ein Klick auf den ")
         self.welcome_box.insert(tk.END, "Daumen hoch (👍)", "bold_green")
-        self.welcome_box.insert(tk.END, " im Steam Workshop hilft mir riesig dabei, das Projekt aktiv weiterzuentwickeln!\n\n\n")
-        self.welcome_box.insert(tk.END, "Klicke unten auf 'Weiter', um deine Tasten im Handumdrehen einzustellen.", "italic")
+        self.welcome_box.insert(tk.END, " im Steam Workshop hilft mir riesig dabei, das Projekt aktiv weiterzuentwickeln!\n\n")
+        
+        
+        
+        self.welcome_box.insert(tk.END, "Klicke unten auf 'Weiter', um deine Tasten im Handumdrehen dummysicher einzustellen.", "italic")
+        
         self.welcome_box.tag_config("bold", font=("Arial", 12, "bold"))
         self.welcome_box.tag_config("bold_blue", font=("Arial", 12, "bold"), foreground=self.accent_blue)
         self.welcome_box.tag_config("bold_green", font=("Arial", 12, "bold"), foreground=self.accent_green)
@@ -248,52 +275,87 @@ class RksInstaller:
 
         # --- SEITE 5: STATUS END-ANZEIGE ---
         self.end_frame = tk.Frame(self.root, padx=30, pady=25, bg=self.bg_main)
+        # Startet den Update-Check 500 Millisekunden nach dem GUI-Aufbau
+        self.root.after(500, self.pruefe_updates)
 
     # --- AUTOMATISCHER GITHUB-UPDATER MECHANISMUS ---
-    def pruefe_auf_updates(self):
-        if platform.system() != "Windows":
-            return 
-
+    def pruefe_updates(self):
+        """Prüft über die GitHub-API nach Updates unter Verwendung der Klassen-Variablen."""
+        # Baut den API-Link dynamisch aus Ihren Variablen zusammen
+        api_url = f"https://api.github.com/repos/{self.github_user}/{self.github_repo}/releases/latest"
+        
         try:
-            url = f"https://github.com{self.github_user}/{self.github_repo}/releases/latest"
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-            
-            with urllib.request.urlopen(req, timeout=3) as response:
-                data = json.loads(response.read().decode())
-                latest_tag = data.get("tag_name", self.aktuelle_version)
+            # Fragt GitHub mit einem Timeout von 3 Sekunden ab (verhindert GUI-Freeze)
+            response = requests.get(api_url, timeout=3)
+            if response.status_code == 200:
+                release_data = response.json()
+                neueste_version = release_data.get("tag_name", self.aktuelle_version)
                 
-                if latest_tag != self.aktuelle_version:
-                    assets = data.get("assets", [])
-                    if assets and len(assets) > 0:
-                        download_url = assets[0].get("browser_download_url")
-                        
-                        if download_url and messagebox.askyesno("Update verfügbar! 🚀", 
-                            f"Eine neue Version ({latest_tag}) des RKS-Installers wurde gefunden!\n\n"
-                            f"Deine Version: {self.aktuelle_version}\n"
-                            f"Neueste Version: {latest_tag}\n\n"
-                            "Möchtest du das Update jetzt vollautomatisch herunterladen und installieren?"):
-                            
-                            self.starte_selbst_update(download_url)
-        except:
-            pass 
+                # PRÄZISE DETEKTION DER DIREKTEN DOWNLOAD-URL DER .EXE
+                assets = release_data.get("assets", [])
+                download_url = ""
+                
+                if assets:
+                    # Sucht gezielt nach der fertigen ausführbaren Datei im Release
+                    for asset in assets:
+                        if asset.get("name", "").endswith(".exe") or asset.get("name", "").endswith(".py"):
+                            download_url = asset.get("browser_download_url", "")
+                            break
+                
+                # Falls kein spezifisches Asset gefunden wurde, nutzen wir die allgemeine URL als Fallback
+                if not download_url:
+                    download_url = release_data.get("html_url", "")
+                
+                # Vergleicht das GitHub-Tag mit Ihrer self.aktuelle_version ("v1.10.2 (Hotfix)")
+                if neueste_version != self.aktuelle_version:
+                    antwort = messagebox.askyesno(
+                        "Update verfügbar! 🚀", 
+                        f"Eine neuere Version ({neueste_version}) des Installers ist verfügbar!\n"
+                        f"Deine aktuelle Version: {self.aktuelle_version}\n\n"
+                        "Möchtest du das automatische Update jetzt starten?\n"
+                        "(Das Programm lädt die neue Version herunter und startet sich vollautomatisch neu!)"
+                    )
+                    
+                    # PRÄZISE BEFEHLS-WEICHE: Startet das echte Selbst-Update anstatt nur den Browser zu öffnen
+                    if antwort and download_url:
+                        self.starte_selbst_update(download_url)
+        except Exception:
+            # Bei Offline-Modus oder GitHub-Störung läuft das Programm lautlos weiter
+            pass
 
     def starte_selbst_update(self, download_url):
         try:
             current_exe = sys.executable
             backup_exe = current_exe + ".old"
             
+            # Löscht ein eventuell verbliebenes altes Backup
             if os.path.exists(backup_exe):
                 os.remove(backup_exe)
+                
+            # Benennt die aktuell laufende Datei um (wird vom OS im RAM gehalten)
             os.rename(current_exe, backup_exe)
             
+            # Lädt die neue Version direkt an den alten Platz herunter
             urllib.request.urlretrieve(download_url, current_exe)
             
-            batch_cmd = f'ping 127.0.0.1 -n 2 > nul & del "{backup_exe}"'
-            subprocess.Popen(f'cmd.exe /c {batch_cmd}', shell=True)
+            # PLATTFORM-WEICHE FÜR DEN HINTERGRUND-REINIGER
+            if platform.system() == "Windows" and "WINEPREFIX" not in os.environ:
+                # Ihr originaler, perfekt funktionierender Windows-Befehl
+                batch_cmd = f'ping 127.0.0.1 -n 2 > nul & del "{backup_exe}"'
+                subprocess.Popen(f'cmd.exe /c {batch_cmd}', shell=True)
+            else:
+                # LINUX LOGIK: Nutzt die Standard-Shell, wartet 2 Sekunden und löscht das Backup
+                os.chmod(current_exe, 0o755)  # Macht die neue Datei unter Linux sofort ausführbar!
+                linux_cmd = f'sleep 2 && rm -f "{backup_exe}"'
+                subprocess.Popen(['/bin/sh', '-c', linux_cmd])
+            
+            # Startet die neue Version im Hintergrund
             subprocess.Popen([current_exe])
             
+            # Schließt den alten Installer sofort, damit er im Ordner freigegeben wird
             self.root.destroy()
             sys.exit()
+            
         except Exception as e:
             messagebox.showerror("Update-Fehler", f"Das automatische Update ist fehlgeschlagen: {str(e)}")
 
@@ -470,8 +532,12 @@ class RksInstaller:
                             if os.path.exists(datei_pfad) and os.path.isfile(datei_pfad):
                                 try:
                                     readable_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
-                                    # Visueller Indikator, woher das Profil stammt (Cloud oder Lokal)
-                                    prefix = "☁ [Cloud]" if "steam" in s_dir.lower() or "remote" in s_dir.lower() else "👤 [Lokal]"
+                                    # TEXT-BASIERTE PRÄFIXE: Verhindert Kästchen und falsche Abstände unter Windows
+                                    if "steam" in s_dir.lower() or "remote" in s_dir.lower():
+                                        prefix = "[Cloud]"
+                                    else:
+                                        prefix = "[Lokal]"
+                                        
                                     display_str = f"{prefix} {readable_name} ({folder[:6]}...)"
                                     
                                     # Verhindert doppelte Einträge, falls ein Profil in mehreren Pfaden liegt
@@ -491,8 +557,26 @@ class RksInstaller:
             self.lbl_status_p2.config(text="⚠ Kein Profil gefunden. Bitte 'Manuelle Suche' nutzen!", fg="orange")
 
     def manuelle_dateiauswahl(self):
-        """Ermöglicht das manuelle Heraussuchen der controls.sii bei Steam Cloud / Sonderpfaden."""
+        """Ermöglicht das manuelle Heraussuchen der controls.sii und hebelt die Linux-Ordner-Versteckung aus."""
+        # Standard-Startpfad für echtes Windows
+        start_pfad = os.path.expanduser(r"~\Documents")
+        
+        # WINE-DETEKTION: Wenn wir unter Linux/Wine laufen, zwingen wir den Dialog direkt in den versteckten Pfad
+        if "WINEPREFIX" in os.environ or platform.system() != "Windows":
+            user_name = os.environ.get("USER", "unknown")
+            game_name = self.game_combo.get()
+            app_id = "227300" if game_name == "Euro Truck Simulator 2" else "270880"
+            
+            # Baut den direkten Pfad in die unsichtbare Steam-Flasche über Laufwerk Z:\
+            test_wine_pfad = f"Z:\\home\\{user_name}\\.steam\\steam\\steamapps\\compatdata\\{app_id}\\pfx\\drive_c\\users\\steamuser\\Documents\\{game_name}"
+            if os.path.exists(test_wine_pfad):
+                start_pfad = test_wine_pfad
+            else:
+                # Fallback auf das normale Linux-Home über Z:\
+                start_pfad = f"Z:\\home\\{user_name}"
+
         dateipfad = filedialog.askopenfilename(
+            initialdir=start_pfad, # ZWINGT den Dialog, direkt im richtigen (versteckten) Ordner zu starten!
             title="Wähle deine aktive controls.sii aus",
             filetypes=[("ETS2 Steuerung", "controls.sii"), ("Alle Dateien", "*.*")]
         )
