@@ -1,6 +1,6 @@
 # 🚀 RKS-Tastaturlenkung v1.10.2 — Linux & Steam Deck Support! 🚚💨
 
-🔗 **[➔ DOWNLOAD RKS-INSTALLER v1.10.2 .ZIP (CLICK HERE)](https://github.com)**
+🔗 **[➔ DOWNLOAD RKS-INSTALLER v1.10.2 .ZIP (CLICK HERE)](../../releases/latest)**
 
 ⚠️ **IMPORTANT / WICHTIG:**
 * This modification ONLY works if you use the GitHub installer AND stay subscribed to this Steam Workshop mod!
