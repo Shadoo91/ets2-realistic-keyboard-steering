@@ -1,77 +1,33 @@
 # 🚀 RKS-Mod — Realistic Keyboard Steering (Universal Version)
 
-```text
-==================================================================================
-🚨 CRITICAL UPDATE INFO / WICHTIGER HINWEIS FÜR RE-INSTALLATIONEN 🚨
-==================================================================================
-🇺🇸 ENGLISH:
-⚠️ The old PowerShell script (.ps1) has been completely RETIRED! 
-⚠️ EVERY USER MUST download the new standalone Graphical Installer (.exe)!
-⚠️ The mod ONLY works in-game if you are actively subscribed to the Workshop mods!
+[![GitHub release](https://shields.io)](https://github.com)
 
-🇩🇪 DEUTSCH:
-⚠️ Das alte PowerShell-Skript (.ps1) wurde komplett EINGESTAMPFT! 
-⚠️ JEDER SPIELER MUSS diesen neuen grafischen Installer (.exe) herunterladen!
-⚠️ Die Mod funktioniert im Spiel NUR, wenn du die Workshop-Mods aktiv abonniert hast!
-==================================================================================
-```
+Ein vollautomatischer, grafischer Installer zur Injektion einer realistischen Tastatur- und Maussteuerung für *Euro Truck Simulator 2* und *American Truck Simulator*.
 
----
+## 📥 DOWNLOAD & UPDATES (v1.10.2)
+👉 **[CLICK HERE TO DOWNLOAD THE LATEST RKS-INSTALLER (.ZIP)](https://github.com)**
 
-# 🇺🇸 ENGLISH VERSION
-
-## 📥 DOWNLOAD THE GRAPHICAL INSTALLER (.EXE)
-Do not copy the raw script. Download the pre-compiled, secure standalone Windows application directly from our official releases page:
-
-👉 **[CLICK HERE TO DOWNLOAD THE LATEST RKS-INSTALLER](https://github.com/Shadoo91/ets2-realistic-keyboard-steering/releases/download/v1.10.1/RKS-Installer-v1.10.1.zip)**
-
-*(Simply download the ZIP, extract it, and double-click the `RKS-Installer.exe`. No Python required!)*
-
-## 💎 Key Features in v1.10.1:
-* 🎮 **Live Key Snooper:** Map your keys or mouse thumb buttons instantly by tapping them inside the GUI.
-* 🛡️ **Backup & Profile Protection:** Automated backup creation before any file modification.
-* 🔧 **SCS Repair Engine:** Fully reconstructs corrupted or empty `controls.sii` files in the background.
-* 🔄 **Auto-Updater:** The tool checks this repository on startup and updates itself seamlessly.
+## 💎 New in v1.10.2:
+- 🎮 **Live Key Snooper:** Map keys/mouse buttons directly in the GUI.
+- 🐧 **Linux & Steam Deck Support:** Auto-detects paths.
+- 🛡️ **Backup Protection:** Automatic backups before modification.
 
 ## 🔗 Required Steam Workshop Subscriptions:
-*This installer scans your hard drive. Installation will be blocked if you are not subscribed to the corresponding Steam Workshop mod!*
-
-* 🚚 **Euro Truck Simulator 2 Mod:** https://steamcommunity.com/sharedfiles/filedetails/?id=3727705125
-* 🦅 **American Truck Simulator Mod:** https://steamcommunity.com/sharedfiles/filedetails/?id=3725174940
-
-## 📜 License & Copyright
-**Copyright (c) 2026 by Shadoo91. All rights reserved.**
-Re-uploading, distribution on third-party platforms, or copying the mathematical formulas into other modifications without express written permission from Shadoo91 is strictly prohibited and illegal.
-
-----------------------------------------------------------------------------------
-Enjoy the realistic truck handling! Safe travels! ~ Shadoo91 😉
+- 🚚 **ETS2 Mod:** [Steam Workshop](https://steamcommunity.com)
+- 🦅 **ATS Mod:** [Steam Workshop](https://steamcommunity.com)
 
 ---
 
 # 🇩🇪 DEUTSCHE VERSION
 
-## 📥 GRAPHISCHEN INSTALLER HERUNTERLADEN (.EXE)
-Kopiere nicht das rohe Skript. Lade dir die fertig kompilierte, sichere Windows-Anwendung direkt von unserer offiziellen Release-Seite herunter:
+## 📥 DOWNLOAD & UPDATES (v1.10.2)
+👉 **[KLICKE HIER, UM DEN NEUEN RKS-INSTALLER HERUNTERZULADEN (.ZIP)](https://github.com)**
 
-👉 **[KLICKE HIER, UM DEN NEUEN RKS-INSTALLER HERUNTERZULADEN](https://github.com/Shadoo91/ets2-realistic-keyboard-steering/releases/download/v1.10.1/RKS-Installer-v1.10.1.zip)**
-
-*(Einfach die ZIP herunterladen, entpacken und die `RKS-Installer.exe` per Doppelklick starten. Kein Python nötig!)*
-
-## 💎 Die wichtigsten Neuerungen in v1.10.1:
-* 🎮 **Tasten live anlernen:** Klicke einfach auf einen Button im Tool und lerne Tasten oder Maus-Daumentasten live an.
-* 🛡️ **Profil- & Backup-Schutz:** Automatische Backup-Erstellung vor jeder Datei-Modifikation.
-* 🔧 **SCS-Reparatur-Engine:** Repariert oder rekonstruiert beschädigte oder leere `controls.sii`-Dateien im Hintergrund.
-* 🔄 **Integrierter Auto-Updater:** Das Tool prüft GitHub bei jedem Start und aktualisiert sich vollautomatisch.
+## 💎 Neuerungen in v1.10.2:
+- 🎮 **Tasten live anlernen:** Maus-/Tastaturbelegung direkt im Tool.
+- 🐧 **Linux & Steam Deck Support:** Automatischer Scan.
+- 🛡️ **Profil- & Backup-Schutz:** Automatische Backups.
 
 ## 🔗 Benötigte Steam Workshop Abonnements:
-*Dieser Installer prüft deine Festplatte. Die Installation wird blockiert, wenn du die Mod nicht im Workshop abonniert hast!*
-
-* 🚚 **Euro Truck Simulator 2 Mod:** https://steamcommunity.com/sharedfiles/filedetails/?id=3727705125
-* 🦅 **American Truck Simulator Mod:** https://steamcommunity.com/sharedfiles/filedetails/?id=3725174940
-
-## 📜 Lizenz & Urheberrecht
-**Urheberrecht (c) 2026 von Shadoo91. Alle Rechte vorbehalten.**
-Ein Re-Upload, die Verbreitung auf Drittanbieter-Plattformen oder das Kopieren der mathematischen Formeln in andere Modifikationen ohne ausdrückliche, schriftliche Genehmigung von Shadoo91 ist strengstens untersagt und illegal.
-
-----------------------------------------------------------------------------------
-Viel Spaß mit dem realistischen Fahrgefühl und gute Fahrt! ~ Shadoo91 😉
+- 🚚 **ETS2 Mod:** [Steam Workshop](https://steamcommunity.com)
+- 🦅 **ATS Mod:** [Steam Workshop](https://steamcommunity.com)
