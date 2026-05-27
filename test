@@ -901,20 +901,20 @@ class RksInstaller:
             R = self.taste_rangier_code
             N = self.taste_notbremse_code
             
-            # Formeln vorbereiten (Nutzen jetzt die korrekte, vom Spiel erwartete Syntax)
+            # DIE ZUKUNFTSSICHERE VERSION: Nutzt 'steering_speed_coef' für den perfekten Geschwindigkeits-Effekt!
             rks_formeln = [
-                "mix dsteerleft `keyboard.a?0`",
-                "mix dsteerright `keyboard.d?0`",
-                f"mix dsteering `(keyboard.a?0 - keyboard.d?0) * (0.30 + ({T} * (0.60 - (keyboard.s?0 * 0.25)))) * (1.00 + (keyboard.s?0 * {N} * 1.20)) * (c_steer_func * (4.2 - steering_speed_coef))`",
-                f"mix steering `(dsteering * (1.00 - c_steer_func)) + (({R}) * (keyboard.a?0 - keyboard.d?0) * 0.35)`",
-                "mix msteering `-mouse.rel_position.x?0 * c_msens`",
-                "mix mpedals `mouse.rel_position.y?0 * c_msens`",
-                "mix dforward `0`",
-                "mix dbackward `0`",
-                f"mix aforward `((keyboard.w?0 * 0.35) + ({N} * 0.55)) * (! keyboard.s?0)`",
-                f"mix abackward `keyboard.s?0 * (0.10 + ({T} * 0.35) + ({N} * 1.00))`",
-                "mix forward `aforward`",
-                "mix backward `abackward`"
+                f'mix dsteerleft `keyboard.a?0`',
+                f'mix dsteerright `keyboard.d?0`',
+                f'mix dsteering `(keyboard.a?0 - keyboard.d?0) * (0.30 + ({T} * (0.60 - (keyboard.s?0 * 0.25)))) * (1.00 + (keyboard.s?0 * {N} * 1.20)) * (c_steer_func * (4.2 - steering_speed_coef))`',
+                f'mix steering `(dsteering * (1.00 - c_steer_func)) + (({R}) * (keyboard.a?0 - keyboard.d?0) * 0.35)`',
+                f'mix msteering `-mouse.rel_position.x?0 * c_msens`',
+                f'mix mpedals `mouse.rel_position.y?0 * c_msens`',
+                f'mix dforward `0`',
+                f'mix dbackward `0`',
+                f'mix aforward `((keyboard.w?0 * 0.35) + ({N} * 0.55)) * (! keyboard.s?0)`',
+                f'mix abackward `keyboard.s?0 * (0.10 + ({T} * 0.35) + ({N} * 1.00))`',
+                f'mix forward `aforward`',
+                f'mix backward `abackward`'
             ]
 
             # --- CACHE-FREIE & SCHNITTSTELLENGENAUE IN-PLACE-REPARATUR ---
@@ -927,20 +927,20 @@ class RksInstaller:
             bereinigte_lines = []
             max_index = 320
             
-            # Das exakte, spielkonforme Mapping deiner RKS-Mod-Formeln
+            # Das exakte, zukunftssichere Mapping inklusive des neuen Speed-Effekts
             formel_mapping = {
-                "mix dsteerleft": "mix dsteerleft `keyboard.a?0`",
-                "mix dsteerright": "mix dsteerright `keyboard.d?0`",
-                "mix dsteering": f"mix dsteering `(keyboard.a?0 - keyboard.d?0) * (0.30 + ({T} * (0.60 - (keyboard.s?0 * 0.25)))) * (1.00 + (keyboard.s?0 * {N} * 1.20)) * (c_steer_func * (4.2 - steering_speed_coef))`",
-                "mix steering": f"mix steering `(dsteering * (1.00 - c_steer_func)) + (({R}) * (keyboard.a?0 - keyboard.d?0) * 0.35)`",
-                "mix msteering": "mix msteering `-mouse.rel_position.x?0 * c_msens`",
-                "mix mpedals": "mix mpedals `mouse.rel_position.y?0 * c_msens`",
-                "mix dforward": "mix dforward `0`",
-                "mix dbackward": "mix dbackward `0`",
-                "mix aforward": f"mix aforward `((keyboard.w?0 * 0.35) + ({N} * 0.55)) * (! keyboard.s?0)`",
-                "mix abackward": f"mix abackward `keyboard.s?0 * (0.10 + ({T} * 0.35) + ({N} * 1.00))`",
-                "mix forward": "mix forward `aforward`",
-                "mix backward": "mix backward `abackward`"
+                "mix dsteerleft": f'mix dsteerleft `keyboard.a?0`',
+                "mix dsteerright": f'mix dsteerright `keyboard.d?0`',
+                "mix dsteering": f'mix dsteering `(keyboard.a?0 - keyboard.d?0) * (0.30 + ({T} * (0.60 - (keyboard.s?0 * 0.25)))) * (1.00 + (keyboard.s?0 * {N} * 1.20)) * (c_steer_func * (4.2 - steering_speed_coef))`',
+                "mix steering": f'mix steering `(dsteering * (1.00 - c_steer_func)) + (({R}) * (keyboard.a?0 - keyboard.d?0) * 0.35)`',
+                "mix msteering": f'mix msteering `-mouse.rel_position.x?0 * c_msens`',
+                "mix mpedals": f'mix mpedals `mouse.rel_position.y?0 * c_msens`',
+                "mix dforward": f'mix dforward `0`',
+                "mix dbackward": f'mix dbackward `0`',
+                "mix aforward": f'mix aforward `((keyboard.w?0 * 0.35) + ({N} * 0.55)) * (! keyboard.s?0)`',
+                "mix abackward": f'mix abackward `keyboard.s?0 * (0.10 + ({T} * 0.35) + ({N} * 1.00))`',
+                "mix forward": f'mix forward `aforward`',
+                "mix backward": f'mix backward `abackward`'
             }
             
             # Tracker, welche Keys erfolgreich im originalen Bereich (oben) ersetzt wurden
@@ -958,10 +958,8 @@ class RksInstaller:
                         line_idx = 999 # Fallback für beschädigte Indizes
                 else:
                     line_idx = 999
-
+                    
                 # RADIKALER UNTEN-ANHÄNG-SCHUTZ:
-                # Wenn eine Mod-Zeile eine ID größer als 400 hat, ist sie eine "Anhäng-Leiche".
-                # Diese wird hier im Live-View knallhart gelöscht!
                 if line_idx > 400 and any(f"{x} " in line for x in formel_mapping.keys()):
                     continue
 
@@ -969,12 +967,11 @@ class RksInstaller:
                 getauscht = False
                 if line_idx <= 400:
                     for key, formel in formel_mapping.items():
-                        if f' {key} `' in line or f' "{key} `' in line or f' {key} "' in line:
+                        # UNBESTECHLICHE ERKENNUNG: Prüft, ob der nackte Name im Inhalt existiert
+                        if f'"{key} ' in line or f' {key} ' in line:
                             try:
-                                # Spaltet die Zeile exakt vor dem eigentlichen Inhalt auf
-                                # Behält config_lines[334]: " exakt bei und tauscht nur die Formel!
-                                prefix = line.split(' "')[0]
-                                line = f'{prefix} "{formel}"\n'
+                                # Baut die Zeile absolut sauber und standardisiert neu auf
+                                line = f' config_lines[{line_idx}]: "{formel}"\n'
                                 oben_ersetzt[key] = True
                                 getauscht = True
                                 break
@@ -987,9 +984,8 @@ class RksInstaller:
 
                 bereinigte_lines.append(line)
             
-            # SELBSTHEILUNG: Falls eine Zeile oben komplett gelöscht war und fehlt
+            # SELBSTHEILUNG: Falls eine Zeile oben komplett gefehlt hat
             reparatur_block = []
-            # Wir setzen die fehlenden Zeilen mit fortlaufender ID ab 330 ein, falls sie oben fehlten
             reparatur_idx = 330
             for key, formel in formel_mapping.items():
                 if not oben_ersetzt[key]:
@@ -1003,12 +999,11 @@ class RksInstaller:
                     klammer_index = idx
                     break
             
-            # Fügt die fehlenden Zeilen als geschlossenen Block ein, NUR wenn sie oben gefehlt haben
+            # Fügt die fehlenden Zeilen als geschlossenen Block ein
             if reparatur_block:
-                # Wir suchen im Array nach der Zeile 329, um es genau dort einzubetten, statt unten!
                 einfuege_punkt = klammer_index
                 for idx, bline in enumerate(bereinigte_lines):
-                    if "config_lines[329]" in bline:
+                    if "config_lines" in bline:
                         einfuege_punkt = idx + 1
                         break
                 
@@ -1019,6 +1014,7 @@ class RksInstaller:
             with open(target_file, "w", encoding="utf-8") as f:
                 f.writelines(bereinigte_lines)
                 f.flush()
+
 
             # UNBESTECHLICHE VERIFIKATION
             try:
