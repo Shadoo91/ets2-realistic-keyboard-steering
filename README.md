@@ -1,6 +1,6 @@
 # 🚀 RKS-Mod — Realistic Keyboard Steering (Universal Version)
 
-[![GitHub release](https://shields.io)](https://github.com)
+[![GitHub release](https://shields.io)]([https://github.com](https://github.com/Shadoo91/ets2-realistic-keyboard-steering/releases/tag/v1.10.2))
 
 Ein vollautomatischer, grafischer Installer zur Injektion einer realistischen Tastatur- und Maussteuerung für *Euro Truck Simulator 2* und *American Truck Simulator*.
 
