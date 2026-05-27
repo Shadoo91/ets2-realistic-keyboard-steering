@@ -897,27 +897,27 @@ class RksInstaller:
             with open(target_file, "r", encoding="utf-8", errors="ignore") as f:
                 lines = f.readlines()
                 
-            T = self.taste_turbo_code
-            R = self.taste_rangier_code
-            N = self.taste_notbremse_code
+             # ABSICHERUNG: Falls der Snooper leer ist, erzwingen wir die funktionierenden Standard-Tasten!
+            T = self.taste_turbo_code if getattr(self, 'taste_turbo_code', '').strip() else "keyboard.space?0"
+            R = self.taste_rangier_code if getattr(self, 'taste_rangier_code', '').strip() else "mouse.button_4?0"
+            N = self.taste_notbremse_code if getattr(self, 'taste_notbremse_code', '').strip() else "keyboard.lalt?0"
             
-            # DIE ZUKUNFTSSICHERE VERSION: Nutzt 'steering_speed_coef' für den perfekten Geschwindigkeits-Effekt!
+            # UNZERSTÖRBARE VERSION: Fängt leere Variablen ab und nutzt deine originale Physik-Formel
             rks_formeln = [
-                f'mix dsteerleft `keyboard.a?0`',
-                f'mix dsteerright `keyboard.d?0`',
-                f'mix dsteering `(keyboard.a?0 - keyboard.d?0) * (0.30 + ({T} * (0.60 - (keyboard.s?0 * 0.25)))) * (1.00 + (keyboard.s?0 * {N} * 1.20)) * (c_steer_func * (4.2 - steering_speed_coef))`',
-                f'mix steering `(dsteering * (1.00 - c_steer_func)) + (({R}) * (keyboard.a?0 - keyboard.d?0) * 0.35)`',
-                f'mix msteering `-mouse.rel_position.x?0 * c_msens`',
-                f'mix mpedals `mouse.rel_position.y?0 * c_msens`',
-                f'mix dforward `0`',
-                f'mix dbackward `0`',
-                f'mix aforward `((keyboard.w?0 * 0.35) + ({N} * 0.55)) * (! keyboard.s?0)`',
-                f'mix abackward `keyboard.s?0 * (0.10 + ({T} * 0.35) + ({N} * 1.00))`',
-                f'mix forward `aforward`',
-                f'mix backward `abackward`'
+                "mix dsteerleft `keyboard.a?0`",
+                "mix dsteerright `keyboard.d?0`",
+                f"mix dsteering `(keyboard.a?0 - keyboard.d?0) * (0.30 + ({T} * (0.60 - (keyboard.s?0 * 0.25)))) * (1.00 + (keyboard.s?0 * {N} * 1.20)) * (c_steer_func * (4.2 - steering_speed_coef))`",
+                f"mix steering `(dsteering * (1.00 - c_steer_func)) + (({R}) * (keyboard.a?0 - keyboard.d?0) * 0.35)`",
+                "mix msteering `-mouse.rel_position.x?0 * c_msens`",
+                "mix mpedals `mouse.rel_position.y?0 * c_msens`",
+                "mix dforward `0`",
+                "mix dbackward `0`",
+                f"mix aforward `((keyboard.w?0 * 0.35) + ({N} * 0.55)) * (! keyboard.s?0)`",
+                f"mix abackward `keyboard.s?0 * (0.10 + ({T} * 0.35) + ({N} * 1.00))`",
+                "mix forward `aforward`",
+                "mix backward `abackward`"
             ]
 
-            # --- CACHE-FREIE & SCHNITTSTELLENGENAUE IN-PLACE-REPARATUR ---
             try:
                 with open(target_file, "r", encoding="utf-8", errors="ignore") as f_retry:
                     lines = f_retry.readlines()
@@ -927,121 +927,139 @@ class RksInstaller:
             bereinigte_lines = []
             max_index = 320
             
-            # Das exakte, zukunftssichere Mapping inklusive des neuen Speed-Effekts
+            # Das unzerstörbare Mapping, das leere Strings unmöglich macht
             formel_mapping = {
-                "mix dsteerleft": f'mix dsteerleft `keyboard.a?0`',
-                "mix dsteerright": f'mix dsteerright `keyboard.d?0`',
-                "mix dsteering": f'mix dsteering `(keyboard.a?0 - keyboard.d?0) * (0.30 + ({T} * (0.60 - (keyboard.s?0 * 0.25)))) * (1.00 + (keyboard.s?0 * {N} * 1.20)) * (c_steer_func * (4.2 - steering_speed_coef))`',
-                "mix steering": f'mix steering `(dsteering * (1.00 - c_steer_func)) + (({R}) * (keyboard.a?0 - keyboard.d?0) * 0.35)`',
-                "mix msteering": f'mix msteering `-mouse.rel_position.x?0 * c_msens`',
-                "mix mpedals": f'mix mpedals `mouse.rel_position.y?0 * c_msens`',
-                "mix dforward": f'mix dforward `0`',
-                "mix dbackward": f'mix dbackward `0`',
-                "mix aforward": f'mix aforward `((keyboard.w?0 * 0.35) + ({N} * 0.55)) * (! keyboard.s?0)`',
-                "mix abackward": f'mix abackward `keyboard.s?0 * (0.10 + ({T} * 0.35) + ({N} * 1.00))`',
-                "mix forward": f'mix forward `aforward`',
-                "mix backward": f'mix backward `abackward`'
+                "mix dsteerleft": "mix dsteerleft `keyboard.a?0`",
+                "mix dsteerright": "mix dsteerright `keyboard.d?0`",
+                "mix dsteering": f"mix dsteering `(keyboard.a?0 - keyboard.d?0) * (0.30 + ({T} * (0.60 - (keyboard.s?0 * 0.25)))) * (1.00 + (keyboard.s?0 * {N} * 1.20)) * (c_steer_func * (4.2 - steering_speed_coef))`",
+                "mix steering": f"mix steering `(dsteering * (1.00 - c_steer_func)) + (({R}) * (keyboard.a?0 - keyboard.d?0) * 0.35)`",
+                "mix msteering": "mix msteering `-mouse.rel_position.x?0 * c_msens`",
+                "mix mpedals": "mix mpedals `mouse.rel_position.y?0 * c_msens`",
+                "mix dforward": "mix dforward `0`",
+                "mix dbackward": "mix dbackward `0`",
+                "mix aforward": f"mix aforward `((keyboard.w?0 * 0.35) + ({N} * 0.55)) * (! keyboard.s?0)`",
+                "mix abackward": f"mix abackward `keyboard.s?0 * (0.10 + ({T} * 0.35) + ({N} * 1.00))`",
+                "mix forward": "mix forward `aforward`",
+                "mix backward": "mix backward `abackward`"
             }
             
-            # Tracker, welche Keys erfolgreich im originalen Bereich (oben) ersetzt wurden
             oben_ersetzt = {x: False for x in formel_mapping.keys()}
 
-            for line in lines:
-                if "config_lines[" in line:
-                    try:
-                        # Holt die reine numerische ID der Zeile aus den eckigen Klammern
-                        # Das fängt jeden Fehler ab, falls parts eine Liste ist!
-                        idx_part = line.split("config_lines[")[1].split("]")[0]
-                        line_idx = int(idx_part)
-                        max_index = max(max_index, line_idx)
-                    except: 
-                        line_idx = 999 # Fallback für beschädigte Indizes
-                else:
-                    line_idx = 999
-                    
-                # RADIKALER UNTEN-ANHÄNG-SCHUTZ:
-                if line_idx > 400 and any(f"{x} " in line for x in formel_mapping.keys()):
-                    continue
+            # --- PFAD-ERMITTLUNG UND VALIDIERUNG ---
+            target_file = self.profile_dict.get(selected_prof)
+            if not target_file or not os.path.exists(target_file):
+                print("FEHLER: Zieldatei existiert nicht oder Pfad ist ungültig!")
+                return
 
-                # ECHTER IN-PLACE TAUSCH (NUR IM VANILLA-BEREICH OBEN)
-                getauscht = False
-                if line_idx <= 400:
-                    for key, formel in formel_mapping.items():
-                        # UNBESTECHLICHE ERKENNUNG: Prüft, ob der nackte Name im Inhalt existiert
-                        if f'"{key} ' in line or f' {key} ' in line:
-                            try:
-                                # Baut die Zeile absolut sauber und standardisiert neu auf
-                                line = f' config_lines[{line_idx}]: "{formel}"\n'
-                                oben_ersetzt[key] = True
-                                getauscht = True
-                                break
-                            except: 
-                                pass
-                
-                if getauscht:
-                    bereinigte_lines.append(line)
-                    continue
-
-                bereinigte_lines.append(line)
-            
-            # SELBSTHEILUNG: Falls eine Zeile oben komplett gefehlt hat
-            reparatur_block = []
-            reparatur_idx = 330
-            for key, formel in formel_mapping.items():
-                if not oben_ersetzt[key]:
-                    reparatur_block.append(f' config_lines[{reparatur_idx}]: "{formel}"\n')
-                reparatur_idx += 1
-
-            # Sucht die Position der schließenden Profil-Klammer '}' für den Notfall
-            klammer_index = -1
-            for idx in range(len(bereinigte_lines) - 1, -1, -1):
-                if "}" in bereinigte_lines[idx]:
-                    klammer_index = idx
-                    break
-            
-            # Fügt die fehlenden Zeilen als geschlossenen Block ein
-            if reparatur_block:
-                einfuege_punkt = klammer_index
-                for idx, bline in enumerate(bereinigte_lines):
-                    if "config_lines" in bline:
-                        einfuege_punkt = idx + 1
-                        break
-                
-                if einfuege_punkt != -1:
-                    bereinigte_lines[einfuege_punkt:einfuege_punkt] = reparatur_block
-
-            # SCHREIBEN ERZWINGEN (Ohne Caching-Verzögerung)
-            with open(target_file, "w", encoding="utf-8") as f:
-                f.writelines(bereinigte_lines)
-                f.flush()
-
-
-            # UNBESTECHLICHE VERIFIKATION
+            # --- DATEI EINLESEN (NUR EINMAL!) ---
             try:
-                with open(target_file, "r", encoding="utf-8", errors="ignore") as f_check:
-                    if "mix dsteering" in f_check.read():
-                        ist_erfolgreich = True
-            except:
+                with open(target_file, "r", encoding="utf-8", errors="ignore") as f_read:
+                    lines = f_read.readlines()
+            except Exception as e:
+                print(f"FEHLER beim Lesen der Datei: {e}")
+                return
+
+            bereinigte_lines = []
+            neue_datei_dict = {}
+            header_zeilen = []
+            
+            # Tracker für die exakte, originale Anzahl an config_lines aus der Datei
+            originale_anzahl_zeilen = 591  # Fallback, falls das Auslesen fehlschlägt
+            anzahl_match_gefunden = False
+
+            # 1. DATEI ANALYSIEREN: Holt die echten Zeilen und bewahrt das exakte Format
+            for line in lines:
+                if "config_lines:" in line:
+                    # Wir merken uns die originale Gesamtzahl (z. B. 591) für den späteren Loop!
+                    try:
+                        originale_anzahl_zeilen = int(line.split("config_lines:")[1].strip())
+                        anzahl_match_gefunden = True
+                    except:
+                        pass
+                    header_zeilen.append(line)
+                elif "config_lines[" in line:
+                    try:
+                        # Holt die Nummer absolut unbeschädigt heraus
+                        idx_part = line.split("config_lines[")[1].split("]")[0]
+                        idx = int(idx_part)
+                        
+                        # Extrahiert den Inhalt exakt zwischen den Anführungszeichen
+                        parts = line.split(':', 1)
+                        if len(parts) > 1:
+                            inhalt_raw = parts[1].strip()
+                            if inhalt_raw.startswith('"') and inhalt_raw.endswith('"'):
+                                inhalt = inhalt_raw[1:-1]
+                            else:
+                                inhalt = inhalt_raw.strip('"')
+                        else:
+                            inhalt = line.split(']:')[1].strip().strip('"')
+
+                        # Wenn es kein RKS-Key ist, speichern wir den Vanilla-Wert
+                        ist_rks_key = any(key in inhalt for key in formel_mapping.keys())
+                        if not ist_rks_key:
+                            neue_datei_dict[idx] = inhalt
+                    except:
+                        pass
+                else:
+                    # Bewahrt SiiNunit, die öffnende Klammer { und die nameless-Zeile am Anfang
+                    # Ignoriert alte schließende Klammern am Ende, da wir das gleich präzise neu setzen
+                    if "}" not in line and line.strip() != "":
+                        header_zeilen.append(line)
+
+            # 2. RKS-INJEKTION: Setzt deine Mod-Formeln starr auf die originalen Indizes 330 bis 341
+            start_idx = 330
+            for formel in rks_formeln:
+                neue_datei_dict[start_idx] = formel
+                start_idx += 1
+
+            # 3. DATEI REKONSTRUIEREN: Wir zählen exakt die originale Anzahl an Zeilen ab (z. B. range(591))
+            bereinigte_lines.extend(header_zeilen)
+            
+            for i in range(originale_anzahl_zeilen):
+                # Selbstheilung: Falls Zeile 332 manuell gelöscht war, wird sie hier wiedererweckt,
+                # da range(591) lückenlos jeden Index abfragt und befüllt!
+                inhalt = neue_datei_dict.get(i, "mix dforward `0`")
+                bereinigte_lines.append(f' config_lines[{i}]: "{inhalt}"\n')
+            
+            # 4. DAS SEHR WICHTIGE ENDE: Exakte Klammerstruktur mit abschließender Leerzeile
+            bereinigte_lines.append("}\n")
+            bereinigte_lines.append("\n")   # Die leere Zeile nach der ersten schließenden Klammer
+            bereinigte_lines.append("}\n")  # Die finale Klammer setzt den unbestechlichen Schlusspunkt!
+
+            # 5. PHYSISCHES SCHREIBEN
+            try:
+                with open(target_file, "w", encoding="utf-8") as f_write:
+                    f_write.writelines(bereinigte_lines)
+                    f_write.flush()
+                print("✓ Spieldatei formattreu und erfolgreich neu aufgebaut!")
+                ist_erfolgreich = True
+                fehler_details = "Keine"
+            except Exception as e:
+                print(f"FEHLER beim Schreiben der Datei: {e}")
                 ist_erfolgreich = False
-                
-            fehler_details = "Keine"
+                fehler_details = str(e)
+
+            # UI-WECHSEL ZUR ENDSEITE
+            self.eula_frame.pack_forget()
+            self.end_frame.pack(fill="both", expand=True)
+            
+            for widget in self.end_frame.winfo_children():
+                widget.destroy()
 
         except Exception as e:
             ist_erfolgreich = False
             fehler_details = str(e)
 
-        # OUTPUT ANZEIGE (Präzise Pfad-Verifikation für den User)
+        # OUTPUT ANZEIGE (Dein originales End-UI-Design)
         if ist_erfolgreich:
             tk.Label(self.end_frame, text=self.txt["status_success"], font=("Arial", 14, "bold"), fg="green", bg=self.bg_main).pack(anchor="w", pady=(40, 10))
             
-            # Zeigt den exakten Ordner an, in den Python gerade geschrieben hat
             speicher_ordner = os.path.dirname(target_file)
             tk.Label(self.end_frame, text=f"Erfolgreich modifiziert in:\n➔ {speicher_ordner}", font=("Arial", 10, "bold"), fg="#3498db", bg=self.bg_main, justify="left", wraplength=700).pack(anchor="w", pady=(0, 10))
             
             tk.Label(self.end_frame, text="Die Dateien deines gewählten Profils wurden erfolgreich modifiziert. Viel Spaß beim Fahren!", font=("Arial", 12), fg=self.fg_text, bg=self.bg_main).pack(anchor="w", pady=(0, 20))
         else:
             tk.Label(self.end_frame, text=self.txt["status_failed"], font=("Arial", 14, "bold"), fg="red", bg=self.bg_main).pack(anchor="w", pady=(40, 5))
-            # NEU: Zeigt dem User jetzt exakt an, WARUM Python abgestürzt ist, statt pauschal ATS zu beschuldigen
             tk.Label(self.end_frame, text=f"Fehler beim Schreiben: {fehler_details}\nBitte stelle sicher, dass ETS2/ATS geschlossen sind und versuche es erneut!", font=("Arial", 11), fg=self.fg_text, bg=self.bg_main, justify="left", wraplength=700).pack(anchor="w", pady=(0, 20))
 
         line_end = tk.Frame(self.end_frame, height=2, bg="#dddddd")
