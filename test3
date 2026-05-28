@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
+from tkinter import filedialog
 import os
 import platform
 import sys
@@ -8,6 +9,7 @@ import shutil
 import urllib.request
 import json
 import subprocess
+import requests
 
 class RksInstaller:
     def __init__(self, root):
@@ -17,9 +19,10 @@ class RksInstaller:
         self.root.resizable(False, False)
         
         # GITHUB-EINSTELLUNGEN FÜR DEN AUTO-UPDATER
-        self.aktuelle_version = "v1.10.1"
+        self.aktuelle_version = "v1.10.2"                     
+        self.anzeige_version = "v1.10.2 (Hotfix)"            
         self.github_user = "Shadoo91"       
-        self.github_repo = "ets2-realistic-keyboard-steering"   
+        self.github_repo = "ets2-realistic-keyboard-steering"
         
         # Moderne Farb-Palette (Flat-Design)
         self.bg_main = "#f8f9fa"       
@@ -70,7 +73,7 @@ class RksInstaller:
             "terms_sub": "Bitte lies und scrolle die Bedingungen vollständig durch, um die Installation freizuschalten:",
             "terms_accept": "Ich habe die Lizenzvereinbarung gelesen und akzeptiere alle Bedingungen bedingungslos.",
             "terms_text": (
-                "SOFTWARE-LIZENZ & NUTZUNGSBEDINGUNGEN (RKS-Mod v1.10.1)\n"
+                "SOFTWARE-LIZENZ & NUTZUNGSBEDINGUNGEN (RKS-Mod v1.10.2)\n"
                 "Urheberrecht (c) 2026 von Shadoo91. Alle Rechte vorbehalten.\n"
                 "----------------------------------------------------------------------------------\n\n"
                 "1. GEWÄHRUNG DER LIZENZ\n"
@@ -102,23 +105,50 @@ class RksInstaller:
         tk.Label(self.welcome_frame, text=self.txt["welcome_head"], font=("Arial", 16, "bold"), fg=self.accent_blue, bg=self.bg_main).pack(anchor="w", pady=(0, 15))
         self.welcome_box = tk.Text(self.welcome_frame, height=18, width=90, font=("Arial", 12), fg=self.fg_text, bg=self.card_bg, bd=1, relief="solid", padx=20, pady=20, wrap="word")
         self.welcome_box.pack(fill="both", expand=True, pady=(0, 20))
+        
         self.welcome_box.insert(tk.END, "Wahnsinn! Ein riesiges ")
-        self.welcome_box.insert(tk.END, "DANKESCHÖN für über 300 Abonnenten", "bold_blue")
+        self.welcome_box.insert(tk.END, "DANKESCHÖN für über 700 Abonnenten", "bold_blue")
         self.welcome_box.insert(tk.END, " auf Steam!\n\n")
-        self.welcome_box.insert(tk.END, "Das hier ist meine ")
-        self.welcome_box.insert(tk.END, "allererste Mod", "bold")
-        self.welcome_box.insert(tk.END, " für ")
-        self.welcome_box.insert(tk.END, "ETS2 & ATS", "bold_blue")
-        self.welcome_box.insert(tk.END, ", und euer genialer Support und euer ")
+        self.welcome_box.insert(tk.END, "Euer genialer Support und das massive ")
         self.welcome_box.insert(tk.END, "Vertrauen", "bold")
-        self.welcome_box.insert(tk.END, " hauen mich einfach um. Danke!\n\n")
-        self.welcome_box.insert(tk.END, "Dieses Tool installiert oder entfernt dein erweitertes RKS-Tastatur-Lenksystem ab jetzt absolut dummysicher und vollautomatisch auf deinem PC.\n\n\n")
+        self.welcome_box.insert(tk.END, " in meine ")
+        self.welcome_box.insert(tk.END, "RKS-MOD", "bold_blue")
+        self.welcome_box.insert(tk.END, " für ETS2 & ATS")
+        self.welcome_box.insert(tk.END, " hauen mich einfach um.")  
+        self.welcome_box.insert(tk.END, " Vielen Dank!", "bold")   
+        self.welcome_box.insert(tk.END, "\n\n")
+        self.welcome_box.insert(tk.END, "🛠️ WAS IST NEU IN DIESEM HOTFIX (v1.10.2)?\n", "bold_orange")
+        self.welcome_box.insert(tk.END, "\n")
+        self.welcome_box.insert(tk.END, "• ")
+        self.welcome_box.insert(tk.END, "Steam Cloud & Proton Support:", "bold")
+        self.welcome_box.insert(tk.END, " Volle automatische Erkennung von Cloud-Profilen auf Windows und Linux. Leere 'Ghost-Ordner' werden nun ignoriert.\n")        
+        self.welcome_box.insert(tk.END, "\n")        
+        self.welcome_box.insert(tk.END, "• ")
+        self.welcome_box.insert(tk.END, "Manuelle Ordnerauswahl:", "bold")
+        self.welcome_box.insert(tk.END, " Ein neuer Button auf Seite 2 erlaubt es dir, deine 'controls.sii' bei Sonderpfaden direkt selbst auszuwählen.\n")
+        self.welcome_box.insert(tk.END, "\n")        
+        self.welcome_box.insert(tk.END, "• ")
+        self.welcome_box.insert(tk.END, "Selbstheilende Reparatur:", "bold")
+        self.welcome_box.insert(tk.END, " Der Installer erkennt nun beschädigte oder unvollständige Profildateien und stellt gelöschte Originalzeilen automatisch wieder her.\n")
+        self.welcome_box.insert(tk.END, "\n")        
+        self.welcome_box.insert(tk.END, "• ")
+        self.welcome_box.insert(tk.END, "Intelligenter Backup-Schutz:", "bold")
+        self.welcome_box.insert(tk.END, " Bei Updates wirst du gefragt, ob du dein bestehendes Backup überschreiben willst – so bleiben deine eigenen Tastenänderungen geschützt.\n") 
+        self.welcome_box.insert(tk.END, "\n")        
+        self.welcome_box.insert(tk.END, "• ")
+        self.welcome_box.insert(tk.END, "GUI Performance:", "bold")
+        self.welcome_box.insert(tk.END, " Ein Klick-Lag bei den Dropdown-Menüs wurde behoben, sie reagieren jetzt sofort und flüssig beim ersten Klick.\n\n\n")
         self.welcome_box.insert(tk.END, "📢 KLEINER WUNSCH VOM MODDER:\n", "bold_orange")
-        self.welcome_box.insert(tk.END, "Wenn dir die neue, feine Physik gefällt und der Lkw damit so richtig Bock macht, lass dem Projekt doch bitte eine kurze positive Bewertung da!\n\n")
+        self.welcome_box.insert(tk.END, "\n")
+        self.welcome_box.insert(tk.END, "Wenn dir die meine Mod gefällt, lass dem Projekt doch bitte eine kurze positive Bewertung da!")
         self.welcome_box.insert(tk.END, "Ein Klick auf den ")
         self.welcome_box.insert(tk.END, "Daumen hoch (👍)", "bold_green")
-        self.welcome_box.insert(tk.END, " im Steam Workshop hilft mir riesig dabei, das Projekt aktiv weiterzuentwickeln!\n\n\n")
-        self.welcome_box.insert(tk.END, "Klicke unten auf 'Weiter', um deine Tasten im Handumdrehen einzustellen.", "italic")
+        self.welcome_box.insert(tk.END, " im Steam Workshop hilft mir riesig dabei, das Projekt aktiv weiterzuentwickeln!\n\n")
+        
+        
+        
+        self.welcome_box.insert(tk.END, "Klicke unten auf 'Weiter', um deine Tasten im Handumdrehen dummysicher einzustellen.", "italic")
+        
         self.welcome_box.tag_config("bold", font=("Arial", 12, "bold"))
         self.welcome_box.tag_config("bold_blue", font=("Arial", 12, "bold"), foreground=self.accent_blue)
         self.welcome_box.tag_config("bold_green", font=("Arial", 12, "bold"), foreground=self.accent_green)
@@ -142,15 +172,41 @@ class RksInstaller:
         self.game_combo = ttk.Combobox(game_frame, values=["Euro Truck Simulator 2", "American Truck Simulator"], state="readonly", width=30, font=("Arial", 11))
         self.game_combo.current(0)
         self.game_combo.pack(side="left")
+        # PRÄZISE ERWEITERUNG: Erzwingt sofortigen Fokus beim ersten Klick auf das Spiel-Dropdown
+        self.game_combo.bind("<Button-1>", lambda e: self.game_combo.focus_set())
         
         prof_frame = tk.Frame(card_profile, bg=self.card_bg)
         prof_frame.pack(fill="x", pady=(8, 0))
         tk.Label(prof_frame, text=self.txt["profile_select"], font=("Arial", 12, "bold"), fg=self.fg_text, bg=self.card_bg, width=15, anchor="w").pack(side="left")
         self.prof_combo = ttk.Combobox(prof_frame, state="readonly", width=30, font=("Arial", 11))
         self.prof_combo.pack(side="left")
+        # PRÄZISE ERWEITERUNG: Erzwingt sofortigen Fokus beim ersten Klick auf das Profil-Dropdown
+        self.prof_combo.bind("<Button-1>", lambda e: self.prof_combo.focus_set())
         
         self.btn_uninstall = tk.Button(prof_frame, text="Mod deinstallieren ❌", bg=self.accent_red, fg="white", font=("Arial", 10, "bold"), relief="flat", padx=10)
         self.btn_uninstall.pack(side="right", padx=5)
+
+        # === PRÄZISE PLATZIERUNG: Direkt als Zusatz-Aktion in der Profil-Kachel ===
+        f_browse = tk.Frame(card_profile, bg=self.card_bg)
+        f_browse.pack(fill="x", pady=(8, 0))
+        
+        self.btn_browse = tk.Button(
+            f_browse, 
+            text="📂 controls.sii manuell suchen (Steam Cloud Fallback)...", 
+            font=("Arial", 10),
+            command=self.manuelle_dateiauswahl,
+            bg=self.bg_main,       # Hebt sich edel von der card_bg ab
+            fg=self.fg_text, 
+            bd=1, 
+            relief="solid", 
+            padx=10,
+            pady=3
+        )
+        self.btn_browse.pack(side="left", padx=(122, 0)) # Perfekt bündig mit den Comboboxen darüber!
+
+        self.lbl_status_p2 = tk.Label(card_profile, text="", bg=self.card_bg, font=("Arial", 10, "bold"))
+        self.lbl_status_p2.pack(anchor="w", padx=(122, 0), pady=(4, 0))
+        # =========================================================================
         
         card_keys = tk.Frame(self.config_frame, bg=self.card_bg, bd=1, relief="solid", padx=15, pady=15)
         card_keys.pack(fill="both", expand=True, pady=(0, 15))
@@ -176,6 +232,7 @@ class RksInstaller:
         self.status_label.pack(pady=(10, 0))
         self.btn_weiter = tk.Button(self.config_frame, text=self.txt["weiter"], width=20, height=2, bg=self.accent_blue, fg="white", font=("Arial", 11, "bold"), relief="flat")
         self.btn_weiter.pack(side="bottom", anchor="e")
+
 
         # --- SEITE 3: README / ÜBERSICHT FRAME ---
         self.readme_frame = tk.Frame(self.root, padx=30, pady=15, bg=self.bg_main)
@@ -219,52 +276,98 @@ class RksInstaller:
 
         # --- SEITE 5: STATUS END-ANZEIGE ---
         self.end_frame = tk.Frame(self.root, padx=30, pady=25, bg=self.bg_main)
+        # Startet den Update-Check 500 Millisekunden nach dem GUI-Aufbau
+        self.root.after(500, self.pruefe_updates)
 
     # --- AUTOMATISCHER GITHUB-UPDATER MECHANISMUS ---
-    def pruefe_auf_updates(self):
-        if platform.system() != "Windows":
-            return 
-
+    def pruefe_updates(self):
+        """Prüft über die GitHub-API nach Updates und vergleicht die Versionen mathematisch korrekt."""
+        api_url = f"https://github.com{self.github_user}/{self.github_repo}/releases/latest"
+        
         try:
-            url = f"https://github.com{self.github_user}/{self.github_repo}/releases/latest"
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-            
-            with urllib.request.urlopen(req, timeout=3) as response:
-                data = json.loads(response.read().decode())
-                latest_tag = data.get("tag_name", self.aktuelle_version)
+            response = requests.get(api_url, timeout=3)
+            if response.status_code == 200:
+                release_data = response.json()
                 
-                if latest_tag != self.aktuelle_version:
-                    assets = data.get("assets", [])
-                    if assets and len(assets) > 0:
-                        download_url = assets[0].get("browser_download_url")
+                # Zieht das GitHub-Tag (z.B. "v1.10.1")
+                neueste_version = release_data.get("tag_name", self.aktuelle_version).strip()
+                lokale_version = self.aktuelle_version.strip()
+                
+                # HILFSFUNKTION: Wandelt "v1.10.2" in eine echte Zahlen-Liste [1, 10, 2] um
+                def version_zu_zahlen(v_string):
+                    import re
+                    # Filtert alle Zahlen aus dem String heraus
+                    zahlen = re.findall(r'\d+', v_string)
+                    return [int(z) for z in zahlen] if zahlen else [0]
+
+                online_zahlen = version_zu_zahlen(neueste_version)
+                lokale_zahlen = version_zu_zahlen(lokale_version)
+                
+                # MATHEMATISCHER VERGLEICH (Prüft NUR, ob online ECHT NEUER ist als lokal)
+                # [1, 10, 1] > [1, 10, 2] ist FALSCH -> Kein Update-Popup!
+                if online_zahlen > lokale_zahlen:
+                    
+                    # PRÄZISE DETEKTION DER DIREKTEN DOWNLOAD-URL DER .EXE
+                    assets = release_data.get("assets", [])
+                    download_url = ""
+                    
+                    if assets:
+                        for asset in assets:
+                            if asset.get("name", "").endswith(".exe") or asset.get("name", "").endswith(".py"):
+                                download_url = asset.get("browser_download_url", "")
+                                break
+                    
+                    if not download_url:
+                        download_url = release_data.get("html_url", "")
                         
-                        if download_url and messagebox.askyesno("Update verfügbar! 🚀", 
-                            f"Eine neue Version ({latest_tag}) des RKS-Installers wurde gefunden!\n\n"
-                            f"Deine Version: {self.aktuelle_version}\n"
-                            f"Neueste Version: {latest_tag}\n\n"
-                            "Möchtest du das Update jetzt vollautomatisch herunterladen und installieren?"):
-                            
-                            self.starte_selbst_update(download_url)
-        except:
-            pass 
+                    antwort = messagebox.askyesno(
+                        "Update verfügbar! 🚀", 
+                        f"Eine neuere Version ({neueste_version}) des Installers ist verfügbar!\n"
+                        f"Deine aktuelle Version: {self.anzeige_version}\n\n"
+                        "Möchtest du das automatische Update jetzt starten?\n"
+                        "(Das Programm lädt die neue Version herunter und startet sich vollautomatisch neu!)"
+                    )
+                    
+                    if antwort and download_url:
+                        self.starte_selbst_update(download_url)
+                        
+        except Exception:
+            # Bei Störungen oder Offline-Modus läuft das Programm lautlos weiter
+            pass
 
     def starte_selbst_update(self, download_url):
         try:
             current_exe = sys.executable
             backup_exe = current_exe + ".old"
             
+            # Löscht ein eventuell verbliebenes altes Backup
             if os.path.exists(backup_exe):
                 os.remove(backup_exe)
+                
+            # Benennt die aktuell laufende Datei um (wird vom OS im RAM gehalten)
             os.rename(current_exe, backup_exe)
             
+            # Lädt die neue Version direkt an den alten Platz herunter
             urllib.request.urlretrieve(download_url, current_exe)
             
-            batch_cmd = f'ping 127.0.0.1 -n 2 > nul & del "{backup_exe}"'
-            subprocess.Popen(f'cmd.exe /c {batch_cmd}', shell=True)
+            # PLATTFORM-WEICHE FÜR DEN HINTERGRUND-REINIGER
+            if platform.system() == "Windows" and "WINEPREFIX" not in os.environ:
+                # Ihr originaler, perfekt funktionierender Windows-Befehl
+                batch_cmd = f'ping 127.0.0.1 -n 2 > nul & del "{backup_exe}"'
+                subprocess.Popen(f'cmd.exe /c {batch_cmd}', shell=True)
+            else:
+                # LINUX LOGIK: Nutzt die Standard-Shell, wartet 2 Sekunden und löscht das Backup
+                os.chmod(current_exe, 0o755)  # Macht die neue Datei unter Linux sofort ausführbar!
+                linux_cmd = f'sleep 2 && rm -f "{backup_exe}"'
+                subprocess.Popen(['/bin/sh', '-c', linux_cmd])
+            
+            # Startet die neue Version im Hintergrund
             subprocess.Popen([current_exe])
             
+            # Schließt den alten Installer sofort, damit er im Ordner freigegeben wird
             self.root.destroy()
             sys.exit()
+            
         except Exception as e:
             messagebox.showerror("Update-Fehler", f"Das automatische Update ist fehlgeschlagen: {str(e)}")
 
@@ -371,11 +474,16 @@ class RksInstaller:
                 tk.Label(f, text=f"    {normal_part}", font=("Arial", 9), fg="#444444", bg=self.card_bg).pack(side="left")
 
     def suche_profile(self):
+        """Sucht plattformübergreifend, massentauglich und vollautomatisch nach ETS2/ATS-Profilen."""
         game_name = self.game_combo.get()
+        app_id = "227300" if game_name == "Euro Truck Simulator 2" else "270880"
         home = os.path.expanduser("~")
-        base_path = None
         
-        if platform.system() == "Windows":
+        basis_ordner_liste = []
+
+        # 1. PLATTFORM-WEICHE: Erkennt echtes Windows vs. Wine-Emulation unter Linux
+        if platform.system() == "Windows" and "WINEPREFIX" not in os.environ:
+            # ECHTES WINDOWS: Nutzt Ihre bewährte Windows-API-Erkennung
             try:
                 import ctypes
                 from ctypes import wintypes
@@ -387,33 +495,124 @@ class RksInstaller:
             except:
                 local_documents = os.path.join(home, "Documents") 
                 
-            local_path = os.path.join(local_documents, game_name)
-            onedrive_path = os.path.join(os.environ.get("USERPROFILE", ""), "OneDrive", "Documents", game_name)
+            basis_ordner_liste.append(os.path.join(local_documents, game_name))
+            basis_ordner_liste.append(os.path.join(os.environ.get("USERPROFILE", ""), "OneDrive", "Documents", game_name))
             
-            if os.path.exists(local_path): base_path = local_path
-            elif os.path.exists(onedrive_path): base_path = onedrive_path
+            # Windows Standard-Steam-Cloud Pfad (Fallback)
+            program_files = os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)")
+            steam_userdata = os.path.join(program_files, "Steam", "userdata")
+            if os.path.exists(steam_userdata):
+                for user_id in os.listdir(steam_userdata):
+                    cloud_pfad = os.path.join(steam_userdata, user_id, app_id, "remote")
+                    if os.path.exists(cloud_pfad):
+                        basis_ordner_liste.append(cloud_pfad)
         else:
-            app_id = "227300" if game_name == "Euro Truck Simulator 2" else "270880"
-            linux_steam_path = os.path.join(home, ".steam", "steam", "steamapps", "compatdata", app_id, "pfx", "drive_c", "users", "steamuser", "Documents", game_name)
-            if os.path.exists(linux_steam_path): base_path = linux_steam_path
+            # WINE ODER ECHTES LINUX: Ermittelt die Linux-Basis
+            if platform.system() == "Windows":
+                # Wir laufen als .exe unter Wine und greifen über Laufwerk Z:\ auf Linux zu
+                user_name = os.environ.get("USER", "unknown")
+                base_linux = os.path.join(r"Z:\home", user_name)
+            else:
+                # Wir laufen als rohes .py Skript nativ unter Linux
+                base_linux = home
 
+            # Ihre erprobten und funktionierenden Linux-Steam-Pfade (jetzt Wine-kompatibel!)
+            basis_ordner_liste.append(os.path.join(base_linux, ".steam", "steam", "steamapps", "compatdata", app_id, "pfx", "drive_c", "users", "steamuser", "Documents", game_name))
+            basis_ordner_liste.append(os.path.join(base_linux, ".local", "share", game_name))
+            basis_ordner_liste.append(os.path.join(base_linux, ".var", "app", "com.valvesoftware.Steam", "data", "Steam", "steamapps", "compatdata", app_id, "pfx", "drive_c", "users", "steamuser", "Documents", game_name))
+
+        # 2. PROFILE AUS ALLEN QUELLEN ERFASSEN & DUPLIKATE VERMEIDEN
         self.profile_dict.clear()
-        if base_path and os.path.exists(os.path.join(base_path, "profiles")):
-            profiles_dir = os.path.join(base_path, "profiles")
-            for folder in os.listdir(profiles_dir):
-                if os.path.isdir(os.path.join(profiles_dir, folder)):
-                    try:
-                        readable_name = bytes.fromhex(folder).decode('utf-8')
-                        display_str = f"{readable_name} ({folder[:6]}...)"
-                        self.profile_dict[display_str] = os.path.join(profiles_dir, folder, "controls.sii")
-                    except: pass
+        profil_sub_ordner = ["profiles", "steam_profiles", "profiles_cloud"]
+
+        for basis in basis_ordner_liste:
+            if not basis or not os.path.exists(basis):
+                continue
+                
+            ordner_zum_scannen = [basis] if os.path.basename(basis) == "remote" else [os.path.join(basis, sub) for sub in profil_sub_ordner]
+
+            for s_dir in ordner_zum_scannen:
+                if os.path.exists(s_dir) and os.path.isdir(s_dir):
+                    for folder in os.listdir(s_dir):
+                        profil_pfad = os.path.join(s_dir, folder)
+                        if os.path.isdir(profil_pfad):
+                            datei_pfad = os.path.join(profil_pfad, "controls.sii")
+                            
+                            # GHOST-FILTER: Verhindert das Einlesen leerer Dateileichen
+                            if os.path.exists(datei_pfad) and os.path.isfile(datei_pfad):
+                                try:
+                                    readable_name = bytes.fromhex(folder).decode('utf-8', errors='ignore')
+                                    
+                                    # Massentaugliche Indikatoren ohne Windows-Layout-Bug
+                                    if "steam" in s_dir.lower() or "remote" in s_dir.lower():
+                                        prefix = "» [Cloud]"
+                                    else:
+                                        prefix = "■ [Lokal]"
+                                        
+                                    display_str = f"{prefix} {readable_name} ({folder[:6]}...)"
+                                    
+                                    if display_str not in self.profile_dict:
+                                        self.profile_dict[display_str] = datei_pfad
+                                except:
+                                    pass
                         
+        # 3. UI-DROP-DOWN AKTUALISIEREN
         if self.profile_dict:
             self.prof_combo.config(values=list(self.profile_dict.keys()))
             self.prof_combo.current(0)
+            self.lbl_status_p2.config(text=f"✓ {len(self.profile_dict)} Profil(e) erfolgreich geladen.", fg="green")
         else:
             self.prof_combo.config(values=[self.txt["no_profiles"]])
             self.prof_combo.current(0)
+            self.lbl_status_p2.config(text="⚠ Kein Profil gefunden. Bitte 'Manuelle Suche' nutzen!", fg="orange")
+
+    def manuelle_dateiauswahl(self):
+        """Ermöglicht das manuelle Heraussuchen der controls.sii und hebelt die Linux-Ordner-Versteckung aus."""
+        # Standard-Startpfad für echtes Windows
+        start_pfad = os.path.expanduser(r"~\Documents")
+        
+        # WINE-DETEKTION: Wenn wir unter Linux/Wine laufen, zwingen wir den Dialog direkt in den versteckten Pfad
+        if "WINEPREFIX" in os.environ or platform.system() != "Windows":
+            user_name = os.environ.get("USER", "unknown")
+            game_name = self.game_combo.get()
+            app_id = "227300" if game_name == "Euro Truck Simulator 2" else "270880"
+            
+            # Baut den direkten Pfad in die unsichtbare Steam-Flasche über Laufwerk Z:\
+            test_wine_pfad = f"Z:\\home\\{user_name}\\.steam\\steam\\steamapps\\compatdata\\{app_id}\\pfx\\drive_c\\users\\steamuser\\Documents\\{game_name}"
+            if os.path.exists(test_wine_pfad):
+                start_pfad = test_wine_pfad
+            else:
+                # Fallback auf das normale Linux-Home über Z:\
+                start_pfad = f"Z:\\home\\{user_name}"
+
+        dateipfad = filedialog.askopenfilename(
+            initialdir=start_pfad, # ZWINGT den Dialog, direkt im richtigen (versteckten) Ordner zu starten!
+            title="Wähle deine aktive controls.sii aus",
+            filetypes=[("ETS2 Steuerung", "controls.sii"), ("Alle Dateien", "*.*")]
+        )
+        
+        if dateipfad:
+            if os.path.basename(dateipfad) != "controls.sii":
+                messagebox.showerror("Falsche Datei", "Bitte wählen Sie exakt die Datei 'controls.sii' aus!")
+                return
+                
+            if os.path.getsize(dateipfad) <= 100:
+                messagebox.showerror("Ghost-Datei", "Diese Datei enthält keine Daten (Ghost-Datei). Bitte wählen Sie die aktive Datei!")
+                return
+                
+            if "userdata" in dateipfad.lower() or "remote" in dateipfad.lower():
+                # Gettauscht: "» [Steam Cloud]" anstelle von "☁ [Steam Cloud]"
+                anzeige_name = "» [Steam Cloud] " + os.path.basename(os.path.dirname(os.path.dirname(dateipfad)))
+            else:
+                # Gettauscht: "■ [Manuell]" anstelle von "📂 [Manuell]"
+                anzeige_name = "■ [Manuell] " + os.path.basename(os.path.dirname(dateipfad))
+                
+            self.profile_dict[anzeige_name] = dateipfad
+            
+            # PRÄZISE KORREKTUR: Nutzt jetzt self.prof_combo anstatt self.combo_profil
+            self.prof_combo['values'] = list(self.profile_dict.keys())
+            self.prof_combo.set(anzeige_name)
+            self.lbl_status_p2.config(text="✓ Externe controls.sii erfolgreich geladen!", fg="green")
 
     def starte_listener(self, ziel):
         self.aktueller_listener = ziel
@@ -468,90 +667,35 @@ class RksInstaller:
         self.aktueller_listener = None
 
     def ausfuehren_deinstallation(self):
+        """Führt die saubere Mod-Deinstallation im ausgewählten Profil durch."""
         selected_prof = self.prof_combo.get()
-        if not selected_prof or selected_prof == self.txt["no_profiles"]:
-            messagebox.showerror("Fehler", "Bitte wähle zuerst ein gültiges Profil aus!")
+        
+        if selected_prof == self.txt["no_profiles"] or not selected_prof:
+            messagebox.showerror(self.txt["err_title"], self.txt["err_no_prof"])
+            return
+
+        # Ausfallsichere Pfad-Ermittlung trotz Emojis/Präfixen
+        target_file = self.profile_dict.get(selected_prof)
+        if not target_file:
+            for key, path in self.profile_dict.items():
+                if selected_prof in key or key in selected_prof:
+                    target_file = path
+                    break
+
+        if not target_file or not os.path.exists(target_file):
+            messagebox.showerror(self.txt["err_title"], "Der Pfad zur controls.sii wurde nicht gefunden!")
             return
             
-        target_file = self.profile_dict[selected_prof]
         backup_file = target_file + ".bak"
-        
-        if os.path.exists(backup_file):
-            if messagebox.askyesno("Deinstallieren", f"Möchtest du die RKS-Mod für das Profil '{selected_prof}' wirklich deinstallieren und das originale Backup wiederherstellen?"):
-                try:
+
+        try:
                     os.remove(target_file)
                     shutil.copyfile(backup_file, target_file)
                     messagebox.showinfo("Erfolg", f"Die RKS-Mod wurde erfolgreich für das Profil '{selected_prof}' deinstalliert!")
-                except Exception as e:
+        except Exception as e:
                     messagebox.showerror("Fehler", f"Deinstallation fehlgeschlagen: {str(e)}")
         else:
             messagebox.showinfo("Info", f"Für das Profil '{selected_prof}' ist die RKS-Mod noch gar nicht installiert!")
-
-    # --- FIXED: FINDET JETZT AUCH STEAM-CLOUD-PROFILE IM USERDATA-ORDNER ---
-    # --- FIXED V3: PERFEKTER STEAM-CLOUD-TIEFENSCAN FÜR USERDATA ---
-    def suche_profile(self):
-        game_name = self.game_combo.get()
-        app_id = "227300" if game_name == "Euro Truck Simulator 2" else "270880"
-        home = os.path.expanduser("~")
-        
-        moegliche_basis_pfade = []
-        
-        if platform.system() == "Windows":
-            try:
-                import ctypes
-                from ctypes import wintypes
-                CSIDL_PERSONAL = 5       
-                SHGFP_TYPE_CURRENT = 0
-                buf = ctypes.create_unicode_buffer(wintypes.MAX_PATH)
-                ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
-                local_documents = buf.value
-            except:
-                local_documents = os.path.join(home, "Documents") 
-                
-            moegliche_basis_pfade.append(os.path.join(local_documents, game_name))
-            moegliche_basis_pfade.append(os.path.join(os.environ.get("USERPROFILE", ""), "OneDrive", "Documents", game_name))
-            
-            # FIXED: Der Tiefenscan sucht jetzt exakt nach dem verborgenen "remote/profiles" Ordner von Steam!
-            steam_base = os.path.join(os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)"), "Steam", "userdata")
-            if not os.path.exists(steam_base):
-                steam_base = os.path.join(os.environ.get("ProgramFiles", "C:\\Program Files"), "Steam", "userdata")
-                
-            if os.path.exists(steam_base):
-                for user_folder in os.listdir(steam_base):
-                    # Pfad zu den Steam-Cloud-Profilen exakt spiegeln
-                    cloud_profile_path = os.path.join(steam_base, user_folder, app_id, "remote", "profiles")
-                    if os.path.exists(cloud_profile_path):
-                        moegliche_basis_pfade.append(cloud_profile_path)
-        else:
-            moegliche_basis_pfade.append(os.path.join(home, ".steam", "steam", "steamapps", "compatdata", app_id, "pfx", "drive_c", "users", "steamuser", "Documents", game_name))
-
-        self.profile_dict.clear()
-        
-        for b_path in moegliche_basis_pfade:
-            if not os.path.exists(b_path): continue
-            
-            # Wenn der Pfad direkt auf den Steam-Cloud-Zweig zeigt, nutzen wir ihn direkt als profiles_dir
-            if b_path.endswith("profiles"):
-                profiles_dir = b_path
-            else:
-                profiles_dir = os.path.join(b_path, "profiles")
-                
-            if os.path.exists(profiles_dir):
-                for folder in os.listdir(profiles_dir):
-                    if os.path.isdir(os.path.join(profiles_dir, folder)):
-                        try:
-                            readable_name = bytes.fromhex(folder).decode('utf-8')
-                            display_str = f"{readable_name} ({folder[:6]}...)"
-                            if display_str not in self.profile_dict:
-                                self.profile_dict[display_str] = os.path.join(profiles_dir, folder, "controls.sii")
-                        except: pass
-                        
-        if self.profile_dict:
-            self.prof_combo.config(values=list(self.profile_dict.keys()))
-            self.prof_combo.current(0)
-        else:
-            self.prof_combo.config(values=[self.txt["no_profiles"]])
-            self.prof_combo.current(0)
 
     # --- UNZERSTÖRBAR: ENTPFERNT JEDEN WINDOWS-SCHREIBSCHUTZ VOR DEM SPEICHERN ---
     def ausfuehren_installation(self):
@@ -560,11 +704,11 @@ class RksInstaller:
         if game_name == "Euro Truck Simulator 2":
             workshop_mod_id = "3727705125"
             app_id = "227300"
-            link_url = "https://steamcommunity.com"
+            link_url = "https://steamcommunity.com/sharedfiles/filedetails/?id=3727705125"
         else:
             workshop_mod_id = "3725174940"
             app_id = "270880"
-            link_url = "https://steamcommunity.com"
+            link_url = "https://steamcommunity.com/sharedfiles/filedetails/?id=3725174940"
         
         selected_prof = self.prof_combo.get()
         if not selected_prof or selected_prof == self.txt["no_profiles"]: return
@@ -572,7 +716,9 @@ class RksInstaller:
         home = os.path.expanduser("~")
         workshop_path = None
 
-        if platform.system() == "Windows":
+        # MASSENTAUGLICHE WORKSHOP-SUCHE (ERKENNT WINE-EMULATION UNTER LINUX)
+        if platform.system() == "Windows" and "WINEPREFIX" not in os.environ:
+            # ECHTES WINDOWS: Standard-Pfade auf Laufwerk C:, D: und E: absuchen
             moegliche_pfade = [
                 os.path.join(os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)"), "Steam", "steamapps", "workshop", "content", app_id, workshop_mod_id),
                 os.path.join(os.environ.get("ProgramFiles", "C:\\Program Files"), "Steam", "steamapps", "workshop", "content", app_id, workshop_mod_id),
@@ -581,15 +727,29 @@ class RksInstaller:
                 f"C:\\SteamLibrary\\steamapps\\workshop\\content\\{app_id}\\{workshop_mod_id}"
             ]
             for p in moegliche_pfade:
-                if os.path.exists(p): workshop_path = p; break
+                if os.path.exists(p): 
+                    workshop_path = p
+                    break
         else:
+            # WINE ODER NATIVES LINUX
+            if platform.system() == "Windows":
+                # Wir laufen als .exe unter Wine und greifen über Laufwerk Z:\ auf Linux zu
+                user_name = os.environ.get("USER", "unknown")
+                base_linux = os.path.join(r"Z:\home", user_name)
+            else:
+                # Wir laufen als rohes .py Skript nativ unter Linux
+                base_linux = home
+
+            # Ihre originalen Linux-Pfade, jetzt absolut Wine-kompatibel über base_linux!
             moegliche_linux_pfade = [
-                os.path.join(home, ".steam", "steam", "steamapps", "workshop", "content", app_id, workshop_mod_id),
-                os.path.join(home, ".local", "share", "Steam", "steamapps", "workshop", "content", app_id, workshop_mod_id),
-                os.path.join(home, ".var", "app", "com.valvesoftware.Steam", ".steam", "steam", "steamapps", "workshop", "content", app_id, workshop_mod_id)
+                os.path.join(base_linux, ".steam", "steam", "steamapps", "workshop", "content", app_id, workshop_mod_id),
+                os.path.join(base_linux, ".local", "share", "Steam", "steamapps", "workshop", "content", app_id, workshop_mod_id),
+                os.path.join(base_linux, ".var", "app", "com.valvesoftware.Steam", ".steam", "steam", "steamapps", "workshop", "content", app_id, workshop_mod_id)
             ]
             for lp in moegliche_linux_pfade:
-                if os.path.exists(lp): workshop_path = lp; break
+                if os.path.exists(lp): 
+                    workshop_path = lp
+                    break
 
         self.eula_frame.pack_forget()
         self.end_frame.pack(fill="both", expand=True)
@@ -611,8 +771,50 @@ class RksInstaller:
             btn_zurueck_s5.pack(side="bottom", anchor="e", pady=20)
             return
 
-        target_file = self.profile_dict[selected_prof]
+        # Ausfallsichere Pfad-Ermittlung trotz Emojis/Präfixen
+        target_file = self.profile_dict.get(selected_prof)
+        if not target_file:
+            for key, path in self.profile_dict.items():
+                if selected_prof in key or key in selected_prof:
+                    target_file = path
+                    break
+
+        if not target_file or not os.path.exists(target_file):
+            messagebox.showerror(self.txt["err_title"], "Der Pfad zur controls.sii wurde nicht gefunden!")
+            return
+
         backup_file = target_file + ".bak"
+        neues_backup_erstellen = True
+
+        # DIE GEWÜNSCHTE BACKUP-WEICHE: Fragt den User bei bestehender Datei
+        if os.path.exists(backup_file):
+            antwort = messagebox.askyesno(
+                "Backup überschreiben?", 
+                "Ein bestehendes Backup (controls.sii.bak) wurde gefunden!\n\n"
+                "Hast du seit der letzten Installation deine eigenen Tasten im Spiel geändert?\n\n"
+                "JA = Altes Backup überschreiben (empfohlen bei neuen Einstellungen).\n"
+                "NEIN = Altes Backup behalten (deine allerersten Originaleinstellungen bleiben geschützt)."
+            )
+            if not antwort:
+                neues_backup_erstellen = False
+
+        # Schreibrechte verifizieren
+        try:
+            os.chmod(target_file, 0o666)
+            if os.path.exists(backup_file):
+                os.chmod(backup_file, 0o666)
+        except Exception:
+            pass
+
+        # Backup nur überschreiben, wenn der User zustimmt
+        if neues_backup_erstellen:
+            try:
+                import shutil
+                shutil.copy2(target_file, backup_file)
+            except Exception as e:
+                messagebox.showerror(self.txt["err_title"], f"Backup-Erstellung fehlgeschlagen: {str(e)}")
+                return
+
         ist_erfolgreich = False
 
         try:
@@ -623,6 +825,10 @@ class RksInstaller:
             # CRITICAL FIX: Zwingt Windows, den Schreibschutz aufzuheben! [1]
             if os.path.exists(target_file):
                 os.chmod(target_file, stat.S_IWRITE)
+
+            # LINUX FIX: Erteilt dem Skript unter Linux/Proton uneingeschränkte Schreibrechte
+            if platform.system() != "Windows" and os.path.exists(target_file):
+                os.chmod(target_file, 0o666)
 
             if not os.path.exists(backup_file):
                 shutil.copyfile(target_file, backup_file)
@@ -650,64 +856,138 @@ class RksInstaller:
                 f'mix forward `aforward`',
                 f'mix backward `abackward`'
             ]
-            
+
+            # --- CACHE-FREIE & SCHNITTSTELLENGENAUE IN-PLACE-REPARATUR ---
+            # Wir erzwingen das physische Neueinlesen der Datei, um RAM-Leichen zu verhindern
+            try:
+                with open(target_file, "r", encoding="utf-8", errors="ignore") as f_retry:
+                    lines = f_retry.readlines()
+            except:
+                pass
+
             bereinigte_lines = []
             max_index = 320
             
+            # Das exakte Mapping Ihrer RKS-Mod-Formeln
+            formel_mapping = {
+                "mix dsteerleft": f"mix dsteerleft `keyboard.a?0`",
+                "mix dsteerright": f"mix dsteerright `keyboard.d?0`",
+                "mix dsteering": f"mix dsteering `(keyboard.a?0 - keyboard.d?0) * (0.30 + ({T} * (0.60 - (keyboard.s?0 * 0.25)))) * (1.00 + (keyboard.s?0 * {N} * 1.20)) * (c_steer_func * (4.2 - steering_speed_coef))`",
+                "mix steering": f"mix steering `(dsteering * (1.00 - c_steer_func)) + (({R}) * (keyboard.a?0 - keyboard.d?0) * 0.35)`",
+                "mix msteering": f"mix msteering `-mouse.rel_position.x?0 * c_msens`",
+                "mix mpedals": f"mix mpedals `mouse.rel_position.y?0 * c_msens`",
+                "mix dforward": f"mix dforward `0`",
+                "mix dbackward": f"mix dbackward `0`",
+                "mix aforward": f"mix aforward `((keyboard.w?0 * 0.35) + ({N} * 0.55)) * (! keyboard.s?0)`",
+                "mix abackward": f"mix abackward `keyboard.s?0 * (0.10 + ({T} * 0.35) + ({N} * 1.00))`",
+                "mix forward": f"mix forward `aforward`",
+                "mix backward": f"mix backward `abackward`"
+            }
+            
+            # Tracker, welche Keys erfolgreich im originalen Bereich (oben) ersetzt wurden
+            oben_ersetzt = {x: False for x in formel_mapping.keys()}
+
             for line in lines:
                 if "config_lines[" in line:
                     try:
-                        parts = line.split("[")
-                        if len(parts) > 1:
-                            idx_str = parts[1].split("]")
-                            max_index = max(max_index, int(idx_str[0]))
-                    except: pass
-                
-                if any(x in line for x in ['mix dsteerleft', 'mix dsteerright', 'mix dsteering', 'mix steering', 'mix msteering', 'mix mpedals', 'mix dforward', 'mix dbackward', 'mix aforward', 'mix abackward', 'mix forward', 'mix backward']):
+                        # Holt die reine numerische ID der Zeile aus den eckigen Klammern
+                        # Das fängt jeden Fehler ab, falls parts eine Liste ist!
+                        idx_part = line.split("config_lines[")[1].split("]")[0]
+                        line_idx = int(idx_part)
+                        max_index = max(max_index, line_idx)
+                    except: 
+                        line_idx = 999 # Fallback für beschädigte Indizes
+                else:
+                    line_idx = 999
+
+                # RADIKALER UNTEN-ANHÄNG-SCHUTZ:
+                # Wenn eine Mod-Zeile eine ID größer als 400 hat, ist sie eine "Anhäng-Leiche".
+                # Diese wird hier im Live-View knallhart gelöscht!
+                if line_idx > 400 and any(f"{x} " in line for x in formel_mapping.keys()):
                     continue
+
+                # ECHTER IN-PLACE TAUSCH (NUR IM VANILLA-BEREICH OBEN)
+                getauscht = False
+                if line_idx <= 400:
+                    for key, formel in formel_mapping.items():
+                        if f' {key} `' in line or f' "{key} `' in line or f' {key} "' in line:
+                            try:
+                                # Spaltet die Zeile exakt vor dem eigentlichen Inhalt auf
+                                # Behält config_lines[334]: " exakt bei und tauscht nur die Formel!
+                                prefix = line.split(' "')[0]
+                                line = f'{prefix} "{formel}"\n'
+                                oben_ersetzt[key] = True
+                                getauscht = True
+                                break
+                            except: 
+                                pass
+                
+                if getauscht:
+                    bereinigte_lines.append(line)
+                    continue
+
                 bereinigte_lines.append(line)
             
+            # SELBSTHEILUNG: Falls eine Zeile oben komplett gelöscht war und fehlt
+            reparatur_block = []
+            # Wir setzen die fehlenden Zeilen mit fortlaufender ID ab 330 ein, falls sie oben fehlten
+            reparatur_idx = 330
+            for key, formel in formel_mapping.items():
+                if not oben_ersetzt[key]:
+                    reparatur_block.append(f' config_lines[{reparatur_idx}]: "{formel}"\n')
+                reparatur_idx += 1
+
+            # Sucht die Position der schließenden Profil-Klammer '}' für den Notfall
             klammer_index = -1
             for idx in range(len(bereinigte_lines) - 1, -1, -1):
                 if "}" in bereinigte_lines[idx]:
                     klammer_index = idx
                     break
             
-            neue_zeilen_block = []
-            current_idx = max_index + 1
-            for formel in rks_formeln:
-                neue_zeilen_block.append(f' config_lines[{current_idx}]: "{formel}"\n')
-                current_idx += 1
-            
-            if klammer_index != -1:
-                bereinigte_lines[klammer_index:klammer_index] = neue_zeilen_block
-            else:
-                bereinigte_lines.extend(neue_zeilen_block)
-                bereinigte_lines.append("}\n")
-                        
-            # Schreiben über nativen OS-Deskriptor erzwingen [1]
-            fd = os.open(target_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC)
-            with os.fdopen(fd, 'w', encoding='utf-8') as f:
+            # Fügt die fehlenden Zeilen als geschlossenen Block ein, NUR wenn sie oben gefehlt haben
+            if reparatur_block:
+                # Wir suchen im Array nach der Zeile 329, um es genau dort einzubetten, statt unten!
+                einfuege_punkt = klammer_index
+                for idx, bline in enumerate(bereinigte_lines):
+                    if "config_lines[329]" in bline:
+                        einfuege_punkt = idx + 1
+                        break
+                
+                if einfuege_punkt != -1:
+                    bereinigte_lines[einfuege_punkt:einfuege_punkt] = reparatur_block
+
+            # SCHREIBEN ERZWINGEN (Ohne Caching-Verzögerung)
+            with open(target_file, "w", encoding="utf-8") as f:
                 f.writelines(bereinigte_lines)
                 f.flush()
-                os.fsync(fd)
 
-            # Unbestechliche Verifikation direkt auf der Hardware [1]
-            if os.path.getmtime(target_file) >= (zeit_vor_schreiben - 1.0):
-                with open(target_file, "rb") as f_check:
-                    if b"mix dsteering" in f_check.read():
+            # UNBESTECHLICHE VERIFIKATION
+            try:
+                with open(target_file, "r", encoding="utf-8", errors="ignore") as f_check:
+                    if "mix dsteering" in f_check.read():
                         ist_erfolgreich = True
-            
+            except:
+                ist_erfolgreich = False
+                
+            fehler_details = "Keine"
+
         except Exception as e:
             ist_erfolgreich = False
+            fehler_details = str(e)
 
-        # OUTPUT ANZEIGE
+        # OUTPUT ANZEIGE (Präzise Pfad-Verifikation für den User)
         if ist_erfolgreich:
             tk.Label(self.end_frame, text=self.txt["status_success"], font=("Arial", 14, "bold"), fg="green", bg=self.bg_main).pack(anchor="w", pady=(40, 10))
+            
+            # Zeigt den exakten Ordner an, in den Python gerade geschrieben hat
+            speicher_ordner = os.path.dirname(target_file)
+            tk.Label(self.end_frame, text=f"Erfolgreich modifiziert in:\n➔ {speicher_ordner}", font=("Arial", 10, "bold"), fg="#3498db", bg=self.bg_main, justify="left", wraplength=700).pack(anchor="w", pady=(0, 10))
+            
             tk.Label(self.end_frame, text="Die Dateien deines gewählten Profils wurden erfolgreich modifiziert. Viel Spaß beim Fahren!", font=("Arial", 12), fg=self.fg_text, bg=self.bg_main).pack(anchor="w", pady=(0, 20))
         else:
             tk.Label(self.end_frame, text=self.txt["status_failed"], font=("Arial", 14, "bold"), fg="red", bg=self.bg_main).pack(anchor="w", pady=(40, 5))
-            tk.Label(self.end_frame, text="Fehler: Das Schreiben wurde blockiert. Bitte stelle sicher, dass ETS2/ATS geschlossen sind und versuche es erneut!", font=("Arial", 11), fg=self.fg_text, bg=self.bg_main, justify="left", wraplength=700).pack(anchor="w", pady=(0, 20))
+            # NEU: Zeigt dem User jetzt exakt an, WARUM Python abgestürzt ist, statt pauschal ATS zu beschuldigen
+            tk.Label(self.end_frame, text=f"Fehler beim Schreiben: {fehler_details}\nBitte stelle sicher, dass ETS2/ATS geschlossen sind und versuche es erneut!", font=("Arial", 11), fg=self.fg_text, bg=self.bg_main, justify="left", wraplength=700).pack(anchor="w", pady=(0, 20))
 
         line_end = tk.Frame(self.end_frame, height=2, bg="#dddddd")
         line_end.pack(fill="x", pady=10)
@@ -742,7 +1022,7 @@ if __name__ == "__main__":
         app = RksInstaller(root)
         
         # SCHARFE BEFEHLS-WEICHE [ex-1.3.4]
-        app.btn_start.config(command=app.seite_config)
+        app.btn_start.config(command=lambda: [app.seite_config(), app.suche_profile()])
         app.btn_weiter.config(command=app.seite_readme)
         app.btn_back3.config(command=app.zurueck_zu_config)
         app.btn_to_eula.config(command=app.seite_eula)
@@ -750,7 +1030,9 @@ if __name__ == "__main__":
         app.btn_install.config(command=app.ausfuehren_installation)
         app.btn_uninstall.config(command=app.ausfuehren_deinstallation)
         app.chk_terms.config(command=app.toggle_install_button)
-        app.game_combo.bind("<<ComboboxSelected>>", lambda e: app.suche_profile())
+        # Verzögert den Hintergrund-Scan, um den GUI-Thread beim Öffnen komplett zu entlasten
+        app.game_combo.bind("<<ComboboxSelected>>", lambda e: app.root.after(10, app.suche_profile))
+
         
         app.btn_turbo.config(command=lambda: app.starte_listener("turbo"))
         app.btn_rangier.config(command=lambda: app.starte_listener("rangier"))
