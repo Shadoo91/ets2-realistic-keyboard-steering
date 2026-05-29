@@ -1,6 +1,6 @@
-# 🚀 RKS-Tastaturlenkung v1.10.2 — Linux & Steam Deck Support! 🚚💨
+# 🚀 RKS-Tastaturlenkung v1.10.3 — Linux & Steam Deck Support! 🚚💨
 
-🔗 **[➔ DOWNLOAD RKS-INSTALLER v1.10.2 .ZIP (CLICK HERE)](../../releases/latest)**
+🔗 **[➔ DOWNLOAD RKS-INSTALLER v1.10.3 .ZIP (CLICK HERE)](../../releases/latest)**
 
 ⚠️ **IMPORTANT / WICHTIG:**
 * This modification ONLY works if you use the GitHub installer AND stay subscribed to this Steam Workshop mod!
@@ -10,7 +10,7 @@
 
 # 🇺🇸 ENGLISH VERSION
 
-A massive **THANK YOU to over 700 subscribers** here in the workshop! This is my very first modding project for ETS2 & ATS, and your incredible support and trust completely blow me away!
+A massive **THANK YOU to over 800 subscribers** here in the workshop! This is my very first modding project for ETS2 & ATS, and your incredible support and trust completely blow me away!
 
 To make the installation bulletproof and easy for everyone, I developed a **fully automatic graphical tool**. No more manual overwriting in game files — the installer handles everything for you!
 
@@ -39,7 +39,7 @@ If you love the realistic truck handling, please drop a positive rating (**Thumb
 
 # 🇩🇪 DEUTSCHE VERSION
 
-Wahnsinn! Ein riesiges **DANKESCHÖN für über 700 Abonnenten** hier im Workshop! Das ist mein allererstes Modding-Projekt, und euer genialer Support und euer Vertrauen hauen mich einfach um!
+Wahnsinn! Ein riesiges **DANKESCHÖN für über 800 Abonnenten** hier im Workshop! Das ist mein allererstes Modding-Projekt, und euer genialer Support und euer Vertrauen hauen mich einfach um!
 
 Um die Einrichtung für absolut jeden so einfach wie möglich zu machen, habe ich ein **vollautomatisches Grafik-Tool** entwickelt. Kein manuelles Umschreiben in den Spieldateien mehr – der Installer übernimmt alles dummysicher für dich!
 
