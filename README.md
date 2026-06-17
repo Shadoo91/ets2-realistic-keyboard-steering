@@ -1,4 +1,4 @@
-#  RKS-Tastaturlenkung v1.10.4 — Professionelles Update! 
+#  RKS-Tastaturlenkung v1.10.4 
 
 🔗 **[➔ DOWNLOAD RKS-INSTALLER v1.10.4 .ZIP (CLICK HERE)](https://github.com)**
 
