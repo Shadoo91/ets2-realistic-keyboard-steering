@@ -1,68 +1,53 @@
-# 🚀 RKS-Tastaturlenkung v1.10.3 — Linux & Steam Deck Support! 🚚💨
+#  RKS-Tastaturlenkung v1.10.4 — Professionelles Update! 
 
-🔗 **[➔ DOWNLOAD RKS-INSTALLER v1.10.3 .ZIP (CLICK HERE)](../../releases/latest)**
+🔗 **[➔ DOWNLOAD RKS-INSTALLER v1.10.4 .ZIP (CLICK HERE)](https://github.com)**
 
-⚠️ **IMPORTANT / WICHTIG:**
-* This modification ONLY works if you use the GitHub installer AND stay subscribed to this Steam Workshop mod!
-* Diese Modifikation funktioniert NUR in Kombination aus dem GitHub-Installer UND dem aktiven Abonnement dieser Steam-Workshop-Mod!
-
----
+⚠ **IMPORTANT / WICHTIG:**
+- Mod funktioniert NUR mit GitHub-Installer UND aktivem Steam Workshop Abo!
+- Mod works ONLY with GitHub installer AND active Steam Workshop subscription!
 
 # 🇺🇸 ENGLISH VERSION
+**Over 900 subscribers!** Thank you for the support on my first ETS2/ATS project.
 
-A massive **THANK YOU to over 800 subscribers** here in the workshop! This is my very first modding project for ETS2 & ATS, and your incredible support and trust completely blow me away!
+The new **automatic graphical tool** ensures a bulletproof installation without manual file editing.
 
-To make the installation bulletproof and easy for everyone, I developed a **fully automatic graphical tool**. No more manual overwriting in game files — the installer handles everything for you!
+##  NEW INSTALLER FEATURES
+- ✔ **Dynamic Steering:** Sensitivity adapts to W-key for precise cornering and stability.
+- ✔ **Optimized Keys:** Re-engineered for seamless operation and better interconnected feel.
+- ✔ **Fully Automated Setup:** Recommended game configuration (`config.cfg`) is applied automatically!
+- ✔ **Backup Engine:** Save `controls.sii` & `config.cfg` via file dialog.
+- ✔ **Fixes & Localization:** Updated error handling (ERR_TIMEOUT) and dual-language support.
+- ✔ **Key Snooper & Uninstaller:** Live key assignment and 1-Click restoration from ZIP.
 
-## 🛡️ WHAT CAN THE NEW INSTALLER DO?
+##  RECOGNIZED IN-GAME VALUES (AUTOMATICALLY CONFIGURED)
+- • Automatic Centering: **OFF / AUS**
+- • Steering Sensitivity: **40%**
+- • Steering Non-Linearity: **60%**
+- • Stability: **~80%** | Suspension: **~40%**
+- *Note: The installer automatically patches your profile files to these exact optimal values!*
 
-* ✔ **Live Key Snooper:** Click the buttons in the tool and tap your desired key (or mouse thumb button!) to assign it instantly.
-* ✔ **Profile Protection & Backups:** The tool asks before overwriting, protects your old keys, and only modifies the physics lines.
-* ✔ **Automatic Repair:** If your controls.sii is corrupted or empty, the tool completely reconstructs a flawless SCS base file.
-* ✔ **1-Click Uninstaller:** Choose your profile and click the red uninstall button to instantly restore your vanilla settings.
-* ✔ **Auto-Updater:** The tool checks GitHub on every startup and pulls updates fully automatically!
-
-## ⚙️ RECOMMENDED IN-GAME SETTINGS
-
-Please adjust the following in your game options for the physics matrix to work perfectly:
-
-* • Automatic Centering: **DISABLED**
-* • Steering Sensitivity: **40%**
-* • Steering Non-Linearity: **60%**
-* • Truck & Trailer Stability: **~80%**
-* • Suspension Stiffness: **~40%**
-
-📢 **SMALL WISH FROM THE MODDER:**
-If you love the realistic truck handling, please drop a positive rating (**Thumb Up 👍**) here in the Steam Workshop!
-
----
+📢 **Support:** If you love the mod, please leave a **Thumbs Up 👍**!
 
 # 🇩🇪 DEUTSCHE VERSION
+**Über 900 Abonnenten!** Wahnsinn, danke für den Support bei meinem ersten Projekt.
 
-Wahnsinn! Ein riesiges **DANKESCHÖN für über 800 Abonnenten** hier im Workshop! Das ist mein allererstes Modding-Projekt, und euer genialer Support und euer Vertrauen hauen mich einfach um!
+Das **automatische Grafik-Tool** macht die Installation dummysicher, ganz ohne manuelles Umschreiben.
 
-Um die Einrichtung für absolut jeden so einfach wie möglich zu machen, habe ich ein **vollautomatisches Grafik-Tool** entwickelt. Kein manuelles Umschreiben in den Spieldateien mehr – der Installer übernimmt alles dummysicher für dich!
+##  WAS KANN DER NEUE INSTALLER?
+- ✔ **Dynamische Lenkung:** Sensibilität passt sich der W-Taste für Präzision in Kurven an.
+- ✔ **Optimierte Tasten:** Perfektes Zusammenspiel von Boost- & Assistenten-Taste.
+- ✔ **Vollautomatische Einrichtung:** Empfohlene Einstellungen (`config.cfg`) werden vollautomatisch gesetzt!
+- ✔ **Backup Engine:** Backup von `controls.sii` & `config.cfg` per Dateidialog unter freiem Namen.
+- ✔ **Fixes & Mehrsprachigkeit:** Update-Routine (ERR_TIMEOUT) & automatisches Deutsch/Englisch.
+- ✔ **Tasten-Anlerner & Deinstaller:** Live-Zuweisung & 1-Klick-Wiederherstellung aus ZIP.
 
-## 🛡️ WAS KANN DER NEUE INSTALLER?
+##  EMPFOHLENE WERTE (WERDEN AUTOMATISCH EINGESTELLT)
+- • Automatische Zentrierung: **AUS**
+- • Lenkintensität: **40%**
+- • Nichtlineare Lenkung: **60%**
+- • Stabilität: **~80%** | Steifigkeit: **~40%**
+- *Hinweis: Das Tool jagt diese Werte von alleine formattreu in deine Spieldateien!*
 
-* ✔ **Tasten live anlernen:** Klicke im Tool auf die Buttons und tippe deine Wunschtasten (oder Maus-Daumentasten!) einfach an.
-* ✔ **Profil-Schutz & Backups:** Das Tool fragt dich vor der Installation nach Backups, schützt deine alten Tasten und modifiziert nur die Physik-Zeilen.
-* ✔ **Automatische Reparatur:** Sollte deine controls.sii beschädigt oder komplett leer sein, baut das Tool sie vollautomatisch im Hintergrund wieder fehlerfrei auf!
-* ✔ **1-Klick-Deinstallation:** Wähle dein Profil und klicke auf den roten Deinstallieren-Button, um deine Werkseinstellungen sofort wiederherzustellen.
-* ✔ **Auto-Updater:** Das Tool prüft bei jedem Start GitHub und zieht sich Updates auf Wunsch vollautomatisch!
+📢 **Support:** Lass gerne einen **Daumen hoch 👍** da, wenn es dir gefällt!
 
-## ⚙️ EMPFOHLENE IN-GAME EINSTELLUNGEN
-
-Damit die neue, feine Physik perfekt greift, stellt bitte im Spielmenü Folgendes ein:
-
-* • Automatische Zentrierung: **AUSGESTELLT**
-* • Lenkintensität: Auf **40%** stellen
-* • Nichtlineare Lenkung: Auf **60%** stellen
-* • Lkw- & Auflieger-Stabilität: Auf etwa **80%** einstellen
-* • Steifigkeit (Lkw & Kabine): Auf etwa **40%** einstellen
-
-📢 **KLEINER WUNSCH VOM MODDER:**
-Wenn dir das neue Fahrgefühl gefällt und das Cruisen damit so richtig Bock macht, lass mir bitte eine positive Bewertung (**Daumen hoch 👍**) hier im Steam Workshop da!
-
-Viel Spaß und gute Fahrt!
-~ Shadoo91 😉
+Viel Spaß und gute Fahrt wünscht dir Shadoo91! ;)
