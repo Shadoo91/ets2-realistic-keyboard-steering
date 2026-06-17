@@ -1,6 +1,6 @@
 #  RKS-Tastaturlenkung v1.10.4 
 
-🔗 **[➔ DOWNLOAD RKS-INSTALLER v1.10.4 .ZIP (CLICK HERE)]([https://github.com](https://github.com/Shadoo91/ets2-realistic-keyboard-steering/releases/download/v1.10.4/RKS_Installer_v1.10.4.exe))**
+🔗 **[➔ DOWNLOAD RKS-INSTALLER v1.10.4 .ZIP (CLICK HERE)][(https://github.com)](https://github.com/Shadoo91/ets2-realistic-keyboard-steering/releases/download/v1.10.4/RKS_Installer_v1.10.4.exe)**
 
 ⚠ **IMPORTANT / WICHTIG:**
 - Mod funktioniert NUR mit GitHub-Installer UND aktivem Steam Workshop Abo!
